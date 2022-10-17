@@ -1,0 +1,46 @@
+{
+    "plugins/centralepilote/desktop/php/centralepilote.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+
+        "#": "#"
+    },
+    "plugins/centralepilote/desktop/php/centralepilote_radiateur.inc.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+
+        "#": "#"
+    },
+    "plugins/centralepilote/desktop/php/centralepilote_zone.inc.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+
+        "#": "#"
+    },
+    "plugins/centralepilote/desktop/php/centralepilote_centrale.inc.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+
+        "#": "#"
+    },
+    "plugins/centralepilote/desktop/modal/modal.device_list.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+        "#": "#"
+    },
+    "plugins/centralepilote/desktop/modal/modal.centralepilote.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+        "#": "#"
+    },
+    "plugins/centralepilote/desktop/modal/modal.programmation.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+        "#": "#"
+    },
+    "plugins/centralepilote/plugin_info/configuration.php": {
+        "401 - Accès non autorisé": "401 - Denied access",
+
+        "#": "#"
+    }
+}

@@ -1,0 +1,20 @@
+{
+	"id" : "centralepilote",
+	"name" : "Centrale Fil-Pilote",
+    "description": {
+        "fr_FR": "Centrale ",
+        "en_US": "Dashboard "
+    },
+	"licence" : "AGPL",
+	"author" : "Vincent",
+	"require" : "4.0",
+    "version": "0.1",
+	"category" : "energy",
+	"hasDependency" : false,
+    "maxDependancyInstallTime" : 10,
+	"hasOwnDeamon" : false,
+	"changelog" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
+	"documentation" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
+	"language" : ["fr_FR","en_US"],
+	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile"]
+}
