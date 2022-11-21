@@ -55,7 +55,8 @@ class centralepilote extends eqLogic {
     *  statut_horsgel,
     *  statut_off : commandes 'info' composites à lire pour avoir le statut de chaque commande fil pilote (si nature = virtuel)
     *  zone : id de la zone du radiateur, ou '' si pas dans une zone.
-    *  temperature : commande permettant d'obtenir la température associée à un radiateur
+    *  temperature : commande permettant d'obtenir la température associée à un radiateur (optionel)
+    *  puissance : puissance en watts du radiateur (optionel)
     *  notes : juste des notes pour s'y retrouver ...
     *  
     */
@@ -217,16 +218,16 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public static function cpCentraleSetConfig($p_key, $p_value) {
-      centralepilote::log('debug',  "cpCentralSetConfig(".$p_value.")");
+      centralepilote::log('debug',  "cpCentralSetConfig('".$p_key."', '".$p_value."')");
       $v_centrale = centralepilote::cpCentraleGet(); 
       if (!is_object($v_centrale)) {
         centralepilote::log('error',  "cpCentralSetConfig() : Missing default centrale eqLogic");
-        return;
+        return(0);
       }
       $v_centrale->setConfiguration($p_key, $p_value);
-      //$v_centrale->save();
+      $v_centrale->save();
       centralepilote::log('debug',  "cpCentralSetConfig() ok");
-      return;
+      return(1);
     }
     /* -------------------------------------------------------------------------*/
 
@@ -242,41 +243,6 @@ class centralepilote extends eqLogic {
       $v_result = ($v_value == 'color' ? 'color' : 'icon');
       return $v_result;
    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
-     * Method : cpModeGetIconClass()
-     * Description :
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpModeGetIconClass_BACK($p_mode) {
-      $v_result = '';
-      switch ($p_mode) {
-        case 'confort' :
-          $v_result = 'fab fa-hotjar';
-        break;
-        case 'confort_1' :
-          $v_result = 'fab fa-hotjar';
-        break;
-        case 'confort_2' :
-          $v_result = 'fab fa-hotjar';
-        break;
-        case 'eco' :
-          $v_result = 'fas fa-leaf';
-        break;
-        case 'horsgel' :
-          $v_result = 'far fa-snowflake';
-        break;
-        case 'off' :
-          $v_result = 'fas fa-power-off';
-        break;
-        default :
-          // TBC : error message
-      }
-      return $v_result;
-    }
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
@@ -525,31 +491,6 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpModeExist()
-     * Description :
-     *   Get background color depending of mode
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpModeExist_BAK($p_mode) {
-      $v_mode_list = ['confort'=>true,
-                      'confort_1'=>true,
-                      'confort_2'=>true,
-                      'eco'=>true,
-                      'horsgel'=>true,
-                      'off'=>true
-                      ];
-      if (!isset($v_mode_list[$p_mode])) {
-        centralepilote::log('debug',  " mode '".$p_mode."' does not exist");
-        return(false);
-      }
-      
-      return(true);
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
      * Method : cpModeSupported()
      * Description :
      *   Look for supported mode by configuration.
@@ -601,6 +542,58 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpProgGetList()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpProgGetList() {
+      $v_prog_list_str = centralepilote::cpCentraleGetConfig('prog_list');
+      if (!is_string($v_prog_list_str) || ($v_prog_list_str == '')) {
+        centralepilotelog::log('debug', "cpProgGetList() : missing or empty prog_list.");
+        return(array());
+      }
+      
+      // ----- Parse string value
+      try {
+        $v_prog_list = json_decode($v_prog_list_str, true);
+      }
+      catch (Exception $exc) {
+        centralepilotelog::log('debug', "cpProgGetList() : error parsing JSON prog_list.");
+        return(array());
+      }
+      
+      return($v_prog_list);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpProgSaveList()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpProgSaveList($p_prog_list) {
+    
+      // ----- Sanity checks
+      if (!is_array($p_prog_list)) {
+        centralepilotelog::log('debug', "cpProgSaveList() : prog_list is not an array. Use empty array instead.");
+        $p_prog_list = array();
+      }
+    
+      // ----- Encode & save
+      $v_prog_list_json = json_encode($p_prog_list, JSON_FORCE_OBJECT);
+      centralepilote::cpCentraleSetConfig('prog_list', $v_prog_list_json);
+      
+      return;
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpProgCreateDefault()
      * Description :
      *   
@@ -612,8 +605,9 @@ class centralepilote extends eqLogic {
       $v_prog = '';
 
       // ----- Read existing value
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
       //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
       centralepilotelog::log('debug', "cpProgCreateDefault : ".$v_prog_list);
       
       if (is_array($v_prog_list)) {
@@ -640,8 +634,10 @@ class centralepilote extends eqLogic {
       
       // ----- Encode & save
       $v_prog_list[0] = json_decode($v_prog0);
-      $v_prog_list_json = json_encode($v_prog_list, JSON_FORCE_OBJECT);
-      config::save('prog_list', $v_prog_list_json, 'centralepilote');
+      //$v_prog_list_json = json_encode($v_prog_list, JSON_FORCE_OBJECT);
+      //config::save('prog_list', $v_prog_list_json, 'centralepilote');
+      //centralepilote::cpCentraleSetConfig('prog_list', $v_prog_list_json);
+      centralepilote::cpProgSaveList($v_prog_list);
       
       // ----- Update equipement cmds
       centralepilote::cpCmdAllProgrammeSelectUpdate();
@@ -660,8 +656,15 @@ class centralepilote extends eqLogic {
      */
     public static function cpProgSave($p_id, $p_prog) {
       // ----- Read existing value
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
       //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
+      if (is_object($v_prog_list)) {
+        centralepilotelog::log('debug', "cpProgSave(), list is object not array !");
+      }
+      if (is_string($v_prog_list)) {
+        centralepilotelog::log('debug', "cpProgSave(), list is string not array !");
+      }
       if (!is_array($v_prog_list)) {
         // TBC : normally a default programm should exists
         centralepilotelog::log('debug', "cpProgSave(), missing default program");
@@ -685,7 +688,7 @@ class centralepilote extends eqLogic {
     
       // ----- Look for empty id -> means new programm
       if ($p_id == '') {
-        $p_id = 1;
+        $p_id = 10;
         $v_found = false;
         while (!$v_found) {
           $v_found = true;
@@ -716,9 +719,10 @@ class centralepilote extends eqLogic {
       }
       
       // ----- Encode & save
-      $v_prog_list_json = json_encode($v_prog_list, JSON_FORCE_OBJECT);
-      config::save('prog_list', $v_prog_list_json, 'centralepilote');  
+      //$v_prog_list_json = json_encode($v_prog_list, JSON_FORCE_OBJECT);
+      //config::save('prog_list', $v_prog_list_json, 'centralepilote');  
       //centralepilote::cpCentraleSetConfig('prog_list', $v_prog_list_json);
+      centralepilote::cpProgSaveList($v_prog_list);
 
       // ----- Update equipement cmds
       centralepilote::cpCmdAllProgrammeSelectUpdate();      
@@ -742,8 +746,9 @@ class centralepilote extends eqLogic {
       $v_prog = null;
       
       // ----- Get existing list
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
       //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
       
       //message::add('centralepilote',  date("s").':Load id '.$p_id );
       if (($p_id == '') || (!isset($v_prog_list[$p_id]))) {
@@ -771,8 +776,9 @@ class centralepilote extends eqLogic {
       $v_next_id = -1;
       
       // ----- Get existing list
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
       //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
       
       $v_next = false;
       foreach ($v_prog_list as $v_key => $v_prog) {
@@ -803,8 +809,9 @@ class centralepilote extends eqLogic {
      */
     public static function cpProgClean() {
       // ----- Get existing list
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
       //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
       
       // ----- Remove all except default
       // Needed to disassociate all program from all radiateur and all zone
@@ -815,9 +822,10 @@ class centralepilote extends eqLogic {
       }
 
       // ----- For sanity check I also remove all the list and recreate the default one
-      $v_prog_list_json = '{}';
-      config::save('prog_list', $v_prog_list_json, 'centralepilote');  
+      //$v_prog_list_json = '{}';
+      //config::save('prog_list', $v_prog_list_json, 'centralepilote');  
       //centralepilote::cpCentraleSetConfig('prog_list', $v_prog_list_json);
+      centralepilote::cpProgSaveList(array());
       
       // ----- Recreate default one
       centralepilote::cpProgCreateDefault();      
@@ -827,49 +835,6 @@ class centralepilote extends eqLogic {
     }
     /* -------------------------------------------------------------------------*/
 
-    /**---------------------------------------------------------------------------
-     * Method : cpProgList()
-     * Description :
-     *   
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpProgList($p_details=false) {    
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
-      //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
-      return($v_prog_list);
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
-     * Method : cpProgValueList()
-     * Description :
-     *   The method return a string with the list of programmes in a format
-     *   suitable for being used in a 'select' command.
-     *   Sample :
-     *   $this->cpCmdProgrammeSelectUpdate(centralepilote::cpProgValueList());
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpProgValueList() {    
-      $v_str = '';
-
-      // ----- Get existing list
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
-
-      // ----- Generate the list
-      $v_str_list = array();
-      foreach ($v_prog_list as $v_key => $v_prog) {
-        $v_str_list[] = $v_prog['id'].'|'.$v_prog['name'];
-      }
-      
-      $v_str = implode(';', $v_str_list);
-      
-      return($v_str);
-    }
-    /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
      * Method : cpProgDelete()
@@ -887,8 +852,9 @@ class centralepilote extends eqLogic {
       }
       
       // ----- Read existing value
-      $v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
       //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
             
       // ----- Look unknown prog
       if (!isset($v_prog_list[$p_id])) {
@@ -917,14 +883,62 @@ class centralepilote extends eqLogic {
       unset($v_prog_list[$p_id]);
       
       // ----- Reencode and save
-      $v_prog_list_json = json_encode($v_prog_list, JSON_FORCE_OBJECT);      
-      config::save('prog_list', $v_prog_list_json, 'centralepilote');  
+      //$v_prog_list_json = json_encode($v_prog_list, JSON_FORCE_OBJECT);      
+      //config::save('prog_list', $v_prog_list_json, 'centralepilote');  
       //centralepilote::cpCentraleSetConfig('prog_list', $v_prog_list_json);
+      centralepilote::cpProgSaveList($v_prog_list);
 
       // ----- Update equipement cmds
       centralepilote::cpCmdAllProgrammeSelectUpdate();      
       
       return(true);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpProgList()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpProgList($p_details=false) {    
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
+      return($v_prog_list);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpProgValueList()
+     * Description :
+     *   The method return a string with the list of programmes in a format
+     *   suitable for being used in a 'select' command.
+     *   Sample :
+     *   $this->cpCmdProgrammeSelectUpdate(centralepilote::cpProgValueList());
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpProgValueList() {    
+      $v_str = '';
+
+      // ----- Get existing list
+      //$v_prog_list = config::byKey('prog_list', 'centralepilote');
+      //$v_prog_list = centralepilote::cpCentraleGetConfig('prog_list');
+      $v_prog_list = centralepilote::cpProgGetList();
+
+      // ----- Generate the list
+      $v_str_list = array();
+      foreach ($v_prog_list as $v_key => $v_prog) {
+        $v_str_list[] = $v_prog['id'].'|'.$v_prog['name'];
+      }
+      
+      $v_str = implode(';', $v_str_list);
+      
+      return($v_str);
     }
     /* -------------------------------------------------------------------------*/
 
@@ -1187,6 +1201,10 @@ class centralepilote extends eqLogic {
         //$this->setConfiguration('admin_mode', 'eco');
         $this->setConfiguration('pilotage', 'eco');
         $this->setConfiguration('programme_id', '0');
+
+        // ----- Information concernant les caractéristiques du radiateur        
+        $this->setConfiguration('temperature', '');
+        $this->setConfiguration('puissance', '');
         
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
@@ -1252,6 +1270,9 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('pilotage', 'eco');
         $this->setConfiguration('programme_id', '0');
         
+        // ----- Information concernant les caractéristiques de la zone        
+        $this->setConfiguration('temperature', '');
+
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }

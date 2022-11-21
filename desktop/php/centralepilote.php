@@ -234,13 +234,20 @@ if (0) {
     <div class="row form-group cp_panel_radiateur_zone">
       <label class="col-sm-3 control-label">{{Température}}</label>
       <div class="col-sm-7">
-        <textarea class="cp_attr_radiateur eqLogicAttr form-control input-sm" data-l1key="configuration" data-l2key="temperature" style="height : 33px;" placeholder="{{Mesure de température associée au radiateur}}"></textarea>
+        <textarea class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="temperature" style="height : 33px;" placeholder="{{Mesure de température associée au radiateur}}"></textarea>
       </div>
       <div class="col-sm-2">
         <a class="btn btn-default cursor cp_modal_select_cmd_info btn-sm" data-input="temperature"><i class="fas fa-list-alt"></i> {{Rechercher}}</a>
       </div>
     </div>
 
+
+    <div class="row form-group cp_panel_radiateur">
+      <label class="col-sm-3 control-label">{{Puissance}}</label>
+      <div class="col-sm-9">
+        <input type="text" class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="puissance" placeholder="{{Puissance en Watts du radiateur}}"/>
+      </div>
+    </div>
 
 
       <div class="form-group cp_panel_radiateur">

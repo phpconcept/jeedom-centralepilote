@@ -90,6 +90,14 @@ Radiateur en mode programmé :
 
 ### Change Logs
 
+Release v0.2 (beta) :
+- Migration automatique depuis la v0.1 par garantie. En particulier perte des programmations, le reste devrait être ok.
+- Modification du concept de pilotage manuel/auto qui était séparé des modes de chaleur. Un seul concept de "pilotage" reste pouvant prendre comme valeurs les modes de chauffage 'confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off' et 'auto'. Cela allège l'utilisation et le code sous-jacent. 
+- Conséquence : Suppression des commandes "prog_select" et "manuel". Renommage de la commande 'mode' en commande 'etat'.
+- Sélection des programmes du mode auto par un 'select'. Ajout des commandes "programme_select" (action) et "programme_id" (info) qui viennent compléter la commande "programme" (info) qui contient le nom du programme selectionné.
+- Ajout d'une information sur la puissance des radiateurs (pour usage futur de mesures ou d'analyses).
+- Changement du stockage des programmations : ils étaient dans la configuration du plugin (ce qui était un problème car perte lors de la desactivation), ils sont maintenant dans la configuration de l'objet (unique) 'Centrale'.
+
 Release v0.1 (beta) :
 - Première version
 
