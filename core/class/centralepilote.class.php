@@ -1944,6 +1944,12 @@ class centralepilote extends eqLogic {
         return;
       } 
       $v_cmd_tmp->setConfiguration('listValue', $p_value_list_str);
+      
+      // TBC : Trick to update the widgets of all radiateurs ...
+      $v_val = $v_cmd_tmp->getIsVisible();
+      $v_cmd_tmp->setIsVisible(($v_val?0:1));
+      $v_cmd_tmp->save();
+      $v_cmd_tmp->setIsVisible(($v_val?1:0));
       $v_cmd_tmp->save();
     
     }
