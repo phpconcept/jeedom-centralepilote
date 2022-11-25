@@ -73,7 +73,7 @@ function centralepilote_update() {
       if (is_object($v_cmd)) {
         centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Remove cmd 'mode' and create cmd 'etat'");
         $v_cmd->remove();
-        $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>6]);
+        $v_eq->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>6]);
       }
     
       // ----- Look to remove cmd 'manuel'
