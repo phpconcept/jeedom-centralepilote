@@ -73,7 +73,7 @@ function centralepilote_update() {
       if (is_object($v_cmd)) {
         centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Remove cmd 'mode' and create cmd 'etat'");
         $v_cmd->remove();
-        $v_eq->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>6]);
+        $v_eq->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>7]);
       }
     
       // ----- Look to remove cmd 'manuel'
@@ -106,6 +106,9 @@ function centralepilote_update() {
         centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing configuration 'programme_id'");
         $v_eq->setConfiguration('programme_id', '0');
       }
+      
+      // ----- Reset commands display
+      $v_eq->cpCmdResetDisplay();
       
     }
     
