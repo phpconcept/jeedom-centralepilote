@@ -45,16 +45,19 @@ function centralepilote_update() {
   $v_version = config::byKey('version', 'centralepilote', '');
   log::add('centralepilote', 'info', "Update plugin 'centralepilote' from version ".$v_version." to ".CP_VERSION);
   
-  // ----- Fresh install
+  // ----- Fresh install (or verion 0.1)
   if ($v_version == '') {
     // ----- Create a default centrale object (if not exists)
     centralepilote::cpCentraleCreateDefault();
     
     // ----- Check that at least the default programm is ok
-    //centralepilote::cpProgCreateDefault();
+    centralepilote::cpProgCreateDefault();
   }
-  else if ($v_version == '0.1') {
+  // ----- From version 0.2
+  else if ($v_version == '0.2') {
+    // TBC : For future use
   }
+  // ----- ALl other versions
   else {
   }
   
@@ -68,11 +71,9 @@ function centralepilote_update() {
       // ----- Look to rename cmd 'mode' cmd by cmd 'etat' (migration from 0.1 to 0.2+)
       $v_cmd = $v_eq->getCmd(null, 'mode');
       if (is_object($v_cmd)) {
-        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Change cmd 'mode' to 'etat'");
-        // ----- Change logical ID
-        $v_cmd->setLogicalId('etat');
-        // ----- Change name
-        $v_cmd->setName('Etat');
+        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Remove cmd 'mode' and create cmd 'etat'");
+        $v_cmd->remove();
+        $v_eq->cpCmdCreate('programme_id', ['name'=>'Programme Id', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>6]);
       }
     
       // ----- Look to remove cmd 'manuel'
@@ -92,12 +93,12 @@ function centralepilote_update() {
       $v_cmd = $v_eq->getCmd(null, 'programme_id');
       if (!is_object($v_cmd)) {
         centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'programme_id'");
-        $v_eq->cpCmdCreate('programme_id', ['name'=>'Programme Id', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $v_eq->cpCmdCreate('programme_id', ['name'=>'Programme Id', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>9]);
       }
       $v_cmd = $v_eq->getCmd(null, 'programme_select');
       if (!is_object($v_cmd)) {
         centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'programme_select'");
-        $v_eq->cpCmdCreate('programme_select', ['name'=>'Programme Select', 'type'=>'action', 'subtype'=>'select', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $v_eq->cpCmdCreate('programme_select', ['name'=>'Programme Select', 'type'=>'action', 'subtype'=>'select', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>10]);
       }    
       
       // ----- Config to add
