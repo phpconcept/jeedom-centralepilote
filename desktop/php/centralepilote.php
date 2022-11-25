@@ -200,9 +200,9 @@ if (0) {
            </div>
            
       	<div class="form-group">
-      		<label class="col-sm-4 control-label">{{Activation & Visibilité}}</label>
+      		<label class="col-sm-4 control-label"><span class="cp_panel_radiateur_zone">{{Activation}} & </span>{{Visibilité}}</label>
       		<div class="col-sm-8">
-      			<label class="checkbox-inline"><input type="checkbox" class="cp_attr_radiateur eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}</label>
+      			<label class="checkbox-inline cp_panel_radiateur_zone"><input type="checkbox" class="cp_attr_radiateur eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}</label>
       			<label class="checkbox-inline"><input type="checkbox" class="cp_attr_radiateur eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}</label>
       		</div>
       	</div>

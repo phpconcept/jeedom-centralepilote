@@ -1527,7 +1527,18 @@ class centralepilote extends eqLogic {
         // ----- Look if device enable is changed
         if ($this->_pre_save_cache['isEnable'] != $this->getIsEnable()) {
         
-
+          // ----- Change to enable
+          if ($this->getIsEnable()) {
+          }
+          
+          // ----- Not allowed
+          else {
+            centralepilotelog::log('error', "Not allowed to disable 'Centrale' in CentralePilote PlugIn.");
+            // ----- Change to enable
+            // TBC : comment forcer la désactivation ???
+            //$this->setIsEnable();
+            $this->save();        
+          }
         }
   
       }
