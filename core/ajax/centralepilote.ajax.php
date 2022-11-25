@@ -31,7 +31,7 @@ try {
 		$v_val = centralepilote::cpProgSave(init('id'), init('prog'));
 		//$return = array();
 		//$return['count'] = $v_val;
-      centralepilotelog::log('debug', "cpProgSave ajax pk");
+        //centralepilotelog::log('debug', "cpProgSave ajax pk");
 		ajax::success($v_val);
 	}
 
