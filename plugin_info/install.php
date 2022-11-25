@@ -63,12 +63,12 @@ function centralepilote_update() {
   foreach ($eqLogics as $v_eq) {
   
     // ----- Actions for 'radiateur' and 'zone'
-    if ($this->cpIsType(array('radiateur','zone'))) {
+    if ($v_eq->cpIsType(array('radiateur','zone'))) {
     
       // ----- Look to rename cmd 'mode' cmd by cmd 'etat' (migration from 0.1 to 0.2+)
-      $v_cmd = $this->getCmd(null, 'mode');
+      $v_cmd = $v_eq->getCmd(null, 'mode');
       if (is_object($v_cmd)) {
-        centralepilotelog::log('debug', "Device '".$this->getName()."' : Change cmd 'mode' to 'etat'");
+        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Change cmd 'mode' to 'etat'");
         // ----- Change logical ID
         $v_cmd->setLogicalId('etat');
         // ----- Change name
@@ -76,40 +76,40 @@ function centralepilote_update() {
       }
     
       // ----- Look to remove cmd 'manuel'
-      $v_cmd = $this->getCmd(null, 'manuel');
+      $v_cmd = $v_eq->getCmd(null, 'manuel');
       if (is_object($v_cmd)) {
-        centralepilotelog::log('debug', "Device '".$this->getName()."' : Remove cmd 'manuel'");
+        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Remove cmd 'manuel'");
         $v_cmd->remove();
       }
       // ----- Look to remove cmd 'prog_select'
-      $v_cmd = $this->getCmd(null, 'prog_select');
+      $v_cmd = $v_eq->getCmd(null, 'prog_select');
       if (is_object($v_cmd)) {
-        centralepilotelog::log('debug', "Device '".$this->getName()."' : Remove cmd 'prog_select'");
+        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Remove cmd 'prog_select'");
         $v_cmd->remove();
       }
       
       // ----- Look to add cmd
-      $v_cmd = $this->getCmd(null, 'programme_id');
+      $v_cmd = $v_eq->getCmd(null, 'programme_id');
       if (!is_object($v_cmd)) {
-        centralepilotelog::log('debug', "Device '".$this->getName()."' : Add missing cmd 'programme_id'");
-        $this->cpCmdCreate('programme_id', ['name'=>'Programme Id', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'programme_id'");
+        $v_eq->cpCmdCreate('programme_id', ['name'=>'Programme Id', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
       }
-      $v_cmd = $this->getCmd(null, 'programme_select');
+      $v_cmd = $v_eq->getCmd(null, 'programme_select');
       if (!is_object($v_cmd)) {
-        centralepilotelog::log('debug', "Device '".$this->getName()."' : Add missing cmd 'programme_select'");
-        $this->cpCmdCreate('programme_select', ['name'=>'Programme Select', 'type'=>'action', 'subtype'=>'select', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'programme_select'");
+        $v_eq->cpCmdCreate('programme_select', ['name'=>'Programme Select', 'type'=>'action', 'subtype'=>'select', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
       }    
       
       // ----- Config to add
-      if ($this->getConfiguration('programme_id', '') == '') {
-        centralepilotelog::log('debug', "Device '".$this->getName()."' : Add missing configuration 'programme_id'");
-        $this->setConfiguration('programme_id', '0');
+      if ($v_eq->getConfiguration('programme_id', '') == '') {
+        centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing configuration 'programme_id'");
+        $v_eq->setConfiguration('programme_id', '0');
       }
       
     }
     
     // ----- Actions for 'centrale'
-    else if ($this->cpIsType(array('centrale'))) {
+    else if ($v_eq->cpIsType(array('centrale'))) {
     }  
   }
     
@@ -123,7 +123,7 @@ function centralepilote_update() {
 // Fonction exécutée automatiquement après la suppression ou la désactivation du plugin
 function centralepilote_remove() {
 
-  log::add('centralepilote', 'info', "centralepilote plugin removed");
+  log::add('centralepilote', 'info', "Plugin 'centralepilote' removed");
 }
 
 ?>
