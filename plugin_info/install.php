@@ -145,9 +145,6 @@ function centralepilote_update_v_0_2($v_from_version='') {
   // ----- Create a default centrale object (if not exists)
   centralepilote::cpCentraleCreateDefault();
   
-  // ----- Check that at least the default programm is ok
-  centralepilote::cpProgCreateDefault();
-
   // ----- Global actions at each install (like cleanups)
   $eqLogics = eqLogic::byType('centralepilote');
   foreach ($eqLogics as $v_eq) {
@@ -203,8 +200,11 @@ function centralepilote_update_v_0_2($v_from_version='') {
     }  
   }
   
+  // ----- Check that at least the default programm is ok
+  centralepilote::cpProgCreateDefault();
+
   // ----- Update potential list of programm
-  centralepilotelog::cpCmdAllProgrammeSelectUpdate();
+  centralepilote::cpCmdAllProgrammeSelectUpdate();
     
 }
 
