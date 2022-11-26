@@ -2189,9 +2189,14 @@ class centralepilote extends eqLogic {
       if ($p_pilotage == 'auto') {
         // ----- Change info command
         $this->checkAndUpdateCmd('pilotage', 'auto');
+        
+        // ----- Force display of current programme
+        $v_prog_id = $this->cpGetConf('programme_id');
+        $this->cpPilotageProgSelect($v_prog_id);
                 
         // ----- Call the clock tick to get the good mode depending on programme and clock
-        $this->cpRadClockTick();
+        // TBC : already done in previous
+        //$this->cpRadClockTick();
       }
       
       // ----- Look for pilotage mode 'confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off'
