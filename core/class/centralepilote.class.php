@@ -2017,7 +2017,7 @@ class centralepilote extends eqLogic {
 
         // ----- Look if already the same mode        
         if (($this->cpModeGetFromCmd() == $p_mode) && (!$p_force)) {
-          centralepilote::log('debug',  "Equipement '".$this->getName()."' is already in mode '".$p_mode."'. skip. (".__FILE__.",".__LINE__.")");
+          centralepilote::log('debug',  "Equipement '".$this->getName()."' is already in mode '".$p_mode."'. skip.");
           return;
         }
 
@@ -2348,6 +2348,7 @@ class centralepilote extends eqLogic {
         
         // ----- Store new programme id
         $this->setConfiguration('programme_id', $v_prog['id']);
+        $this->save();
         
         // ----- Change programme name and id in info command
         $this->checkAndUpdateCmd('programme_id', $v_prog['id']);
@@ -2386,18 +2387,22 @@ class centralepilote extends eqLogic {
       
       if ($v_prog_id != $p_prog_remove_id) {
         // ----- device not using removed programm, nothing to do
+        centralepilote::log('debug', "cpPilotageProgRemove() : device '".$this->getName()."' is using prog (".$v_prog_id."), not using removed prog (".$p_prog_remove_id."), nothing to do");
         return;
       }
+      centralepilote::log('debug', "cpPilotageProgRemove() : device '".$this->getName()."' is using prog (".$v_prog_id."), change to default prog.");
       
       // ----- Load default programme
       $v_prog = centralepilote::cpProgLoad(0);
       if ($v_prog === null) {
         // ----- Should not occur : 0 is default programme
+        centralepilote::log('debug', "cpPilotageProgRemove() : Fail to find a default programme here (".__FILE__.",".__LINE__.")");
         return;
       }
       
       // ----- Store new programme id
       $this->setConfiguration('programme_id', $v_prog['id']);
+      $this->save();
       
       // ----- Change programme name and id in info command
       $this->checkAndUpdateCmd('programme_id', $v_prog['id']);
@@ -2406,17 +2411,6 @@ class centralepilote extends eqLogic {
       // ----- Force a 'tick' to update radiateur status (will be ignored if not in auto mode)
       $this->cpEqClockTick();
       
-      // ----- Change mode (if needed)
-      // If this is a radiateur managed by a zone, it will do nothing, waiting 
-      // for the zone to change the mode too manuel.
-      // So I need to force the pilotage to default 'eco' to have the radiateur
-      // becomes 'manuel' when not anymore under 'zone'
-      if ($this->cpPilotageIsZone()) {
-        $this->setConfiguration('pilotage', 'eco');
-      }
-      else {
-        $this->cpPilotageChangeTo('eco', true);
-      }
     }
     /* -------------------------------------------------------------------------*/
 
@@ -2598,6 +2592,8 @@ class centralepilote extends eqLogic {
       // ----- Récupérer l'id programmation
       $v_prog_id = $this->cpGetConf('programme_id');
       
+      centralepilote::log('debug',  "ClockTick current programme_id for '".$this->getName()."' is ".$v_prog_id);
+
       // ----- Récupérer le mode en fonction du tick horloge
       $v_mode = centralepilote::cpProgModeFromClockTick($v_prog_id, $p_jour, $p_heure, $p_minute);
       
