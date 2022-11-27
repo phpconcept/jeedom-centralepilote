@@ -90,6 +90,9 @@ Radiateur en mode programmé :
 
 ### Change Logs
 
+Release v0.3 (beta) :
+-
+
 Release v0.2 (beta) :
 - Migration automatique depuis la v0.1 vers la v0.2 pas complètement transparente. En particulier : perte des programmations, la commande 'pilotage' peut afficher la valeur 'manuel', mais cela sera updater à la prochaine transition. L'ordre des commandes peut aussi être perturbée.
 - Modification du concept de pilotage manuel/auto qui était séparé des modes de chaleur. Un seul concept de "pilotage" reste pouvant prendre comme valeurs les modes de chauffage 'confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off' et 'auto'. Cela allège l'utilisation et le code sous-jacent. 
