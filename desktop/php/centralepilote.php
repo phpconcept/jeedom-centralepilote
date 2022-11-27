@@ -123,7 +123,7 @@ if (0) {
 <div class="col-xs-12 eqLogic" style="display: none;">
 		<div class="input-group pull-right" style="display:inline-flex">
 			<span class="input-group-btn">
-				<a class="btn btn-default btn-sm eqLogicAction roundedLeft" data-action="configure"><i class="fa fa-cogs"></i> {{Configuration avancée}}</a><a class="btn btn-default btn-sm eqLogicAction" data-action="copy"><i class="fas fa-copy"></i> {{Dupliquer}}</a><a class="btn btn-sm btn-success eqLogicAction" data-action="save"><i class="fas fa-check-circle"></i> {{Sauvegarder}}</a><a class="btn btn-danger btn-sm eqLogicAction roundedRight" data-action="remove"><i class="fas fa-minus-circle"></i> {{Supprimer}}</a>
+				<a class="btn btn-default btn-sm eqLogicAction roundedLeft" data-action="configure"><i class="fa fa-cogs"></i> {{Configuration avancée}}</a><a class="btn btn-default btn-sm eqLogicAction cp_panel_radiateur_zone" data-action="copy"><i class="fas fa-copy"></i> {{Dupliquer}}</a><a class="btn btn-sm btn-success eqLogicAction" data-action="save"><i class="fas fa-check-circle"></i> {{Sauvegarder}}</a><a class="btn btn-danger btn-sm eqLogicAction roundedRight cp_panel_radiateur_zone" data-action="remove"><i class="fas fa-minus-circle"></i> {{Supprimer}}</a>
 			</span>
 		</div>
   <ul class="nav nav-tabs" role="tablist">
@@ -200,9 +200,9 @@ if (0) {
            </div>
            
       	<div class="form-group">
-      		<label class="col-sm-4 control-label">{{Activation & Visibilité}}</label>
+      		<label class="col-sm-4 control-label"><span class="cp_panel_radiateur_zone">{{Activation}} & </span>{{Visibilité}}</label>
       		<div class="col-sm-8">
-      			<label class="checkbox-inline"><input type="checkbox" class="cp_attr_radiateur eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}</label>
+      			<label class="checkbox-inline cp_panel_radiateur_zone"><input type="checkbox" class="cp_attr_radiateur eqLogicAttr" data-l1key="isEnable" checked/>{{Activer}}</label>
       			<label class="checkbox-inline"><input type="checkbox" class="cp_attr_radiateur eqLogicAttr" data-l1key="isVisible" checked/>{{Visible}}</label>
       		</div>
       	</div>
@@ -234,13 +234,20 @@ if (0) {
     <div class="row form-group cp_panel_radiateur_zone">
       <label class="col-sm-3 control-label">{{Température}}</label>
       <div class="col-sm-7">
-        <textarea class="cp_attr_radiateur eqLogicAttr form-control input-sm" data-l1key="configuration" data-l2key="temperature" style="height : 33px;" placeholder="{{Mesure de température associée au radiateur}}"></textarea>
+        <textarea class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="temperature" style="height : 33px;" placeholder="{{Mesure de température associée au radiateur}}"></textarea>
       </div>
       <div class="col-sm-2">
         <a class="btn btn-default cursor cp_modal_select_cmd_info btn-sm" data-input="temperature"><i class="fas fa-list-alt"></i> {{Rechercher}}</a>
       </div>
     </div>
 
+
+    <div class="row form-group cp_panel_radiateur">
+      <label class="col-sm-3 control-label">{{Puissance}}</label>
+      <div class="col-sm-9">
+        <input type="text" class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="puissance" placeholder="{{Puissance en Watts du radiateur}}"/>
+      </div>
+    </div>
 
 
       <div class="form-group cp_panel_radiateur">

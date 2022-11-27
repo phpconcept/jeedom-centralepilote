@@ -562,7 +562,8 @@ function saveEqLogic(_eqLogic) {
                            "fallback_horsgel":1,
                            "command_off":1,
                            "statut_off":1,
-                           "fallback_off":1}
+                           "fallback_off":1,
+                           "puissance":1}
                         ,"centrale" : 
                           {"support_confort":1,
                            "support_confort_1":1,
@@ -593,7 +594,8 @@ function saveEqLogic(_eqLogic) {
                            "fallback_horsgel":1,
                            "command_off":1,
                            "statut_off":1,
-                           "fallback_off":1}
+                           "fallback_off":1,
+                           "puissance":1}
                         };
 
 

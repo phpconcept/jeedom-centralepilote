@@ -11,9 +11,9 @@ En attendant une description dans cette page, vous pouvez aller voir : https://f
 ### Créer un Radiateur "Fil-Pilote"
 
 Lors de la création d'un équipement de type "Radiateur", il va falloir indiquer comment est réalisé la fonction de fil-pilote pour ce radiateur. Autrement dit quels contacteurs sont utilisés pour envoyer les ordres fil-pilote au radiateur.
-Le plugin offre actuellement 4 possibilités. Les 3 premières sont à bases de contacteurs simples on/off, la 4ème est à base d'objets virtuels, et permet (normalement) de couvrir tous les autres cas d'objets connectés permettant d'envoyer une commande fil-pilote sans être des contacteurs simples.
+Le plugin offre actuellement 4 possibilités. Les 3 premières sont à base de contacteurs simples on/off, la 4ème est à base d'objets virtuels, et permet (normalement) de couvrir tous les autres cas d'objets connectés permettant d'envoyer une commande fil-pilote sans être des contacteurs simples.
 
-Un schéma permet de bien expliciter comment est réaliser la fonction de fil pilote, et ainsi de simplifier la chose.
+Un schéma permet de bien expliciter comment est réalisé la fonction de fil pilote, et ainsi de simplifier la chose.
 
 - Constitution du fil-pilote par deux commutateurs
 
@@ -31,7 +31,7 @@ Pour supporter les modes Confort/Off, il faut que la diode laisse passer dans le
 
 - Constitution du fil-pilote par un seul commutateur - mode Confort/Hors-Gel
 
-Ce cas est similaire au précédent, mais la diode est inversée, ce qui fait que le mode supporté est différent.
+Ce cas est similaire au précédent, mais la diode est inversée, ce qui fait que les modes supportés sont différents.
 
 ![Programmation](docs/images/config_radiateur_3.png)
 
@@ -48,9 +48,9 @@ Explications : lorsque vous allez commander au radiateur de passer en mode "Conf
 ### Créer une Zone "Fil-Pilote"
 
 Une "Zone" est simplement un regroupement de plusieurs radiateurs que vous voulez piloter en même temps. Cela peut par exemple être l'ensemble des radiateurs d'une même pièce. Ainsi si vous voulez passer la pièce en mode "Eco" vous pouvez le faire directement sans avoir à le faire pour chaque radiateur de la pièce.
-Comme un radiateur vous pouvez décider quels commandes sont supportées ou non. Si vous choisissez un mode non supporté par l'un des radiateur de la zone, alors celui-ci utilisera le mode alternatif que vous avez configuré ou celui par défaut.
+Comme un radiateur, vous pouvez décider quelles commandes sont supportées ou non. Si vous choisissez un mode non supporté par l'un des radiateur de la zone, alors celui-ci utilisera le mode alternatif que vous avez configuré ou celui par défaut.
 
-Une fois la zone configurée, c'est au niveau des radiateurs que vous allez indiquer s'ils sont dans une zone ou non. Si le radiateur est dans une zone, il ne peut alors plus être commandé directement. 
+Une fois la zone créée, c'est au niveau des radiateurs que vous allez indiquer s'ils sont dans une zone ou non. Si le radiateur est dans une zone, il ne peut alors plus être commandé directement. 
 
 ### Configurations des programmations horaires
 
@@ -59,7 +59,7 @@ Les configurations de plages horaires sont globales au plugin. Elles se configur
 
 Le plugin arrive avec une programmation par défaut qu'il n'est pas possible de supprimer et que l'on ne doit pas modifier (il pourra être automatiquement réinitialisé ultérieurement).
 
-Il est ensuite possible de créer des programmation personnalisées.
+Il est ensuite possible de créer des programmations personnalisées.
 
 La configuration des modes de chauffage en fonction des heures se fait simplement en cliquant sur les icônes des modes. A chaque click le mode suivant est proposé. Il est aussi possible de choisir le mode par les boutons se trouvant en dessous, puis de clicker sur les plages horaires.
 
@@ -73,9 +73,9 @@ Configuration des plages horaires :
 
 La configuration d'un radiateur ou d'une zone pour qu'elle utilise une plage horaire ne se fait pas dans la configuration de l'équipement, mais en utilisant des commandes. Cela permet à une personne néofite de facilement passer un radiateur d'un mode manuel à un mode auto. Cela permet aussi à d'autres équipements ou scénarii de changer le mode de pilotage des radiateurs.
 
-Une fois le radiateur (ou la zone) mis en mode "Auto", la selection du programme se fait par le bouton "Select". Chaque pression sur le bouton fait passer au programme suivant. Le programme 0 est le programme par défaut.
+Une fois le radiateur (ou la zone) mis en mode "Auto", la selection du programme se fait par le menu déroulant "Programme Select". Le fonctionnement actuel du core jeedom, fait que la liste commence par un choix "Aucun" (qui n'a aucun sens :-) ). Choisisez le bon programme et celui-ci s'affichera dans "Programme".
 
-Radiateur en mode manuel :
+Radiateur en mode manuel (Confort, Eco, etc... ) :
 
 ![Programmation](docs/images/radiateur_show_1.png)
 
@@ -90,6 +90,14 @@ Radiateur en mode programmé :
 
 ### Change Logs
 
+Release v0.2 (beta) :
+- Migration automatique depuis la v0.1 vers la v0.2 pas complètement transparente. En particulier : perte des programmations, la commande 'pilotage' peut afficher la valeur 'manuel', mais cela sera updater à la prochaine transition. L'ordre des commandes peut aussi être perturbée.
+- Modification du concept de pilotage manuel/auto qui était séparé des modes de chaleur. Un seul concept de "pilotage" reste pouvant prendre comme valeurs les modes de chauffage 'confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off' et 'auto'. Cela allège l'utilisation et le code sous-jacent. 
+- Conséquence : Suppression des commandes "prog_select" et "manuel". Renommage de la commande 'mode' en commande 'etat'.
+- Sélection des programmes du mode auto par un 'select'. Ajout des commandes "programme_select" (action) et "programme_id" (info) qui viennent compléter la commande "programme" (info) qui contient le nom du programme selectionné.
+- Ajout d'une information sur la puissance des radiateurs (pour usage futur de mesures ou d'analyses).
+- Changement du stockage des programmations : ils étaient dans la configuration du plugin (ce qui était un problème car perte lors de la desactivation), ils sont maintenant dans la configuration de l'objet (unique) 'Centrale'.
+
 Release v0.1 (beta) :
 - Première version
 
@@ -100,6 +108,9 @@ Release v0.1 (beta) :
 - Les commmandes "Confort -1" et "Confort -2" ne sont pas encore complètement gérées.
 - Lorsqu'un contacteur est changé directement, sans passer par l'équipement "radiateur fil-pilote", l'état de ce dernier n'est pas automatiquement mis à jour.
 - Lors de création d'un radiateur en choisissant les 3 configurations à base de contacteurs, les modes affichés dans la page de configuration ne sont pas instantanément mis à jour sur la page. Ils le sont apès la sauvegarde du radiateur.
+- Les commandes avec des options (select) ne sont pas encore bien gérées pour les retours d'état des contacteurs.
+- Il ne faut surtout pas détruire ou désactiver l'objet "Centrale". Le PlugIn essaie de l'empêcher, mais tout n'est pas encore contrôlé.
+- Il faut laisser au moins deux modes par radiateur (pour l'instant le plugIn ne vérifie pas ...)
 
 
 ### Aspirations & Idées & Evolutions
@@ -109,5 +120,10 @@ Une petite liste d'idées ou de fonctions que l'on pourrait rajouter dans Central
 - Détection automatique de fenêtre ouverte
 - Améliorer la précision horaire : ajouter une programmation au 1/4 d'heure
 - Créer des widgets plus "jolis" et intuitifs.
+- Ajouter une fonction de déclenchement (passage à un mode à heure fixe) avec éventuellement un retour à un mode donné au bout d'un certain temps.
+- Ajouter le cas d'un radiateur ne supportant pas le fil-pilote (mode on/off = confort/off).
+- Ajouter un nom court aux programmations
+- Bouton "Boost" : cas d'usage lancer le mode "Confort" dans une salle de bain, juste pendant 1h ou 2h et revenir à l'état normal automatiquement.
+- Utiliser les informations (optionnelles) de température de la pièce et de la puissance du radiateur pour proposer des analyses ou des audits.
 
 
