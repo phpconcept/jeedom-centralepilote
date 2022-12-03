@@ -1041,7 +1041,8 @@ class centralepilote extends eqLogic {
         $v_cmd_order=1;
 
         // ----- Création des commandes par défaut
-        $this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        //$this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'binary', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
       }
 
       else {
@@ -1419,11 +1420,11 @@ class centralepilote extends eqLogic {
           
           // ----- Not allowed
           else {
-            centralepilotelog::log('error', "Not allowed to disable 'Centrale' in CentralePilote PlugIn.");
+            //centralepilotelog::log('error', "Not allowed to disable 'Centrale' in CentralePilote PlugIn.");
             // ----- Change to enable
             // TBC : comment forcer la désactivation ???
             //$this->setIsEnable();
-            $this->save();        
+            //$this->save();        
           }
         }
   
