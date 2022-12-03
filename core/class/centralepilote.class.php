@@ -58,6 +58,7 @@ class centralepilote extends eqLogic {
     *  temperature : commande permettant d'obtenir la température associée à un radiateur (optionel)
     *  puissance : puissance en watts du radiateur (optionel)
     *  notes : juste des notes pour s'y retrouver ...
+    *  bypass_mode : Mode forcé au global par l'objet 'centrale'. Prend les valeurs : 'no', 'delestage', 'eco', 'horsgel'
     *  
     */
     var $_pre_save_cache;
@@ -1041,8 +1042,12 @@ class centralepilote extends eqLogic {
         $v_cmd_order=1;
 
         // ----- Création des commandes par défaut
-        //$this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
-        $this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'binary', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('normal', ['name'=>'Normal', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('eco', ['name'=>'Eco', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('eco')]);
+        $this->cpCmdCreate('horsgel', ['name'=>'HorsGel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('horsgel')]);
+        
+        $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
       }
 
       else {
@@ -1186,7 +1191,7 @@ class centralepilote extends eqLogic {
     }
 
     public function preSaveCentrale() {
-      //centralepilotelog::log('debug', "preSave()");
+      centralepilotelog::log('debug', "preSave() : centrale ...");
       
       // It's time to gather informations that will be used in postSave
       
@@ -1218,6 +1223,8 @@ class centralepilote extends eqLogic {
           'isEnable'              => $eqLogic->getIsEnable()
         );
       }
+
+      centralepilotelog::log('debug', "preSave() end");
     }
 
     public function postSave() {
@@ -1397,7 +1404,7 @@ class centralepilote extends eqLogic {
 
     public function postSaveCentrale() {
 
-      //centralepilotelog::log('debug', "postSave()");
+      centralepilotelog::log('debug', "postSave() : centrale");
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
@@ -1416,6 +1423,11 @@ class centralepilote extends eqLogic {
         
           // ----- Change to enable
           if ($this->getIsEnable()) {
+            // ----- Look for etat initial value
+            $v_value = $this->cpCmdGetValue('etat');
+            if ($v_value == '') {
+              $this->checkAndUpdateCmd('etat', 'Normal');
+            }
           }
           
           // ----- Not allowed
@@ -1430,6 +1442,7 @@ class centralepilote extends eqLogic {
   
       }
       
+      centralepilotelog::log('debug', "postSave() : end");
     }
 
     public function preUpdate() {
@@ -2109,17 +2122,14 @@ class centralepilote extends eqLogic {
     /**---------------------------------------------------------------------------
      * Method : cpPilotageIsZone()
      * Description :
+     *   This function returns 'true' if the device is a radiateur and if it is
+     *   inside a zone. And 'false' in any other cases.
      * Parameters :
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
     public function cpPilotageIsZone() {
-      if (!$this->cpIsType(array('radiateur','zone'))) {
-        centralepilote::log('debug', "This method should not be used for not radiateur/zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
-        return(false);
-      }
-      
-      if ($this->cpGetConf('zone') != '') {
+      if ( $this->cpIsType('radiateur') && ($this->cpGetConf('zone') != '')) {
         return(true);
       }
       return(false);
@@ -2135,7 +2145,7 @@ class centralepilote extends eqLogic {
      */
     public function cpPilotageGetAdminValue() {
       if (!$this->cpIsType(array('radiateur','zone'))) {
-        centralepilote::log('debug', "This method cpPilotageGetAdminValue() should not be used for not radiateur/zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug', "This method cpPilotageGetAdminValue() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return('eco');
       }
 
@@ -2163,7 +2173,7 @@ class centralepilote extends eqLogic {
     
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
-        centralepilote::log('debug', "This method cpPilotageChangeTo() should not be used for not radiateur/zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug', "This method cpPilotageChangeTo() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
       
@@ -2237,7 +2247,7 @@ class centralepilote extends eqLogic {
     public function cpPilotageChangeToZone() {
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
-        centralepilote::log('debug', "This method cpPilotageChangeToZone() should not be used for not radiateur/zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug', "This method cpPilotageChangeToZone() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
@@ -2295,7 +2305,7 @@ class centralepilote extends eqLogic {
     public function cpPilotageExitFromZone() {
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
-        centralepilote::log('debug', "This method cpPilotageExitFromZone() should not be used for not radiateur/zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug', "This method cpPilotageExitFromZone() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
@@ -2319,6 +2329,91 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpPilotageChangeToBypass()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpPilotageChangeToBypass($p_bypass_mode) {
+      // ----- Only for 'radiateur' or 'zone'
+      if (!$this->cpIsType(array('radiateur','zone'))) {
+        centralepilote::log('debug', "This method cpPilotageChangeToBypass() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        return;
+      }
+
+      // ----- Check that the device is enable
+      if (!$this->getIsEnable()) {
+        centralepilote::log('debug',  "Equipement '".$this->getName()."' is disable, no change to bypass mode.");
+        return;
+      }
+      
+      // ----- Look of device is a radiateur, inside a zone
+      if ($this->cpPilotageIsZone()) {
+        centralepilote::log('debug',  "Equipement '".$this->getName()."' is under a zone, mode will be changed by the zone.");
+        return;
+      }
+      
+      
+      if ($p_bypass_mode == 'normal') {
+        $this->cpPilotageExitFromBypass();
+        return;
+      }
+      else if ($p_bypass_mode == 'delestage') {
+        $v_mode = 'off';
+      }
+      else if ($p_bypass_mode == 'eco') {
+        $v_mode = 'eco';
+      }
+      else if ($p_bypass_mode == 'horsgel') {
+        $v_mode = 'horsgel';
+      }
+      else {
+        centralepilote::log('debug',  "Error : unexpected bypass mode '".$p_bypass_mode."' here (".__FILE__.",".__LINE__.")");
+        return;
+      }
+
+      centralepilote::log('info',  "Radiateur or Zone '".$this->getName()."' change pilotage to 'bypass->".$v_mode."'");      
+      
+      // ----- Apply the mode to the radiateur
+      $this->cpModeChangeTo($v_mode, true);
+            
+      // ----- Change display of pilotage mode
+      $this->checkAndUpdateCmd('pilotage', 'bypass');
+      
+      // ----- Store bypass mode
+      $this->setConfiguration('bypass_mode', $p_bypass_mode);
+      
+      // ----- Change commands visibility
+      $this->cpCmdResetDisplay();
+      
+      // ----- Save data
+      $this->save();              
+        
+      return;
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpPilotageExitFromBypass()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpPilotageExitFromBypass() {
+      centralepilote::log('info',  "Radiateur or Zone '".$this->getName()."' exit from 'bypass' mode.");      
+
+      // ----- Store bypass mode
+      $this->setConfiguration('bypass_mode', 'no');
+
+      // ----- Change to last stored admin pilotage mode
+      $v_pilotage = $this->cpPilotageGetAdminValue();
+      $this->cpPilotageChangeTo($v_pilotage);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpPilotageProgSelect()
      * Description :
      * Parameters :
@@ -2328,7 +2423,7 @@ class centralepilote extends eqLogic {
     public function cpPilotageProgSelect($p_selected_id=-1) {
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
-        centralepilote::log('debug', "This method cpPilotageProgSelect() should not be used for not radiateur/zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug', "This method cpPilotageProgSelect() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
@@ -2379,7 +2474,7 @@ class centralepilote extends eqLogic {
     public function cpPilotageProgRemove($p_prog_remove_id) {
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
-        centralepilote::log('debug', "This method cpPilotageProgRemove() should not be used for not radiateur/zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug', "This method cpPilotageProgRemove() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
       
@@ -2856,11 +2951,11 @@ class centralepiloteCmd extends cmd {
     public function execute($_options = array()) {
         if ($this->getType() != 'action') {
 			return;
-		}
+		}                
         
         // ----- Get associated equipment
 		$eqLogic = $this->getEqlogic();
-        
+                
         // ----- Get command logical id
         $v_logical_id = $this->getLogicalId();
         
@@ -2869,6 +2964,12 @@ class centralepiloteCmd extends cmd {
 			$eqLogic->cpRefresh();
 			return;
 		}
+
+        // ---- Look fos specific cmds per object type
+        if ($eqLogic->cpIsType('centrale')) {
+          return($this->execute_centrale($eqLogic, $v_logical_id, $_options));
+        }
+        
         
         
 		if ($v_logical_id == 'programme_select') {
@@ -2910,6 +3011,44 @@ class centralepiloteCmd extends cmd {
         }
         
         centralepilotelog::log('error', 'Unknown command '.$v_logical_id.' !');        
+    }
+    
+    public function execute_centrale($p_centrale, $p_logical_id, $_options) {
+
+      $v_bypass_mode = 'no';
+      
+      if ($p_logical_id == 'normal') {
+        $p_centrale->checkAndUpdateCmd('etat', 'normal');
+        centralepilotelog::log('info', "Change Centrale to mode 'normal'.");
+        $v_bypass_mode = 'normal';
+      }
+      else if ($p_logical_id == 'eco') {
+        $p_centrale->checkAndUpdateCmd('etat', 'eco');
+        centralepilotelog::log('info', "Change Centrale to mode 'eco'.");
+        $v_bypass_mode = 'eco';
+      }
+      else if ($p_logical_id == 'horsgel') {
+        $p_centrale->checkAndUpdateCmd('etat', 'horsgel');
+        centralepilotelog::log('info', "Change Centrale to mode 'horsgel'.");
+        $v_bypass_mode = 'horsgel';
+      }
+      else if ($p_logical_id == 'delestage') {
+        $p_centrale->checkAndUpdateCmd('etat', 'delestage');
+        centralepilotelog::log('info', "Change Centrale to mode 'delestage'.");
+        $v_bypass_mode = 'delestage';
+      }
+      else {
+        centralepilotelog::log('info', "Unexpected commad '".$p_logical_id."' for centrale.");
+        return;
+      }
+      
+      // ----- Update all equip
+      $eqLogics = eqLogic::byType('centralepilote');
+      foreach ($eqLogics as $v_eq) {
+        $v_eq->cpPilotageChangeToBypass($v_bypass_mode);
+      }      
+      
+
     }
 
     /*     * **********************Getteur Setteur*************************** */
