@@ -1094,6 +1094,8 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('pilotage', 'eco');
         $this->setConfiguration('programme_id', '0');
 
+        $this->setConfiguration('bypass_mode', 'no');
+
         // ----- Information concernant les caractéristiques du radiateur        
         $this->setConfiguration('temperature', '');
         $this->setConfiguration('puissance', '');
@@ -1586,6 +1588,7 @@ class centralepilote extends eqLogic {
 	private function cpGetDefaultConfiguration($p_key) {
 		$v_conf_keys = array(
 			'type' => 'radiateur',
+			'bypass_mode' => 'no',
             'zone' => ''
 		);
 		// If not in list, default value is ''
@@ -1690,6 +1693,20 @@ class centralepilote extends eqLogic {
       // ----- Look for pilotage mode
       $v_pilotage = $this->cpGetConf('pilotage');
     
+      // ----- Look if device is in bypass mode
+      if (($v_bypass_mode = $this->cpGetConf('bypass_mode')) != 'no') {
+        // ----- Hide all mode commands
+        foreach ($v_mode_list as $v_mode) {
+           $this->cpCmdHide($v_mode, true);
+        }
+
+        // ----- Hide all others
+        $this->cpCmdHide('auto', true);
+        $this->cpCmdHide('programme_select', true);
+        $this->cpCmdHide('programme', true);
+        return;
+      }
+
       // ----- Look for radiateur
       if ($this->cpIsType('radiateur')) {
         // ----- Look if radiateur is in zone
@@ -2178,7 +2195,10 @@ class centralepilote extends eqLogic {
       }
       
       // ----- Check valid $p_pilotage value
-      // TBC
+      if (!in_array($p_pilotage, array('confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off', 'auto'))) {
+        centralepilote::log('debug',  "Erreur unknown pilotage mode '".$p_pilotage."' here (".__FILE__.",".__LINE__.")");
+        return;
+      }
       
       // ----- Check that the device is enable
       if ((!$this->getIsEnable()) && (!$p_force)) {
@@ -2192,9 +2212,23 @@ class centralepilote extends eqLogic {
         return;
       }
       
-      // TBC : look if already the same pilotage mode
+      // ----- Look if device is in bypass mode
+      if (($v_bypass_mode = $this->cpGetConf('bypass_mode')) != 'no') {
+        centralepilote::log('info',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_mode."', exit from bypass mode before changing pilotage mode to '".$p_pilotage."'.");
+        return;
+      }
       
-      centralepilote::log('info',  "Equipement '".$this->getName()."' change pilotage mode to '".$p_pilotage."'");
+      // ----- Get current real pilotage mode
+      $v_pilotage_current = $this->cpCmdGetValue('pilotage');
+      
+      // TBC : ici il ne faut pas comparer les modes admin mais le mode admin cible par rapport au mode réel
+      // ----- look if already the same pilotage mode
+      if (($v_pilotage_current == $p_pilotage) && (!$p_force)) {
+        centralepilote::log('debug',  "Equipement '".$this->getName()."' is already in pilotage mode '".$p_pilotage."', skip.");
+        return;
+      }
+      
+      centralepilote::log('info',  "Equipement '".$this->getName()."' change pilotage mode from '".$v_pilotage_current."' to '".$p_pilotage."'");
       
       // ----- Look for specific 'auto' pilotage mode
       if ($p_pilotage == 'auto') {
@@ -2225,7 +2259,6 @@ class centralepilote extends eqLogic {
       }
 
       // ----- Store new pilotage admin status
-      //$this->setConfiguration('admin_pilotage', $p_pilotage);
       $this->setConfiguration('pilotage', $p_pilotage);
       
       // ----- Change commands visibility
@@ -2269,6 +2302,13 @@ class centralepilote extends eqLogic {
         return(false);
       }
       
+      // ----- Look if device is in bypass mode
+      if (($v_bypass_mode = $this->cpGetConf('bypass_mode')) != 'no') {
+        centralepilote::log('info',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_mode."', pilotage by zone will be active later.");
+        $this->cpCmdResetDisplay();
+        return;
+      }
+
       // ----- Get the current mode of the zone
       $v_zone_object = eqLogic::byId($v_zone);
       if (!is_object($v_zone_object)) {
@@ -2320,6 +2360,14 @@ class centralepilote extends eqLogic {
         return(false);
       }
       
+      // ----- Look if device is in bypass mode
+      if (($v_bypass_mode = $this->cpGetConf('bypass_mode')) != 'no') {
+        centralepilote::log('debug',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_mode."'");
+        // ----- Do  not change the admin pilotage, but change the displayed value
+        $this->checkAndUpdateCmd('pilotage', 'bypass');
+        return;
+      }
+
       // ----- Change to last stored admin pilotage mode
       $v_pilotage = $this->cpPilotageGetAdminValue();
       $this->cpPilotageChangeTo($v_pilotage);
@@ -2348,12 +2396,13 @@ class centralepilote extends eqLogic {
         return;
       }
       
+      /*
       // ----- Look of device is a radiateur, inside a zone
       if ($this->cpPilotageIsZone()) {
         centralepilote::log('debug',  "Equipement '".$this->getName()."' is under a zone, mode will be changed by the zone.");
         return;
       }
-      
+      */
       
       if ($p_bypass_mode == 'normal') {
         $this->cpPilotageExitFromBypass();
@@ -2406,6 +2455,7 @@ class centralepilote extends eqLogic {
 
       // ----- Store bypass mode
       $this->setConfiguration('bypass_mode', 'no');
+      $this->save();
 
       // ----- Change to last stored admin pilotage mode
       $v_pilotage = $this->cpPilotageGetAdminValue();
