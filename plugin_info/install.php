@@ -66,16 +66,54 @@ function centralepilote_update() {
 function centralepilote_update_v_0_3($v_from_version='') {
   // TBC
   
-  // Ajouter cmds
-/*
-  $this->cpCmdCreate('normal', ['name'=>'Normal', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
-  $this->cpCmdCreate('eco', ['name'=>'Eco', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('eco')]);
-  $this->cpCmdCreate('horsgel', ['name'=>'HorsGel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('horsgel')]);
+  // ----- Get centrale
+  $v_centrale = centralepilote::cpCentraleGet();
+  if ($v_centrale === null) {
+    centralepilotelog::log('debug', "Missing default Centrale object. Abort update.");
+    return;
+  }
+  
+  // ----- Ajouter ces commandes à la centrale
+  $v_cmd = $v_centrale->getCmd(null, 'normal');
+  if (!is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing cmd 'normal' to Centrale equipement.");
+    $v_centrale->cpCmdCreate('normal', ['name'=>'Normal', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>1]);
+  }
+  
+  $v_cmd = $v_centrale->getCmd(null, 'horsgel');
+  if (!is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing cmd 'horsgel' to Centrale equipement.");
+    $v_centrale->cpCmdCreate('horsgel', ['name'=>'HorsGel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>3, 'icon'=>centralepilote::cpModeGetIconClass('horsgel')]);
+  }
+  
+  $v_cmd = $v_centrale->getCmd(null, 'eco');
+  if (!is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing cmd 'eco' to Centrale equipement.");
+    $v_centrale->cpCmdCreate('eco', ['name'=>'Eco', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>4, 'icon'=>centralepilote::cpModeGetIconClass('eco')]);
+  }
+  
+  $v_cmd = $v_centrale->getCmd(null, 'etat');
+  if (!is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing cmd 'etat' to Centrale equipement.");
+    $v_centrale->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>5]);
+  }
+  
+  // ----- Look for each equip
+  $eqLogics = eqLogic::byType('centralepilote');
+  foreach ($eqLogics as $v_eq) {
+  
+    // ----- Actions for 'radiateur' and 'zone'
+    if ($v_eq->cpIsType(array('radiateur','zone'))) {
 
-        $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
-        
-        $this->setConfiguration('bypass_mode', 'no');
-*/  
+      // ----- Set config values for each device
+      if ($v_eq->getConfiguration('bypass_mode', '') == '') {
+        $v_eq->setConfiguration('bypass_mode', 'no');
+      }
+
+    }
+  
+  }
+  
 }
 
 
