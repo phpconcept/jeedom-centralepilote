@@ -77,7 +77,7 @@ function centralepilote_update_v_0_3($v_from_version='') {
   $v_cmd = $v_centrale->getCmd(null, 'normal');
   if (!is_object($v_cmd)) {
     centralepilotelog::log('debug', "Add missing cmd 'normal' to Centrale equipement.");
-    $v_centrale->cpCmdCreate('normal', ['name'=>'Normal', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>1]);
+    $v_centrale->cpCmdCreate('normal', ['name'=>'Normal', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>0]);
   }
   
   $v_cmd = $v_centrale->getCmd(null, 'horsgel');
@@ -107,7 +107,9 @@ function centralepilote_update_v_0_3($v_from_version='') {
 
       // ----- Set config values for each device
       if ($v_eq->getConfiguration('bypass_mode', '') == '') {
+        centralepilotelog::log('debug', "Add missing config 'bypass_mode' to equipement '".$v_eq->getName()."'.");
         $v_eq->setConfiguration('bypass_mode', 'no');
+        $v_eq->save();
       }
 
     }
