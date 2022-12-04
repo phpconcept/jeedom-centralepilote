@@ -8,7 +8,7 @@
 	"licence" : "AGPL",
 	"author" : "Vincent",
 	"require" : "4.0",
-    "version": "0.3",
+    "version": "0.4",
 	"category" : "energy",
 	"hasDependency" : false,
     "maxDependancyInstallTime" : 10,
