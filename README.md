@@ -106,6 +106,13 @@ Centrale en mode "Délestage":
 
 ### Change Logs
 
+Release v0.4 (beta) :
+
+- Nouveautés :
+
+- Bug corrections :
+- Lors de la création initiale, l'état de l'équipement "centrale" n'est pas correctement affiché.
+
 Release v0.3 (beta) :
 - Ajout de la fonction de délestage (bypass) au niveau de l'objet "Centrale". Cela permet d'envoyer un ordre centralisé obligatoire à tous les radiateurs (Off, Hors-Gel ou Eco). Les radiateurs resteront dans ce mode jusqu'à l'odre de retour à la normal. Ils reprendront alors le mode de pilotage dans lequel ils étaient.
 
