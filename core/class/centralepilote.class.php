@@ -988,6 +988,13 @@ class centralepilote extends eqLogic {
       postSave ⇒ Méthode appellée après la sauvegarde de votre objet
       preRemove ⇒ Méthode appellée avant la supression de votre objet
       postRemove ⇒ Méthode appellée après la supression de votre objet    
+      
+      Lorsque l'on créé un equipement, il demande son nom, puis il fait les fonctions suivantes :
+        preSave()
+        preInsert()
+        postInsert()
+        postSave()
+      il propose ensuite l'écran des paramètres de configuration :
     */
 
     public function preInsert() {
@@ -1057,6 +1064,7 @@ class centralepilote extends eqLogic {
     }
 
     public function preSave() {
+      centralepilotelog::log('debug', "preSave()");
       $v_type = $this->getConfiguration('type', '');
       if ($v_type == 'radiateur') {
         $this->preSaveRadiateur();
@@ -1230,6 +1238,7 @@ class centralepilote extends eqLogic {
     }
 
     public function postSave() {
+      centralepilotelog::log('debug', "postSave()");
       $v_type = $this->getConfiguration('type', '');
       if ($v_type == 'radiateur') {
         $this->postSaveRadiateur();
