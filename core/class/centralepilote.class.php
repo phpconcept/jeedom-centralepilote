@@ -1486,25 +1486,68 @@ class centralepilote extends eqLogic {
         return parent::toHtml($_version);
       }
       */
-
-   return parent::toHtml($_version);
+      
+      if ($this->cpIsType(array('radiateur','zone'))) {
+        return parent::toHtml($_version);
+      }
 
 
         centralepilote::log('debug',  "Call toHtml");
 
       $replace = $this->preToHtml($_version);
+
       if (!is_array($replace)) {
         return $replace;
       }      
       $version = jeedom::versionAlias($_version);
+
+//        centralepilote::log('debug',  "Call toHtml = ".print_r($replace, true));
+        
+  //      return parent::toHtml($_version);
+
+      $replace['#name_display#'] = 'La Centrale Pilote';
+     
+      $v_cmd = $this->getCmd(null, 'normal');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_normal_id#'] = $v_cmd->getId();
+         $replace['#cmd_normal_name#'] = __("Normal", __FILE__);
+      }
+      $v_cmd = $this->getCmd(null, 'delestage');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_delestage_id#'] = $v_cmd->getId();
+         $replace['#cmd_delestage_name#'] = __("Delestage", __FILE__);
+      }
+      $v_cmd = $this->getCmd(null, 'eco');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_eco_id#'] = $v_cmd->getId();
+         $replace['#cmd_eco_name#'] = __("Eco", __FILE__);
+      }
+      $v_cmd = $this->getCmd(null, 'horsgel');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_horsgel_id#'] = $v_cmd->getId();
+         $replace['#cmd_horsgel_name#'] = __("Hors-Gel", __FILE__);
+      }
+      $v_cmd = $this->getCmd(null, 'etat');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_etat_id#'] = $v_cmd->getId();
+         $replace['#cmd_etat_name#'] = $v_cmd->execCmd();
+      }
+      
+      $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-centrale.template', __CLASS__)));
+
+      // postToHtml() : fait en fait le remplacement dans template + le cache du widget
+    //  $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $_version, 'eqLogic')));
+      
+      /*
       
 //centralepilote::log('debug',  "Template:".getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__));
 
-      $html = template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__));
 
 //centralepilote::log('debug',  "Result:".$html);
 
       cache::set('widgetHtml' . $_version . $this->getId(), $html, 0);
+      
+      */
       return $html;
 
       
