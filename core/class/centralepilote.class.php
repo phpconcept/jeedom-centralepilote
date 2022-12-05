@@ -1055,6 +1055,9 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('horsgel', ['name'=>'HorsGel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('horsgel')]);
         
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        
+        // ----- Here I can change the value because the centrale eq is created in "enable" status.
+        $this->checkAndUpdateCmd('etat', 'Normal');
       }
 
       else {
@@ -1421,9 +1424,11 @@ class centralepilote extends eqLogic {
       if (is_null($this->_pre_save_cache)) {
         centralepilotelog::log('debug', "postSave() : new centrale");
 
+        /* already done in create default centrale
         if ($this->cpGetType() == 'centrale') {
           centralepilote::cpProgCreateDefault();
         }
+        */
         
       }
       
@@ -1435,6 +1440,7 @@ class centralepilote extends eqLogic {
           // ----- Change to enable
           if ($this->getIsEnable()) {
             // ----- Look for etat initial value
+            // TBC : normalement l'eq centrale est créé en mode 'enable' et n'est jamais desctivé, donc ne vient jamais là ... sauf peut être lors de l'activation/desactivation du plugin lui-même
             $v_value = $this->cpCmdGetValue('etat');
             if ($v_value == '') {
               $this->checkAndUpdateCmd('etat', 'Normal');
