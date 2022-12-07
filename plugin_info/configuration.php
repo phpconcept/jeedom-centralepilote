@@ -43,6 +43,12 @@ if (!isConnect()) {
             </div>
         </div>
 
+        <div class="row form-group">
+            <label class="col-lg-4 control-label">{{Widgets par d&eacute;faut : }}</label>
+            <div class="col-lg-5">
+                <input type="checkbox" class="configKey form-control" data-l1key="standard_widget">
+            </div>
+        </div>
 
 
 </fieldset>

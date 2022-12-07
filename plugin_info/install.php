@@ -67,6 +67,7 @@ function centralepilote_update() {
 
 
 function centralepilote_update_v_0_4($v_from_version='') {
+  // Add icons pour Normal et Delestage de Central
 }
 
 

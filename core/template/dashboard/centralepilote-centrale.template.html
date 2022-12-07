@@ -1,4 +1,4 @@
-<div class="eqLogic eqLogic-widget allowResize #eqLogic_class# #class#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width:#width#;height:#height#;background-color:#BGEnedis#!important;">
+<div class="eqLogic eqLogic-widget allowResize #eqLogic_class# #class#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width:#width#;height:#height#;">
   
   <div class="text-center widget-name">
     <span class="warning" title="#alert_name#">
@@ -12,13 +12,14 @@
   </div>
   <div class="text-center">
 
-      <span style="margin-left: 5px;font-size: 0.8em;" class="cmd noRefresh" data-type="info" data-subtype="string" data-cmd_id="#cmd_etat_id#">Mode : #cmd_etat_name#</span><br/>
+  <span style="margin-left: 5px;font-size: 0.8em; display:none;" class="cmd noRefresh " data-type="info" data-subtype="string" data-cmd_id="#cmd_etat_id#">Mode : #cmd_etat_name#</span>
+  <br/>
 
   <div class="content-xs">
-    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_normal_id#">#cmd_normal_name#</a>
-    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_delestage_id#">#cmd_delestage_name#</a>
-    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_eco_id#">#cmd_eco_name#</a>
-    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_horsgel_id#">#cmd_horsgel_name#</a>
+    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_normal_id#" style="#cmd_normal_style#" ><i class="#cmd_normal_icon#"></i> #cmd_normal_name#</a>
+    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_delestage_id#" style="#cmd_delestage_style#" ><i class="#cmd_delestage_icon#"></i> #cmd_delestage_name#</a>
+    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_eco_id#" style="#cmd_eco_style#" ><i class="#cmd_eco_icon#"></i> #cmd_eco_name#</a>
+    <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_horsgel_id#" style="#cmd_horsgel_style#" ><i class="#cmd_horsgel_icon#"></i> #cmd_horsgel_name#</a>
   </div>
 
 
@@ -30,4 +31,5 @@
     });
 
   </script>
+
 </div>

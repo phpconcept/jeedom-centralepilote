@@ -302,7 +302,8 @@ class centralepilote extends eqLogic {
     /**---------------------------------------------------------------------------
      * Method : cpModeGetList()
      * Description :
-     *   Get background color depending of mode
+     *   cpModeGetList() will return the full array.
+     *   cpModeGetList(true) will return an array with only the mode id 'confort', 'eco', ...
      * Parameters :
      * Returned value : 
      * ---------------------------------------------------------------------------
@@ -366,7 +367,8 @@ class centralepilote extends eqLogic {
     /**---------------------------------------------------------------------------
      * Method : cpModeExist()
      * Description :
-     *   Get background color depending of mode
+     *   Will return true if the mode id $p_mode exists.
+     *   Sample : if (centralepilote::cpModeExist('horsgel')) {}
      * Parameters :
      * Returned value : 
      * ---------------------------------------------------------------------------
@@ -1049,8 +1051,8 @@ class centralepilote extends eqLogic {
         $v_cmd_order=1;
 
         // ----- Création des commandes par défaut
-        $this->cpCmdCreate('normal', ['name'=>'Normal', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
-        $this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('normal', ['name'=>'Normal', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>'icon kiko-sun']);
+        $this->cpCmdCreate('delestage', ['name'=>'Délestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('off')]);
         $this->cpCmdCreate('eco', ['name'=>'Eco', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('eco')]);
         $this->cpCmdCreate('horsgel', ['name'=>'HorsGel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('horsgel')]);
         
@@ -1479,6 +1481,7 @@ class centralepilote extends eqLogic {
      * Non obligatoire mais permet de modifier l'affichage du widget si vous en avez besoin
      */
     public function toHtml($_version = 'dashboard') {
+    
       // ----- Look for use of standard widget or not
       // TBC : pour amélioration à travailler
       /*
@@ -1486,13 +1489,31 @@ class centralepilote extends eqLogic {
         return parent::toHtml($_version);
       }
       */
+      if (config::byKey('standard_widget', 'centralepilote') == 1) {
+        return parent::toHtml($_version);
+      }
       
       if ($this->cpIsType(array('radiateur','zone'))) {
         return parent::toHtml($_version);
       }
+      else {
+        return $this->toHtml_centrale($_version);
+      }
 
 
-        centralepilote::log('debug',  "Call toHtml");
+      
+    }
+
+    /**---------------------------------------------------------------------------
+     * Method : toHtml_centrale()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function toHtml_centrale($_version = 'dashboard') {
+      centralepilote::log('debug',  "Call toHtml_centrale()");
 
       $replace = $this->preToHtml($_version);
 
@@ -1500,64 +1521,96 @@ class centralepilote extends eqLogic {
         return $replace;
       }      
       $version = jeedom::versionAlias($_version);
+  
+  // TBC : $replace['#refresh_id#'] = $this->getCmd('action', 'refresh')->getId();
 
-//        centralepilote::log('debug',  "Call toHtml = ".print_r($replace, true));
+      //$replace['#name_display#'] = 'La Centrale Pilote';
+     
+      $v_cmd = $this->getCmd(null, 'etat');
+      if (is_object($v_cmd)) {         
+        $v_etat = $v_cmd->execCmd();
+        $replace['#cmd_etat_id#'] = $v_cmd->getId();
+        $replace['#cmd_etat_code#'] = $v_etat;
+        switch ($v_etat) {
+          case 'normal' :
+            $replace['#cmd_etat_name#'] = __("Normal", __FILE__);
+            break;
+          case 'delestage' :
+            $replace['#cmd_etat_name#'] = __("Delestage", __FILE__);
+            break;
+          default :
+            $replace['#cmd_etat_name#'] = centralepilote::cpModeGetName($v_etat);          
+        }
         
-  //      return parent::toHtml($_version);
-
-      $replace['#name_display#'] = 'La Centrale Pilote';
+        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #2C941A!important; color: white!important;";
+      }
      
       $v_cmd = $this->getCmd(null, 'normal');
       if (is_object($v_cmd)) {         
          $replace['#cmd_normal_id#'] = $v_cmd->getId();
          $replace['#cmd_normal_name#'] = __("Normal", __FILE__);
+         $replace['#cmd_normal_icon#'] = 'icon kiko-sun';
       }
       $v_cmd = $this->getCmd(null, 'delestage');
       if (is_object($v_cmd)) {         
          $replace['#cmd_delestage_id#'] = $v_cmd->getId();
          $replace['#cmd_delestage_name#'] = __("Delestage", __FILE__);
+         $replace['#cmd_delestage_icon#'] = centralepilote::cpModeGetIconClass('off');
       }
       $v_cmd = $this->getCmd(null, 'eco');
       if (is_object($v_cmd)) {         
          $replace['#cmd_eco_id#'] = $v_cmd->getId();
-         $replace['#cmd_eco_name#'] = __("Eco", __FILE__);
+         $replace['#cmd_eco_name#'] = centralepilote::cpModeGetName('eco');
+         $replace['#cmd_eco_icon#'] = centralepilote::cpModeGetIconClass('eco');
       }
       $v_cmd = $this->getCmd(null, 'horsgel');
       if (is_object($v_cmd)) {         
          $replace['#cmd_horsgel_id#'] = $v_cmd->getId();
-         $replace['#cmd_horsgel_name#'] = __("Hors-Gel", __FILE__);
-      }
-      $v_cmd = $this->getCmd(null, 'etat');
-      if (is_object($v_cmd)) {         
-         $replace['#cmd_etat_id#'] = $v_cmd->getId();
-         $replace['#cmd_etat_name#'] = $v_cmd->execCmd();
+         $replace['#cmd_horsgel_name#'] = centralepilote::cpModeGetName('horsgel');
+         $replace['#cmd_horsgel_icon#'] = centralepilote::cpModeGetIconClass('horsgel');
       }
       
-      $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-centrale.template', __CLASS__)));
-
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
-    //  $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $_version, 'eqLogic')));
-      
-      /*
-      
-//centralepilote::log('debug',  "Template:".getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__));
-
-
-//centralepilote::log('debug',  "Result:".$html);
-
-      cache::set('widgetHtml' . $_version . $this->getId(), $html, 0);
-      
-      */
-      return $html;
-
-      
+      return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-centrale.template', __CLASS__)));  
     }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : toHtml_radiateur()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function toHtml_radiateur($_version = 'dashboard') {
+      centralepilote::log('debug',  "Call toHtml_radiateur()");
+
+      $replace = $this->preToHtml($_version);
+
+      if (!is_array($replace)) {
+        return $replace;
+      }      
+      $version = jeedom::versionAlias($_version);
+  
+  
+      
+      // postToHtml() : fait en fait le remplacement dans template + le cache du widget
+      return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
+    }
+    /* -------------------------------------------------------------------------*/
 
     /*
      * Non obligatoire mais ca permet de déclencher une action après modification de variable de configuration
     public static function postConfig_<Variable>() {
     }
      */
+    public static function postConfig_standard_widget() {
+      $eqLogics = eqLogic::byType('centralepilote');
+      foreach ($eqLogics as $v_eq) {
+        $v_eq->refreshWidget();
+      }    
+    }
 
     /*
      * Non obligatoire mais ca permet de déclencher une action avant modification de variable de configuration
@@ -3155,6 +3208,8 @@ class centralepiloteCmd extends cmd {
       foreach ($eqLogics as $v_eq) {
         $v_eq->cpPilotageChangeToBypass($v_bypass_mode);
       }      
+      
+      $p_centrale->refreshWidget();
       
 
     }
