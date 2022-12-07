@@ -1483,17 +1483,14 @@ class centralepilote extends eqLogic {
     public function toHtml($_version = 'dashboard') {
     
       // ----- Look for use of standard widget or not
-      // TBC : pour amélioration à travailler
-      /*
-      if ($this->getConfiguration('custom_widget') != 1) {
-        return parent::toHtml($_version);
-      }
-      */
       if (config::byKey('standard_widget', 'centralepilote') == 1) {
         return parent::toHtml($_version);
       }
       
-      if ($this->cpIsType(array('radiateur','zone'))) {
+      if ($this->cpIsType('radiateur')) {
+        return $this->toHtml_radiateur($_version);
+      }
+      else if ($this->cpIsType('zone')) {
         return parent::toHtml($_version);
       }
       else {
@@ -1592,9 +1589,51 @@ class centralepilote extends eqLogic {
         return $replace;
       }      
       $version = jeedom::versionAlias($_version);
-  
-  
       
+      $v_cmd = $this->getCmd(null, 'pilotage');
+      if (is_object($v_cmd)) {         
+        $v_pilotage_value = $v_cmd->execCmd();
+        $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
+      }
+      
+      $v_cmd = $this->getCmd(null, 'etat');
+      if (is_object($v_cmd)) {         
+        $v_etat_name = $v_cmd->execCmd();
+        $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
+        $replace['#cmd_etat_id#'] = $v_cmd->getId();
+        $replace['#cmd_etat_value#'] = $v_etat;
+        $replace['#cmd_etat_name#'] = $v_etat_name;     
+      }
+      
+      $v_pilotage_current = $this->cpCmdGetValue('pilotage');
+      if ($v_pilotage_current == 'auto') {
+        $replace['#cmd_auto_style#'] = "background-color: #4ABAF2!important; color: white!important;";
+        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #2C941A!important; color: white!important;";
+      }
+      else {
+        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #2C941A!important; color: white!important;";
+      }
+
+      $v_list = centralepilote::cpModeGetList();
+      foreach ($v_list as $v_mode) {      
+        $v_cmd = $this->getCmd(null, $v_mode);
+        if (is_object($v_cmd)) {         
+           $replace['#cmd_'.$v_mode.'_id#'] = $v_cmd->getId();
+           $replace['#cmd_'.$v_mode.'_name#'] = centralepilote::cpModeGetName($v_mode);
+           $replace['#cmd_'.$v_mode.'_icon#'] = centralepilote::cpModeGetIconClass($v_mode);
+        }
+      }
+      $v_cmd = $this->getCmd(null, 'auto');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_auto_id#'] = $v_cmd->getId();
+         $replace['#cmd_auto_name#'] = __("Auto", __FILE__);
+         $replace['#cmd_auto_icon#'] = 'far fa-clock';
+      }
+        
+      // ----- Texte divers
+      $replace['#title_programmation#'] = __("Programmation", __FILE__);
+    
+    
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
     }
@@ -2218,6 +2257,9 @@ class centralepilote extends eqLogic {
       else if ($this->cpGetType() == 'centrale') {
         return;
       }
+      
+      // ----- Update widget
+      $this->refreshWidget();
 
       centralepilote::log('info',  "Equipement '".$this->getName()."' change mode to '".$p_mode."'");
               
@@ -2377,6 +2419,9 @@ class centralepilote extends eqLogic {
       
       // ----- Save data
       $this->save();              
+
+      // ----- Update widget
+      $this->refreshWidget();
     
     }
     /* -------------------------------------------------------------------------*/
@@ -2442,6 +2487,9 @@ class centralepilote extends eqLogic {
       // ----- Change commands visibility of the radiateur
       $this->cpCmdResetDisplay();
         
+      // ----- Update widget
+      $this->refreshWidget();
+        
       return(true);
     }
     /* -------------------------------------------------------------------------*/
@@ -2476,6 +2524,10 @@ class centralepilote extends eqLogic {
         centralepilote::log('debug',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_mode."'");
         // ----- Do  not change the admin pilotage, but change the displayed value
         $this->checkAndUpdateCmd('pilotage', 'bypass');
+ 
+        // ----- Update widget
+        $this->refreshWidget();
+        
         return;
       }
 
@@ -2549,6 +2601,9 @@ class centralepilote extends eqLogic {
       
       // ----- Save data
       $this->save();              
+
+      // ----- Update widget
+      $this->refreshWidget();
         
       return;
     }
