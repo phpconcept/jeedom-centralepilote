@@ -35,13 +35,13 @@
     <div class="col-sm-6 ">
         <span >15 Watts</span><br>
         <span >Text One</span><br>
-        <span >Text One</span><br>
+        <span id="toto">Text One</span><br>
     </div>
   </div>
   <div class="row cp_pilotage_auto" style="display:none;">
     <div class="col-sm-12">
         <span style="font-size:12px;"><i>#title_programmation#</i> : </span>
-                <select style="font-size:12px;background-color: #4ABAF2!important; color: white!important;">
+                <select id="cp_prog_select" style="font-size:12px;background-color: #4ABAF2!important; color: white!important;">
                   <option value="1">Chambre</option>
                   <option value="2">Cuisine</option>
                   <option value="3">Vacances</option>
@@ -62,8 +62,21 @@
     
     $('.cp_etat_#cmd_etat_value#').show();
     
-    $('.cp_pilotage_#cmd_pilotage_value#').show();
-    
+    if ("#cmd_pilotage_value#" == "auto") {
+      
+      // ----- Prepare select input
+      var list_prog_str = "#list_programmation#";
+      var list_prog = list_prog_str.split(';');
+      var v_html = '';
+      for (var i in list_prog) {
+        var v_item = list_prog[i].split('|');
+        v_html += '<option value="'+v_item[0]+'">'+v_item[1]+'</option>';
+      }    
+      $('#cp_prog_select').html(v_html);
+
+      $('.cp_pilotage_#cmd_pilotage_value#').show();
+      
+    }
 
   </script>
 

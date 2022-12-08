@@ -1629,10 +1629,12 @@ class centralepilote extends eqLogic {
          $replace['#cmd_auto_name#'] = __("Auto", __FILE__);
          $replace['#cmd_auto_icon#'] = 'far fa-clock';
       }
+
+      // ----- List of programmation
+      $replace['#list_programmation#'] = centralepilote::cpProgValueList();
         
       // ----- Texte divers
       $replace['#title_programmation#'] = __("Programmation", __FILE__);
-    
     
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
