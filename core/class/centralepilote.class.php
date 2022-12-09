@@ -653,6 +653,23 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpProgGetName()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpProgGetName($p_id) {
+      if (($v_prog = centralepilote::cpProgLoad($p_id)) === null) {
+        return('');
+      }
+      
+      return($v_prog['name']);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpProgNextId()
      * Description :
      *   
@@ -1491,7 +1508,8 @@ class centralepilote extends eqLogic {
         return $this->toHtml_radiateur($_version);
       }
       else if ($this->cpIsType('zone')) {
-        return parent::toHtml($_version);
+        //return parent::toHtml($_version);
+        return $this->toHtml_radiateur($_version);
       }
       else {
         return $this->toHtml_centrale($_version);
@@ -1638,13 +1656,30 @@ class centralepilote extends eqLogic {
       // ----- List of programmation
       $replace['#list_programmation#'] = centralepilote::cpProgValueList();
       $replace['#programme_id#'] = $this->cpGetConf('programme_id');
+      $replace['#programme_name#'] = centralepilote::cpProgGetName($this->cpGetConf('programme_id'));
       
       // ----- Bypass mode
       $replace['#bypass_mode#'] = $this->cpGetConf('bypass_mode');
         
+      // ----- Zone mode
+      $replace['#zone_mode#'] = $this->cpRadGetZoneId();
+      $replace['#cmd_zone_name#'] = $this->cpRadGetZoneName();
+        
+      // ----- Temperatures
+      // TBC
+      $replace['#temperature_cible#'] = "19";      
+      $replace['#temperature_actuelle#'] = "15";      
+      
       // ----- Texte divers
-      $replace['#title_programmation#'] = __("Programmation", __FILE__);
-    
+      $replace['#title_programme#'] = __("Prog", __FILE__);
+      $replace['#title_select_programmation#'] = __("Choisir la programmation", __FILE__);
+      $replace['#title_pilotage_zone#'] = __("Pilotage par Zone", __FILE__);
+      $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      $replace['#title_Retour#'] = __("Retour", __FILE__);
+      $replace['#title_etat#'] = __("Etat", __FILE__);
+      $replace['#title_cible#'] = __("Cible", __FILE__);
+      $replace['#title_actuelle#'] = __("Actuelle", __FILE__);
+      
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
     }
@@ -2794,6 +2829,40 @@ class centralepilote extends eqLogic {
       // ----- Force pilotage to the one stored in conf
       $v_pilotage = $this->cpGetConf('pilotage');
       $this->cpPilotageChangeTo($v_pilotage, true);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpRadGetZoneId()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpRadGetZoneId() {
+      return($this->cpGetConf('zone'));
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpRadGetZoneName()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpRadGetZoneName() {
+      // ----- Get the current mode of the zone
+      if (($v_zone_id = $this->cpRadGetZoneId()) == '') {
+        return('');
+      }
+      $v_zone_object = eqLogic::byId($v_zone_id);
+      if (!is_object($v_zone_object)) {
+        centralepilote::log('debug', "!! Unexpected missing zone object '".$v_zone_id."' here (".__FILE__.",".__LINE__.")");
+        return('');
+      }
+      $v_zone_name = $v_zone_object->getName();
+      return($v_zone_name);
     }
     /* -------------------------------------------------------------------------*/
 

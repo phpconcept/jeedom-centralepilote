@@ -17,8 +17,12 @@
 <div class="col-xs-12" >
   <div class="row cp_bypass_on">
     <div class="col-sm-12" >
-      <a class="btn btn-sm btn-default tooltips" style="font-size:16px!important;width:100%!important;background-color: #4ABAF2!important; color: white!important;" >Delestage Centralise</a>
-      <br>&nbsp;
+      <a class="btn btn-sm btn-default tooltips" style="font-size:16px!important;width:100%!important;background-color: #4ABAF2!important; color: white!important;" >#title_delestage_centralise#</a>
+    </div>
+  </div>
+  <div class="row cp_zone_on">
+    <div class="col-sm-12" >
+      <a class="btn btn-sm btn-default tooltips" style="font-size:12px!important;width:100%!important;" >#title_pilotage_zone# : #cmd_zone_name#</a>
     </div>
   </div>
   <div class="row cp_pilotage_buttons">
@@ -28,28 +32,47 @@
       <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_horsgel_id#" style="#cmd_horsgel_style#" ><i class="#cmd_horsgel_icon#"></i> #cmd_horsgel_name#</a>
       <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_off_id#" style="#cmd_off_style#" ><i class="#cmd_off_icon#"></i> #cmd_off_name#</a>
       <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_auto_id#" style="#cmd_auto_style#" ><i class="#cmd_auto_icon#"></i> #cmd_auto_name#</a>
-      <br>&nbsp;
     </div>
   </div>
-  <div class="row">
+  <div class="row cp_area_normal cp_area">
     <div class="col-sm-6">
-      <i class="icon jeedom-pilote-conf cp_etat_confort" style="font-size:60px;display:none;"></i>
-      <i class="icon jeedom-pilote-eco cp_etat_eco" style="font-size:60px;display:none;"></i>
-      <i class="icon jeedom-pilote-hg cp_etat_horsgel" style="font-size:60px;display:none;"></i>
-      <i class="icon jeedom-pilote-off cp_etat_off" style="font-size:60px;display:none;"></i>
+      <br>
+      <i class="icon jeedom-pilote-conf cp_etat_icon cp_etat_confort" style="font-size:60px;display:none;"></i>
+      <i class="icon jeedom-pilote-eco cp_etat_icon cp_etat_eco" style="font-size:60px;display:none;"></i>
+      <i class="icon jeedom-pilote-hg cp_etat_icon cp_etat_horsgel" style="font-size:60px;display:none;"></i>
+      <i class="icon jeedom-pilote-off cp_etat_icon cp_etat_off" style="font-size:60px;display:none;"></i>
+      <br>
+      <span class="cp_button_prog" style="font-size:12px;"><i>#title_programme# : 
+      <span class="cp_programme_name">#programme_name#</span></i></span>
     </div>
     <div class="col-sm-6 ">
-        <span style="font-size:14px;">Etat: #cmd_etat_name#</span><br>
-        <span style="font-size:14px;">Cible: 19&deg;C</span><br>
-        <span style="font-size:14px;">Actuelle: 16&deg;C</span>
+      <br>
+      <span style="font-size:14px;">#title_etat#: #cmd_etat_name#</span><br>
+      <span style="font-size:14px;">#title_cible#: #temperature_cible#&deg;C</span><br>
+      <span style="font-size:14px;">#title_actuelle#: #temperature_actuelle#&deg;C</span>
+      <br>       
+      <a class="btn btn-sm btn-default tooltips cp_area_button cp_edit_open" ><i class="fas fa-edit" style="font-size:16px;"></i></a>      
+      <a class="btn btn-sm btn-default tooltips cp_area_button cp_window_open" ><i class="icon jeedom-fenetre-ouverte" style="font-size:16px;"></i></a>
+      <a class="btn btn-sm btn-default tooltips cp_area_button cp_prog_select_open cp_button_prog" ><i class="icon divers-calendar2 " style="font-size:16px;"></i></a>
     </div>
   </div>
-  <div class="row cp_pilotage_auto" style="display:none;">
+  <div class="row cp_area_prog_select cp_area" style="display:none;">
+    <div class="col-sm-12" >
+        <br>
+        <span ><i>#title_select_programmation#</i> : </span>
+        <select class="selectCmd cp_prog_select" style="width:80%!important;">
+          <option value="0">Default</option>
+        </select>
+        <br><br>
+      <a class="btn btn-sm btn-default tooltips cp_prog_select_close" ><i class="fas fa-reply" style="font-size:16px;"></i> #title_Retour#</a></span>
+    </div>
+  </div>
+  <div class="row cp_area_edit cp_area" style="display:none;">
     <div class="col-sm-12">
-        <span style="font-size:12px;"><i>#title_programmation#</i> : </span>
-                <select class="selectCmd" id="cp_prog_select" style="background-color: #4ABAF2!important; color: white!important;">
-                  <option value="0">Default</option>
-                </select>
+        <br>
+        TBD
+        <br><br>
+      <a class="btn btn-sm btn-default tooltips cp_edit_close" ><i class="fas fa-reply" style="font-size:16px;"></i> #title_Retour#</a></span>
     </div>
   </div>
 </div>
@@ -66,25 +89,70 @@
       jeedom.cmd.execute({id: $(this).data('cmd_id')});
     });
     
+    // ----- Action for prog select button
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select_open").on('click', function () {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_prog_select').show();      
+    });
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select_close").on('click', function () {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
+    });
+    
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_open").on('click', function () {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_edit').show();      
+    });
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_close").on('click', function () {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
+    });
+    
     // ----- Action for select
     $(".eqLogic[data-eqLogic_uid=#uid#] .selectCmd").on('change', function () {
       jeedom.cmd.execute({id: '#cmd_programme_select_id#', value: {select: $(this).value()}});
+      // ----- Change name in prog span
+      var v_html = '';
+      v_html = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select option[value="'+$(this).value()+'"]').html();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_name').html(v_html);
     });
     
-    //$('#cp_debug_text').html("bypass_mode : #bypass_mode#");
+    //$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("etat value :#cmd_etat_value#");
     
     // ----- Show the icon depending on etat
-    $('.cp_etat_#cmd_etat_value#').show();
+    $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_icon').hide();
+    $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_#cmd_etat_value#').show();
     
     if ("#bypass_mode#" != 'no') {
     
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();   
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_button').hide();   
+         
+
       // ----- Hide pilotage area & buttons
-      $('.cp_pilotage_auto').hide();
-      $('.cp_pilotage_buttons').hide();      
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_pilotage_buttons').hide();    
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_zone_on').hide();        
       
       // ----- Show Bypass message
-      $('.cp_bypass_on').show();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_bypass_on').show();
       
+    }
+    
+    else if ("#zone_mode#" != "") {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_zone_on').show();        
+
+      // ----- Hide Bypass message
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_bypass_on').hide();
+
+      // ----- Hide pilotage buttons
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_pilotage_buttons').hide();      
+
+      // ----- Hide programme
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').hide();
+
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_button').hide();   
     }
     
     else if ("#cmd_pilotage_value#" == "auto") {
@@ -97,25 +165,27 @@
         var v_item = list_prog[i].split('|');
         v_html += '<option value="'+v_item[0]+'">'+v_item[1]+'</option>';
       }    
-      $('#cp_prog_select').html(v_html);
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select').html(v_html);
       
-      $('#cp_prog_select option[value="#programme_id#"]').prop('selected', true);
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select option[value="#programme_id#"]').prop('selected', true);
 
       // ----- Hide Bypass message
-      $('.cp_bypass_on').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_bypass_on').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_zone_on').hide();        
 
       // ----- Show auto area & pilotage buttons
-      $('.cp_pilotage_auto').show();
-      $('.cp_pilotage_buttons').show();      
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').show();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_pilotage_buttons').show();      
     }
     else {
       // ----- Hide Bypass message
-      $('.cp_bypass_on').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_bypass_on').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_zone_on').hide();        
 
       // ----- Show pilotage buttons
-      $('.cp_pilotage_buttons').show();      
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_pilotage_buttons').show();      
 
-      $('.cp_pilotage_auto').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').hide();
     }
 
   </script>
