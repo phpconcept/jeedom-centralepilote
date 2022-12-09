@@ -15,7 +15,13 @@
   <span style="margin-left: 5px;font-size: 0.8em; display:none;" class="cmd noRefresh " data-type="info" data-subtype="string" data-cmd_id="#cmd_etat_id#">Mode : #cmd_etat_name#</span>
 
 <div class="col-xs-12" >
-  <div class="row">
+  <div class="row cp_bypass_on">
+    <div class="col-sm-12" >
+      <a class="btn btn-sm btn-default tooltips" style="font-size:16px!important;width:100%!important;background-color: #4ABAF2!important; color: white!important;" >Delestage Centralise</a>
+      <br>&nbsp;
+    </div>
+  </div>
+  <div class="row cp_pilotage_buttons">
     <div class="col-sm-12">
       <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_confort_id#" style="#cmd_confort_style#" ><i class="#cmd_confort_icon#"></i> #cmd_confort_name#</a>
       <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_eco_id#" style="#cmd_eco_style#" ><i class="#cmd_eco_icon#"></i> #cmd_eco_name#</a>
@@ -33,18 +39,16 @@
       <i class="icon jeedom-pilote-off cp_etat_off" style="font-size:60px;display:none;"></i>
     </div>
     <div class="col-sm-6 ">
-        <span >15 Watts</span><br>
-        <span >Text One</span><br>
-        <span id="toto">Text One</span><br>
+        <span style="font-size:14px;">Etat: #cmd_etat_name#</span><br>
+        <span style="font-size:14px;">Cible: 19&deg;C</span><br>
+        <span style="font-size:14px;">Actuelle: 16&deg;C</span>
     </div>
   </div>
   <div class="row cp_pilotage_auto" style="display:none;">
     <div class="col-sm-12">
         <span style="font-size:12px;"><i>#title_programmation#</i> : </span>
-                <select id="cp_prog_select" style="font-size:12px;background-color: #4ABAF2!important; color: white!important;">
-                  <option value="1">Chambre</option>
-                  <option value="2">Cuisine</option>
-                  <option value="3">Vacances</option>
+                <select class="selectCmd" id="cp_prog_select" style="background-color: #4ABAF2!important; color: white!important;">
+                  <option value="0">Default</option>
                 </select>
     </div>
   </div>
@@ -53,16 +57,37 @@
 
   </div>
   
-  <br><br>
+  <br>
+  <span id="cp_debug_text"></span>
 
   <script>
+    // ----- Action for buttons
     $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on('click', function() {
       jeedom.cmd.execute({id: $(this).data('cmd_id')});
     });
     
+    // ----- Action for select
+    $(".eqLogic[data-eqLogic_uid=#uid#] .selectCmd").on('change', function () {
+      jeedom.cmd.execute({id: '#cmd_programme_select_id#', value: {select: $(this).value()}});
+    });
+    
+    //$('#cp_debug_text').html("bypass_mode : #bypass_mode#");
+    
+    // ----- Show the icon depending on etat
     $('.cp_etat_#cmd_etat_value#').show();
     
-    if ("#cmd_pilotage_value#" == "auto") {
+    if ("#bypass_mode#" != 'no') {
+    
+      // ----- Hide pilotage area & buttons
+      $('.cp_pilotage_auto').hide();
+      $('.cp_pilotage_buttons').hide();      
+      
+      // ----- Show Bypass message
+      $('.cp_bypass_on').show();
+      
+    }
+    
+    else if ("#cmd_pilotage_value#" == "auto") {
       
       // ----- Prepare select input
       var list_prog_str = "#list_programmation#";
@@ -73,9 +98,24 @@
         v_html += '<option value="'+v_item[0]+'">'+v_item[1]+'</option>';
       }    
       $('#cp_prog_select').html(v_html);
-
-      $('.cp_pilotage_#cmd_pilotage_value#').show();
       
+      $('#cp_prog_select option[value="#programme_id#"]').prop('selected', true);
+
+      // ----- Hide Bypass message
+      $('.cp_bypass_on').hide();
+
+      // ----- Show auto area & pilotage buttons
+      $('.cp_pilotage_auto').show();
+      $('.cp_pilotage_buttons').show();      
+    }
+    else {
+      // ----- Hide Bypass message
+      $('.cp_bypass_on').hide();
+
+      // ----- Show pilotage buttons
+      $('.cp_pilotage_buttons').show();      
+
+      $('.cp_pilotage_auto').hide();
     }
 
   </script>

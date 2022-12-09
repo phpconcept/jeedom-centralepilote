@@ -1630,8 +1630,17 @@ class centralepilote extends eqLogic {
          $replace['#cmd_auto_icon#'] = 'far fa-clock';
       }
 
+      $v_cmd = $this->getCmd(null, 'programme_select');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_programme_select_id#'] = $v_cmd->getId();
+      }
+
       // ----- List of programmation
       $replace['#list_programmation#'] = centralepilote::cpProgValueList();
+      $replace['#programme_id#'] = $this->cpGetConf('programme_id');
+      
+      // ----- Bypass mode
+      $replace['#bypass_mode#'] = $this->cpGetConf('bypass_mode');
         
       // ----- Texte divers
       $replace['#title_programmation#'] = __("Programmation", __FILE__);
