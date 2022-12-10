@@ -27,10 +27,10 @@
   </div>
   <div class="row cp_pilotage_buttons">
     <div class="col-sm-12">
-      <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_confort_id#" style="#cmd_confort_style#" ><i class="#cmd_confort_icon#"></i> #cmd_confort_name#</a>
-      <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_eco_id#" style="#cmd_eco_style#" ><i class="#cmd_eco_icon#"></i> #cmd_eco_name#</a>
-      <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_horsgel_id#" style="#cmd_horsgel_style#" ><i class="#cmd_horsgel_icon#"></i> #cmd_horsgel_name#</a>
-      <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_off_id#" style="#cmd_off_style#" ><i class="#cmd_off_icon#"></i> #cmd_off_name#</a>
+      <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_confort_show#" data-cmd_id="#cmd_confort_id#" style="#cmd_confort_style#" ><i class="#cmd_confort_icon#"></i> #cmd_confort_name#</a>
+      <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_eco_show#" data-cmd_id="#cmd_eco_id#" style="#cmd_eco_style#" ><i class="#cmd_eco_icon#"></i> #cmd_eco_name#</a>
+      <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_horsgel_show#" data-cmd_id="#cmd_horsgel_id#" style="#cmd_horsgel_style#" ><i class="#cmd_horsgel_icon#"></i> #cmd_horsgel_name#</a>
+      <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_off_show#" data-cmd_id="#cmd_off_id#" style="#cmd_off_style#" ><i class="#cmd_off_icon#"></i> #cmd_off_name#</a>
       <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_auto_id#" style="#cmd_auto_style#" ><i class="#cmd_auto_icon#"></i> #cmd_auto_name#</a>
     </div>
   </div>
@@ -70,9 +70,26 @@
   <div class="row cp_area_edit cp_area" style="display:none;">
     <div class="col-sm-12">
         <br>
-        TBD
+        <i>Mettre dans le mode</i>
+        <select class="selectCmd cp_prog_select" style="width:80%!important;">
+          <option value="0">Confort</option>
+          <option value="0">Eco</option>
+          <option value="0">Hors-Gel</option>
+          <option value="0">Off</option>
+          <option value="0">Auto</option>
+        </select><br>
+        pendant <input type="text"> heure, puis remettre dans le mode :
+        <select class="selectCmd cp_prog_select" style="width:80%!important;">
+          <option value="0">Actuel</option>
+          <option value="0">Confort</option>
+          <option value="0">Eco</option>
+          <option value="0">Hors-Gel</option>
+          <option value="0">Off</option>
+          <option value="0">Auto</option>
+        </select>
         <br><br>
-      <a class="btn btn-sm btn-default tooltips cp_edit_close" ><i class="fas fa-reply" style="font-size:16px;"></i> #title_Retour#</a></span>
+      <a class="btn btn-sm btn-default tooltips cp_edit_close" ><i class="fas fa-reply" style="font-size:16px;"></i> #title_Annuler#</a></span>
+      <a class="btn btn-sm btn-default tooltips cp_edit_validate" ><i class="fas fa-check" style="font-size:16px;"></i> #title_Valider#</a></span>
     </div>
   </div>
 </div>
@@ -84,6 +101,9 @@
   <span id="cp_debug_text"></span>
 
   <script>
+    // ----- Global show of button modes
+    $('.eqLogic[data-eqLogic_uid=#uid#] .cp_mode_button_no_show').hide();
+    
     // ----- Action for buttons
     $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on('click', function() {
       jeedom.cmd.execute({id: $(this).data('cmd_id')});
