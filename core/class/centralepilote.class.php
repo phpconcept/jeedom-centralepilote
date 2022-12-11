@@ -1052,14 +1052,13 @@ class centralepilote extends eqLogic {
           
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
   
-        //$this->cpCmdCreate('manuel', ['name'=>'Manuel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>'fas fa-hand-pointer']);
         $this->cpCmdCreate('pilotage', ['name'=>'Pilotage', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
   
-        //$this->cpCmdCreate('prog_select', ['name'=>'Select', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
-
         $this->cpCmdCreate('programme', ['name'=>'Programme', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
         $this->cpCmdCreate('programme_id', ['name'=>'Programme Id', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
-        $this->cpCmdCreate('programme_select', ['name'=>'Programme Select', 'type'=>'action', 'subtype'=>'select', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('programme_select', ['name'=>'Programme Select', 'type'=>'action', 'subtype'=>'select', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>'icon divers-calendar2']);
+        
+        $this->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>'fas fa-edit']);
         
         // ----- Update value list for the command 'programme_select' which is of subtype 'select'
         $this->cpCmdProgrammeSelectUpdate(centralepilote::cpProgValueList());
@@ -1646,6 +1645,7 @@ class centralepilote extends eqLogic {
         $v_cmd = $this->getCmd(null, $v_mode);
         if (is_object($v_cmd)) {         
            $replace['#cmd_'.$v_mode.'_id#'] = $v_cmd->getId();
+           $replace['#cmd_'.$v_mode.'_logicalid#'] = $v_mode;
            $replace['#cmd_'.$v_mode.'_name#'] = centralepilote::cpModeGetName($v_mode);
            $replace['#cmd_'.$v_mode.'_icon#'] = centralepilote::cpModeGetIconClass($v_mode);
            if ($this->cpGetConf('support_'.$v_mode) == 1) {
@@ -1662,6 +1662,7 @@ class centralepilote extends eqLogic {
       $v_cmd = $this->getCmd(null, 'auto');
       if (is_object($v_cmd)) {         
          $replace['#cmd_auto_id#'] = $v_cmd->getId();
+         $replace['#cmd_auto_logicalid#'] = 'auto';
          $replace['#cmd_auto_name#'] = __("Auto", __FILE__);
          $replace['#cmd_auto_icon#'] = 'far fa-clock';
       }
@@ -1669,6 +1670,11 @@ class centralepilote extends eqLogic {
       $v_cmd = $this->getCmd(null, 'programme_select');
       if (is_object($v_cmd)) {         
          $replace['#cmd_programme_select_id#'] = $v_cmd->getId();
+      }
+
+      $v_cmd = $this->getCmd(null, 'trigger');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_trigger_id#'] = $v_cmd->getId();
       }
 
       // ----- List of programmation
@@ -1700,6 +1706,10 @@ class centralepilote extends eqLogic {
       $replace['#title_etat#'] = __("Etat", __FILE__);
       $replace['#title_cible#'] = __("Cible", __FILE__);
       $replace['#title_actuelle#'] = __("Actuelle", __FILE__);
+      $replace['#title_Mode#'] = __("Mode", __FILE__);
+      $replace['#title_jusqua#'] = __("jusqu'à", __FILE__);
+      $replace['#title_puis_mode#'] = __("puis", __FILE__);
+      
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
@@ -2703,6 +2713,18 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpPilotageTrigger()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpPilotageTrigger($p_trigger_type, $p_mode, $p_until, $p_return_mode) {
+      centralepilote::log('debug', "[".$this->getName()."]->cpPilotageTrigger('".$p_trigger_type."', '".$p_mode."', '".$p_until."', '".$p_return_mode."')");
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpPilotageProgSelect()
      * Description :
      * Parameters :
@@ -3306,6 +3328,44 @@ class centralepiloteCmd extends cmd {
 		  return;
 		}
         
+		if ($v_logical_id == 'trigger') {
+          centralepilotelog::log('debug', 'Options : '.json_encode($_options).' !');
+          if (!isset($_options['trigger_type'])) {
+            centralepilotelog::log('warning', "Missing option 'trigger_type' while receiving command '".$v_logical_id."'."); 
+          }
+          else if (!isset($_options['mode'])) {
+            centralepilotelog::log('warning', "Missing option 'mode' while receiving command '".$v_logical_id."'."); 
+          }
+          else if (!isset($_options['until'])) {
+            centralepilotelog::log('warning', "Missing option 'until' while receiving command '".$v_logical_id."'."); 
+          }
+          else if (!isset($_options['return_mode'])) {
+            centralepilotelog::log('warning', "Missing option 'return_mode' while receiving command '".$v_logical_id."'."); 
+          }
+          else {
+            $v_trigger_type = $_options['trigger_type'];   // values : 'until', 'from' (future)
+            $v_mode = $_options['mode'];
+            $v_until = $_options['until'];
+            $v_return_mode = $_options['return_mode'];
+			$eqLogic->cpPilotageTrigger($v_trigger_type, $v_mode, $v_until, $v_return_mode);
+          }
+		  return;
+		}
+        
+		if ($v_logical_id == 'auto') {        
+          $eqLogic->cpPilotageChangeTo($v_logical_id);
+		  return;
+		}
+
+        // ----- Look for all other commands that should be a mode
+        if (centralepilote::cpModeExist($v_logical_id)) {
+          //$eqLogic->cpModeChangeTo($v_logical_id);
+          $eqLogic->cpPilotageChangeTo($v_logical_id);
+          return;
+        }
+        
+        
+        
         // ----- Trcik to generate a clock tick for dev
 		if ($this->getName() == 'tick') {
 			centralepilote::cpClockTick();
@@ -3321,18 +3381,6 @@ class centralepiloteCmd extends cmd {
 			return;
 		}
 
-		if ($v_logical_id == 'auto') {        
-          $eqLogic->cpPilotageChangeTo($v_logical_id);
-		  return;
-		}
-
-        // ----- Look for all other commands that should be a mode
-        if (centralepilote::cpModeExist($v_logical_id)) {
-          //$eqLogic->cpModeChangeTo($v_logical_id);
-          $eqLogic->cpPilotageChangeTo($v_logical_id);
-          return;
-        }
-        
         centralepilotelog::log('error', 'Unknown command '.$v_logical_id.' !');        
     }
     

@@ -69,6 +69,7 @@ function centralepilote_update() {
 function centralepilote_update_v_0_4($v_from_version='') {
   // Add icons pour Normal et Delestage de Central
   // Ajout de la conf bypass_type en fonction de la valeur de bypass_mode ... pour chaque rad/zone
+  // Ajout nouvelle commande : $this->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>'fas fa-edit']);
 }
 
 
