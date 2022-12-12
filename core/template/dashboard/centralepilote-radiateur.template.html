@@ -15,12 +15,12 @@
   <span style="margin-left: 5px;font-size: 0.8em; display:none;" class="cmd noRefresh " data-type="info" data-subtype="string" data-cmd_id="#cmd_etat_id#">Mode : #cmd_etat_name#</span>
 
 <div class="col-xs-12" >
-  <div class="row cp_bypass_on">
+  <div class="row cp_bypass_on" style="display:none;">
     <div class="col-sm-12" >
       <a class="btn btn-sm btn-default tooltips" style="font-size:16px!important;width:100%!important;background-color: #4ABAF2!important; color: white!important;" >#title_delestage_centralise#</a>
     </div>
   </div>
-  <div class="row cp_zone_on">
+  <div class="row cp_zone_on" style="display:none;">
     <div class="col-sm-12" >
       <a class="btn btn-sm btn-default tooltips" style="font-size:12px!important;width:100%!important;" >#title_pilotage_zone# : #cmd_zone_name#</a>
     </div>
@@ -87,7 +87,9 @@
           <option value="4">4h</option>
           <option value="5">5h</option>
           <option value="6">6h</option>
-        </select><br>
+        </select>
+        <input type="hidden" class="cp_trigger_time_ref" value="">
+        <br>
         #title_puis_mode# 
         <select class="cp_trigger_return_mode" style="width:50%!important;">
           <option value="#cmd_confort_logicalid#" class="cp_mode_button_#cmd_confort_show#">#cmd_confort_name#</option>
@@ -141,11 +143,12 @@
       // ----- Display the right list of timing depending of the current time
       const d = new Date();
       let v_hour = d.getHours();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref ').value(v_hour);
       var v_html = '';
       for (let i = 1; i < 13; i++) {
         v_hour++;
         if (v_hour == 24) v_hour = 0;
-        v_html += '<option value="'+v_hour+'">'+v_hour+'h</option>';
+        v_html += '<option value="'+i+'">'+v_hour+'h</option>';
       }
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').html(v_html);
       
@@ -159,7 +162,26 @@
     });
     
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_validate").on('click', function () {
-      jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'until', mode: 'eco', until:'20', return_mode:'auto'}});
+      v_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode option:selected').val();
+      if (v_mode == '-') {
+        // missing valid mode escape
+        return;
+      }
+      
+      v_time = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option:selected').val();      
+      // ----- Look for specific case when time to choose was too long and first hour is passed
+      const d = new Date();
+      let v_hour = d.getHours();
+      v_hour_ref = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref ').val();
+      if (v_hour > v_hour_ref) {
+        v_time--;
+        if (v_time == 0)
+          // will need to change time
+          return;
+      }
+
+      v_return_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_return_mode option:selected').val();
+      jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'for_hour', mode: v_mode, for_hour:v_time, return_mode:v_return_mode}});
 
       // ----- Close panel
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
