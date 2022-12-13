@@ -3126,9 +3126,33 @@ class centralepilote extends eqLogic {
         return;
       }
       
-      // TBC
-      centralepilote::log('debug',  "***** check trigger for ".$p_now);
-   
+      // ----- Get existing trigger list
+      $v_trigger_list = $this->cpGetConf('trigger_list');
+      //centralepilote::log('debug', "Current trigger list : '".print_r($v_trigger_list,true)."'");
+      
+      // ----- Look for triggers to do
+      $v_flag_trigger = false;
+      foreach ($v_trigger_list as $v_date => $v_trigger) {
+        if ($p_now >= $v_date) {
+          // ----- Do the action
+          centralepilote::log('debug',  "At '".$p_now."', start trigger type '".$v_trigger['type']."', scheduled '".$v_date."', mode '".$v_trigger['mode']."'");
+          $this->cpPilotageChangeTo($v_trigger['mode']);
+          
+          // ----- Remove the trigger
+          unset($v_trigger_list[$v_date]);
+          $v_flag_trigger = true;
+        }
+        else {
+          centralepilote::log('debug',  "At '".$p_now."', ignore trigger type '".$v_trigger['type']."', scheduled '".$v_date."', mode '".$v_trigger['mode']."'");
+        }
+      }
+      
+      // ----- Look for list to update
+      if ($v_flag_trigger) {
+        $this->setConfiguration('trigger_list', $v_trigger_list);
+        $this->save();
+      }
+        
     }
     /* -------------------------------------------------------------------------*/
 
