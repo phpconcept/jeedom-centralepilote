@@ -80,13 +80,18 @@
           <option value="#cmd_auto_logicalid#" class="cp_mode_button_#cmd_auto_show#">#cmd_auto_name#</option>
         </select><br>
         #title_jusqua# 
-        <select class="cp_trigger_time" style="width:50%!important;">
+        <select class="cp_trigger_time" style="width:25%!important;">
           <option value="1">1h</option>
           <option value="2">2h</option>
           <option value="3">3h</option>
           <option value="4">4h</option>
           <option value="5">5h</option>
           <option value="6">6h</option>
+        </select><select class="cp_trigger_time_min" style="width:25%!important;">
+          <option value="0">00</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
         </select>
         <input type="hidden" class="cp_trigger_time_ref" value="">
         <br>
@@ -143,14 +148,24 @@
       // ----- Display the right list of timing depending of the current time
       const d = new Date();
       let v_hour = d.getHours();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref ').value(v_hour);
       var v_html = '';
-      for (let i = 1; i < 13; i++) {
+      var v_hour_count = v_hour;
+      for (let i = 0; i < 12; i++) {
+        if (i == 1) {
+          v_html += '<option value="'+v_hour_count+'" selected>'+v_hour+'h</option>';
+        }
+        else {
+          v_html += '<option value="'+v_hour_count+'">'+v_hour+'h</option>';
+        }
+        v_hour_count++;
         v_hour++;
         if (v_hour == 24) v_hour = 0;
-        v_html += '<option value="'+i+'">'+v_hour+'h</option>';
       }
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').html(v_html);
+      
+      // ----- Storing reference date without h/m/s
+      const v_date = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref').value(v_date.getTime());
       
       // ----- Select the current mode as the default return mode after trigger
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_return_mode option[value="#cmd_etat_value#"]').prop('selected', true);
@@ -167,21 +182,26 @@
         // missing valid mode escape
         return;
       }
-      
-      v_time = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option:selected').val();      
-      // ----- Look for specific case when time to choose was too long and first hour is passed
-      const d = new Date();
-      let v_hour = d.getHours();
-      v_hour_ref = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref ').val();
-      if (v_hour > v_hour_ref) {
-        v_time--;
-        if (v_time == 0)
-          // will need to change time
-          return;
-      }
 
+      // ----- Get return mode
       v_return_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_return_mode option:selected').val();
-      jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'for_hour', mode: v_mode, for_hour:v_time, return_mode:v_return_mode}});
+      
+      // ----- Get hours and min to add
+      v_time = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option:selected').val();      
+      v_time_min = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_min option:selected').val();      
+      
+      // ----- Calculate trigger time (in milli sec)
+      const v_now = new Date();
+      let v_hour = v_now.getHours();
+      v_time_ref = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref ').val();
+      v_trigger_time = parseInt(v_time_ref) + ((parseInt(v_time)*60) + parseInt(v_time_min))*60*1000;
+      
+      // TBC : should check if time is already passed or not ....
+
+      // Trigger command with time in sec
+      jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'for_time', mode: v_mode, trigger_time:(v_trigger_time/1000), return_mode:v_return_mode}});
+
+//$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("time : "+dd2+",trigger time :'"+v_trigger_time+"' => "+dd.toString());
 
       // ----- Close panel
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
