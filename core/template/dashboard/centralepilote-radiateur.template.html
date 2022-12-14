@@ -34,6 +34,8 @@
       <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_auto_id#" style="#cmd_auto_style#" ><i class="#cmd_auto_icon#"></i> #cmd_auto_name#</a>
     </div>
   </div>
+  
+  
   <div class="row cp_area_normal cp_area">
     <div class="col-sm-6">
       <br>
@@ -48,14 +50,16 @@
     <div class="col-sm-6 ">
       <br>
       <span style="font-size:14px;">#title_etat#: #cmd_etat_name#</span><br>
-      <span style="font-size:14px;">#title_cible#: #temperature_cible#&deg;C</span><br>
-      <span style="font-size:14px;">#title_actuelle#: #temperature_actuelle#&deg;C</span>
+      <span class="cp_temperature_cible" style="font-size:14px;">#title_cible#: #temperature_cible#&deg;C</span><br>
+      <span class="cp_temperature_actuelle" style="font-size:14px;">#title_actuelle#: #temperature_actuelle#&deg;C</span>
       <br>       
-      <a class="btn btn-sm btn-default tooltips cp_area_button cp_edit_open" ><i class="fas fa-edit" style="font-size:16px;"></i></a>      
+      <a class="btn btn-sm btn-default tooltips cp_area_button cp_trigger_open" style="#cmd_trigger_style#"><i class="icon divers-circular114 " style="font-size:16px;"></i></a>      
       <a class="btn btn-sm btn-default tooltips cp_area_button cp_window_open" ><i class="icon jeedom-fenetre-ouverte" style="font-size:16px;"></i></a>
       <a class="btn btn-sm btn-default tooltips cp_area_button cp_prog_select_open cp_button_prog" ><i class="icon divers-calendar2 " style="font-size:16px;"></i></a>
     </div>
   </div>
+  
+  
   <div class="row cp_area_prog_select cp_area" style="display:none;">
     <div class="col-sm-12" >
         <br>
@@ -67,7 +71,9 @@
       <a class="btn btn-sm btn-default tooltips cp_prog_select_close" ><i class="fas fa-reply" style="font-size:16px;"></i> #title_Retour#</a></span>
     </div>
   </div>
-  <div class="row cp_area_edit cp_area" style="display:none;">
+  
+  
+  <div class="row cp_area_trigger_add cp_area" style="display:none;">
     <div class="col-sm-10" style="text-align: right!important;">
         <br>
         #title_a# 
@@ -97,10 +103,26 @@
     </div>
     <div class="col-sm-2">
       <br>
-      <a class="btn btn-sm btn-default tooltips cp_edit_validate" title="#title_Valider#"><i class="fas fa-check" style="font-size:16px;"></i></a><br>
-      <a class="btn btn-sm btn-default tooltips cp_edit_close" title="#title_Annuler#"><i class="fas fa-reply" style="font-size:16px;"></i></a>
+      <a class="btn btn-sm btn-default tooltips cp_trigger_validate" title="#title_Valider#"><i class="fas fa-check" style="font-size:16px;"></i></a><br>
+      <a class="btn btn-sm btn-default tooltips cp_trigger_close" title="#title_Annuler#"><i class="fas fa-reply" style="font-size:16px;"></i></a>
     </div>
   </div>
+  
+  
+  <div class="row cp_area_trigger_show cp_area" style="display:none;">
+    <div class="col-sm-10" style="text-align: left!important;">
+        <br>
+        <span class="cp_trigger_list_show"></span>
+      <br>
+    </div>
+    <div class="col-sm-2">
+      <br>
+      <a class="btn btn-sm btn-default tooltips cp_trigger_add" title="#title_Ajouter#"><i class="fas fa-plus-circle" style="font-size:16px;"></i></a><br>
+      <a class="btn btn-sm btn-default tooltips cp_trigger_close" title="#title_Annuler#"><i class="fas fa-reply" style="font-size:16px;"></i></a>
+    </div>
+  </div>
+  
+  
 </div>
 
 
@@ -113,6 +135,31 @@
       
     // ----- Global show of button modes
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_mode_button_no_show').hide();
+    
+    if ('#temperature_cible#' == '') {
+      // ----- Hide target temperature line
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_temperature_cible').hide();
+    }
+    if ('#temperature_actuelle#' == '') {
+      // ----- Hide target temperature line
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_temperature_actuelle').hide();
+    }
+
+    // ----- Update the list of triggers
+    var v_html = '';
+    var trigger_list_str = "#cmd_trigger_list#";
+    var trigger_list = trigger_list_str.split('|');
+    for (var i in trigger_list) {
+      var trigger = trigger_list[i].split(',');
+      v_html += '<a class="cp_trigger_delete" data-id="'+trigger[1]+'"><i class="far fa-trash-alt" style=""></i></a>&nbsp;&nbsp;';
+      v_html += '#title_Mode# ';
+      v_html += '\''+trigger[4]+'\'';
+      v_html += ' #title_a_min# ';
+      v_html += ''+trigger[2]+'';
+      v_html += '<br>';
+    }
+    $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_list_show').html(v_html);
+      
     
     // ----- Action for buttons
     $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on('click', function() {
@@ -129,11 +176,23 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
     
-    
-    // ----- Managed sub-window for trigger action
-    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_open").on('click', function () {
+    // ----- Action for select
+    $(".eqLogic[data-eqLogic_uid=#uid#] .selectCmd").on('change', function () {
+      jeedom.cmd.execute({id: '#cmd_programme_select_id#', value: {select: $(this).value()}});
+      // ----- Change name in prog span
+      var v_html = '';
+      v_html = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select option[value="'+$(this).value()+'"]').html();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_name').html(v_html);
+
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_edit').show();      
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
+    });
+    
+    
+    
+    function fct_cp_trigger_add_open() {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_add').show();      
       
       // ----- Display the right list of timing depending of the current time
       const d = new Date();
@@ -157,16 +216,47 @@
       const v_date = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref').value(v_date.getTime());
       
-      // ----- Select the current mode as the default return mode after trigger
-      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_return_mode option[value="#cmd_etat_value#"]').prop('selected', true);
+      
+      
+    }
+
+    function fct_cp_trigger_show_open() {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_show').show();    
+    }
+    
+    // ----- Managed sub-window for trigger action
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open").on('click', function () {
+    
+      // ----- Look for existing trigger
+      if ('#cmd_trigger_list#' != '') {
+        fct_cp_trigger_show_open();
+      }
+      
+      else {
+        fct_cp_trigger_add_open();
+      }
+
     });
     
-    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_close").on('click', function () {
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_add").on('click', function () {
+        fct_cp_trigger_add_open();
+    });
+    
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_delete").on('click', function () {
+        var v_id = $(this).data('id');
+        //$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("id :"+v_id);
+        
+        // ----- Trigger command with time in sec
+        jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'trigger_delete', id: v_id}});
+    });
+    
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_close").on('click', function () {
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
     
-    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_validate").on('click', function () {
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_validate").on('click', function () {
       v_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode option:selected').val();
       if (v_mode == '-') {
         // ----- missing valid mode escape
@@ -194,15 +284,6 @@
       // ----- Close panel
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
-    });
-    
-    // ----- Action for select
-    $(".eqLogic[data-eqLogic_uid=#uid#] .selectCmd").on('change', function () {
-      jeedom.cmd.execute({id: '#cmd_programme_select_id#', value: {select: $(this).value()}});
-      // ----- Change name in prog span
-      var v_html = '';
-      v_html = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select option[value="'+$(this).value()+'"]').html();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_name').html(v_html);
     });
     
     //$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("etat value :#cmd_etat_value#");

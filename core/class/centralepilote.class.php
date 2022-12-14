@@ -1695,11 +1695,30 @@ class centralepilote extends eqLogic {
          $replace['#cmd_programme_select_id#'] = $v_cmd->getId();
       }
 
+      // ----- Look for triggers
       $v_cmd = $this->getCmd(null, 'trigger');
       if (is_object($v_cmd)) {         
          $replace['#cmd_trigger_id#'] = $v_cmd->getId();
       }
-
+      if ($this->cpEqHasTrigger() > 0) {
+        $replace['#cmd_trigger_style#'] = "background-color: #4ABAF2!important; color: white!important;";
+        
+        $v_trigger_list = $this->cpGetConf('trigger_list');
+        $v_str = '';
+        foreach ($v_trigger_list as $v_trigger) {
+          if ($v_str != '') $v_str .='|';
+          // TBC
+          $it = explode('-', $v_trigger['time']);
+          $v_time_formatted = $it[3].'h'.$it[4].' ('.$it[2].'/'.$it[1].'/'.$it[0].')';
+          $v_str .= $v_trigger['type'].','.$v_trigger['time'].','.$v_time_formatted.','.$v_trigger['mode'].','.centralepilote::cpMOdeGetName($v_trigger['mode']);
+        }
+        $replace['#cmd_trigger_list#'] = $v_str;
+      }
+      else {
+        $replace['#cmd_trigger_style#'] = '';
+        $replace['#cmd_trigger_list#'] = "";
+      }
+      
       // ----- List of programmation
       $replace['#list_programmation#'] = centralepilote::cpProgValueList();
       $replace['#programme_id#'] = $this->cpGetConf('programme_id');
@@ -1715,8 +1734,8 @@ class centralepilote extends eqLogic {
         
       // ----- Temperatures
       // TBC
-      $replace['#temperature_cible#'] = "19";      
-      $replace['#temperature_actuelle#'] = "15";      
+      $replace['#temperature_cible#'] = $this->cpEqGetTemperatureCible();      
+      $replace['#temperature_actuelle#'] = $this->cpEqGetTemperatureActuelle();      
       
       // ----- Texte divers
       $replace['#title_programme#'] = __("Prog", __FILE__);
@@ -1726,11 +1745,13 @@ class centralepilote extends eqLogic {
       $replace['#title_Retour#'] = __("Retour", __FILE__);
       $replace['#title_Annuler#'] = __("Annuler", __FILE__);
       $replace['#title_Valider#'] = __("Valider", __FILE__);
+      $replace['#title_Ajouter#'] = __("Ajouter", __FILE__);
       $replace['#title_etat#'] = __("Etat", __FILE__);
       $replace['#title_cible#'] = __("Cible", __FILE__);
       $replace['#title_actuelle#'] = __("Actuelle", __FILE__);
       $replace['#title_Mode#'] = __("Mode", __FILE__);
       $replace['#title_a#'] = __("A", __FILE__);
+      $replace['#title_a_min#'] = __("à", __FILE__);
       $replace['#title_missing_mode#'] = __("Missing mode", __FILE__);
       
       
@@ -1836,12 +1857,20 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
 	private function cpGetDefaultConfiguration($p_key) {
+    
+    // TBC : splitt per type
 		$v_conf_keys = array(
 			'type' => 'radiateur',
 			'bypass_type' => 'no',
 			'bypass_mode' => 'no',
 			'trigger_list' => array(),
-            'zone' => ''
+            'zone' => '',
+            
+            'temperature_confort' => '19',
+            'temperature_confort_1' => '18',
+            'temperature_confort_2' => '17',
+            'temperature_eco' => '15',
+            'temperature_horsgel' => '3'
 		);
 		// If not in list, default value is ''
 		return(array_key_exists($p_key, $v_conf_keys) ? $v_conf_keys[$p_key] : '');
@@ -2798,11 +2827,65 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('trigger_list', $v_trigger_list);
         $this->save();
         
+        // ----- Update widget
+        $this->refreshWidget();
+        
         centralepilote::log('info', "Equipement '".$this->getName()."', new trigger at '".$v_date."' change to mode '".$p_mode."'.");
       }
       else {
         centralepilote::log('debug', "Unexpected trigger type : '".$p_trigger_type."'");
       }
+      
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpPilotageRemoveTrigger()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpPilotageRemoveTrigger($p_id) {
+      centralepilote::log('debug', "[".$this->getName()."]->cpPilotageRemoveTrigger('".$p_id."')");
+      
+      // ----- Check that the device is enable
+      if (!$this->getIsEnable()) {
+        centralepilote::log('debug',  "Equipement '".$this->getName()."' is disable, not possible to delete a trigger. (".__FILE__.",".__LINE__.")");
+        return;
+      }
+
+      if ($this->cpPilotageIsZone()) {
+        centralepilote::log('debug',  "Equipement '".$this->getName()."' is in zone pilotage, not possible to delete a trigger. (".__FILE__.",".__LINE__.")");
+        return;
+      }
+      
+      // ----- Look if device is in bypass mode
+      if (($v_bypass_type = $this->cpGetConf('bypass_type')) == 'delestage') {
+        centralepilote::log('info',  "Equipement '".$this->getName()."' is in bypass mode, not possible to delete a trigger.");
+        return;
+      }      
+            
+        // ----- Get existing trigger list
+        $v_trigger_list = $this->cpGetConf('trigger_list');
+        centralepilote::log('debug', "Current trigger list : '".print_r($v_trigger_list,true)."'");
+        
+        // ----- Look for not empty list
+        if ((sizeof($v_trigger_list) == 0) || (!isset($v_trigger_list[$p_id]))) {
+          centralepilote::log('debug', "No trigger with this id for this device.");
+          return;
+        }
+        
+        // ----- Remove the trigger
+        unset($v_trigger_list[$p_id]);
+             
+        $this->setConfiguration('trigger_list', $v_trigger_list);
+        $this->save();
+        
+        // ----- Update widget
+        $this->refreshWidget();
+        
+        centralepilote::log('info', "Equipement '".$this->getName()."', remove trigger '".$p_id."'.");
       
     }
     /* -------------------------------------------------------------------------*/
@@ -3076,6 +3159,50 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpEqGetTemperatureCible()
+     * Description :
+     *   Get the target temperature for the mode $p_mode, or if $p_mode = '' 
+     *   the current mode.
+     *   Return '' if none or mode is 'off'.
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpEqGetTemperatureCible($p_mode='') {
+      if ($p_mode == '') {
+        // ----- Get current mode 
+        $v_mode = $this->cpModeGetFromCmd();
+      }
+      else {
+        $v_mode = $p_mode;
+      }
+      
+      // ----- Get target temperature for the mode for this radiateur (future)
+      // TBC
+      
+      // ----- Get target temperature for the mode globally at the centrale level
+      $v_value = centralepilote::cpCentraleGetConfig('temperature_'.$v_mode);
+      //centralepilote::log('debug',  "Temp ".'temperature_'.$v_mode." '".$v_value."'.");
+      
+      return($v_value);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpEqGetTemperatureActuelle()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpEqGetTemperatureActuelle() {
+      // TBC
+      
+      return('15,55');
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpEqClockTick()
      * Description :
      * Parameters :
@@ -3125,6 +3252,19 @@ class centralepilote extends eqLogic {
 
       // ----- Appliquer le mode à l'équipement (fct qui check fenetre ouverte, etc )
       $this->cpModeChangeTo($v_mode);      
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpEqHasTrigger()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpEqHasTrigger() {
+      $v_trigger_list = $this->cpGetConf('trigger_list');
+      return((is_array($v_trigger_list) ? sizeof($v_trigger_list) : 0));
     }
     /* -------------------------------------------------------------------------*/
 
@@ -3460,17 +3600,27 @@ class centralepiloteCmd extends cmd {
           if (!isset($_options['trigger_type'])) {
             centralepilotelog::log('warning', "Missing option 'trigger_type' while receiving command '".$v_logical_id."'."); 
           }
-          else if (!isset($_options['mode'])) {
-            centralepilotelog::log('warning', "Missing option 'mode' while receiving command '".$v_logical_id."'."); 
+          else if ($_options['trigger_type'] == 'trigger_time') {
+            if (!isset($_options['mode'])) {
+              centralepilotelog::log('warning', "Missing option 'mode' while receiving command '".$v_logical_id."'."); 
+            }
+            else if (!isset($_options['trigger_time'])) {
+              centralepilotelog::log('warning', "Missing option 'trigger_time' while receiving command '".$v_logical_id."'."); 
+            }
+            else {
+              $v_trigger_type = $_options['trigger_type'];   // values : 'trigger_time', 'trigger_period' (future)
+              $v_mode = $_options['mode'];
+              $v_trigger_time = $_options['trigger_time'];
+              $eqLogic->cpPilotageSetTrigger($v_trigger_type, $v_mode, $v_trigger_time);
+            }
           }
-          else if (!isset($_options['trigger_time'])) {
-            centralepilotelog::log('warning', "Missing option 'trigger_time' while receiving command '".$v_logical_id."'."); 
-          }
-          else {
-            $v_trigger_type = $_options['trigger_type'];   // values : 'trigger_time', 'trigger_period' (future)
-            $v_mode = $_options['mode'];
-            $v_trigger_time = $_options['trigger_time'];
-			$eqLogic->cpPilotageSetTrigger($v_trigger_type, $v_mode, $v_trigger_time);
+          else if ($_options['trigger_type'] == 'trigger_delete') {
+            if (!isset($_options['id'])) {
+              centralepilotelog::log('warning', "Missing option 'id' while receiving command '".$v_logical_id."'."); 
+            }
+            else {
+              $eqLogic->cpPilotageRemoveTrigger($_options['id']);
+            }
           }
 		  return;
 		}
