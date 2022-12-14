@@ -1730,8 +1730,8 @@ class centralepilote extends eqLogic {
       $replace['#title_cible#'] = __("Cible", __FILE__);
       $replace['#title_actuelle#'] = __("Actuelle", __FILE__);
       $replace['#title_Mode#'] = __("Mode", __FILE__);
-      $replace['#title_jusqua#'] = __("jusqu'à", __FILE__);
-      $replace['#title_puis_mode#'] = __("puis", __FILE__);
+      $replace['#title_a#'] = __("A", __FILE__);
+      $replace['#title_missing_mode#'] = __("Missing mode", __FILE__);
       
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
@@ -2743,8 +2743,8 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpPilotageSetTrigger($p_trigger_type, $p_mode, $p_trigger_time, $p_return_mode) {
-      centralepilote::log('debug', "[".$this->getName()."]->cpPilotageSetTrigger('".$p_trigger_type."', '".$p_mode."', '".$p_trigger_time."', '".$p_return_mode."')");
+    public function cpPilotageSetTrigger($p_trigger_type, $p_mode, $p_trigger_time) {
+      centralepilote::log('debug', "[".$this->getName()."]->cpPilotageSetTrigger('".$p_trigger_type."', '".$p_mode."', '".$p_trigger_time."')");
       
       // ----- Check that the device is enable
       if (!$this->getIsEnable()) {
@@ -2764,8 +2764,7 @@ class centralepilote extends eqLogic {
       }      
       
       // ----- Check $p_mode & $p_return_mode
-//      if (!centralepilote::cpModeExist($p_mode) || !centralepilote::cpModeExist($p_return_mode)) {
-      if (!centralepilote::cpPilotageExist($p_mode) || !centralepilote::cpPilotageExist($p_return_mode)) {
+      if (!centralepilote::cpPilotageExist($p_mode)) {
         centralepilote::log('debug',  "Equipement '".$this->getName()."' invalid mode for trigger.");
         return;
       }
@@ -2773,8 +2772,8 @@ class centralepilote extends eqLogic {
       // ----- Check $p_for
       // TBC
       
-      // ----- Look for trigger 'for_time'
-      if ($p_trigger_type == 'for_time') {
+      // ----- Look for trigger 'trigger_time'
+      if ($p_trigger_type == 'trigger_time') {
         // ----- Get existing trigger list
         $v_trigger_list = $this->cpGetConf('trigger_list');
         centralepilote::log('debug', "Current trigger list : '".print_r($v_trigger_list,true)."'");
@@ -2785,20 +2784,21 @@ class centralepilote extends eqLogic {
           $v_trigger_list = array();
         }
         
-        // ----- Add new trigger
-        $v_trigger_item = array();
-        $v_trigger_item['type'] = 'trigger_mode';
-        $v_trigger_item['mode'] = $p_return_mode;
-        
 //        $v_date1 = date("Y-m-d-H-i");        
         $v_date = date("Y-m-d-H-i", $p_trigger_time);        
 //        centralepilote::log('debug', "date:".$v_date1.", date:".$v_date);
+        
+        // ----- Add new trigger
+        $v_trigger_item = array();
+        $v_trigger_item['type'] = 'trigger_time';
+        $v_trigger_item['mode'] = $p_mode;
+        $v_trigger_item['time'] = $v_date;
         
         $v_trigger_list[$v_date] = $v_trigger_item;
         $this->setConfiguration('trigger_list', $v_trigger_list);
         $this->save();
         
-        $this->cpPilotageChangeTo($p_mode);
+        centralepilote::log('info', "Equipement '".$this->getName()."', new trigger at '".$v_date."' change to mode '".$p_mode."'.");
       }
       else {
         centralepilote::log('debug', "Unexpected trigger type : '".$p_trigger_type."'");
@@ -3151,7 +3151,7 @@ class centralepilote extends eqLogic {
       foreach ($v_trigger_list as $v_date => $v_trigger) {
         if ($p_now >= $v_date) {
           // ----- Do the action
-          centralepilote::log('debug',  "At '".$p_now."', start trigger type '".$v_trigger['type']."', scheduled '".$v_date."', mode '".$v_trigger['mode']."'");
+          centralepilote::log('debug',  "At '".$p_now."', start trigger type '".$v_trigger['type']."', scheduled '".$v_trigger['time']."', mode '".$v_trigger['mode']."'");
           $this->cpPilotageChangeTo($v_trigger['mode']);
           
           // ----- Remove the trigger
@@ -3159,7 +3159,7 @@ class centralepilote extends eqLogic {
           $v_flag_trigger = true;
         }
         else {
-          centralepilote::log('debug',  "At '".$p_now."', ignore trigger type '".$v_trigger['type']."', scheduled '".$v_date."', mode '".$v_trigger['mode']."'");
+          centralepilote::log('debug',  "At '".$p_now."', ignore trigger type '".$v_trigger['type']."', scheduled '".$v_trigger['time']."', mode '".$v_trigger['mode']."'");
         }
       }
       
@@ -3466,15 +3466,11 @@ class centralepiloteCmd extends cmd {
           else if (!isset($_options['trigger_time'])) {
             centralepilotelog::log('warning', "Missing option 'trigger_time' while receiving command '".$v_logical_id."'."); 
           }
-          else if (!isset($_options['return_mode'])) {
-            centralepilotelog::log('warning', "Missing option 'return_mode' while receiving command '".$v_logical_id."'."); 
-          }
           else {
-            $v_trigger_type = $_options['trigger_type'];   // values : 'for_hour', 'at_hour' (future)
+            $v_trigger_type = $_options['trigger_type'];   // values : 'trigger_time', 'trigger_period' (future)
             $v_mode = $_options['mode'];
             $v_trigger_time = $_options['trigger_time'];
-            $v_return_mode = $_options['return_mode'];
-			$eqLogic->cpPilotageSetTrigger($v_trigger_type, $v_mode, $v_trigger_time, $v_return_mode);
+			$eqLogic->cpPilotageSetTrigger($v_trigger_type, $v_mode, $v_trigger_time);
           }
 		  return;
 		}

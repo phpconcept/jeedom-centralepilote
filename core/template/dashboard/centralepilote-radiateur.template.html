@@ -70,23 +70,10 @@
   <div class="row cp_area_edit cp_area" style="display:none;">
     <div class="col-sm-10" style="text-align: right!important;">
         <br>
-        #title_Mode#  
-        <select class="cp_trigger_mode" style="width:50%!important;">
-          <option value="-">Choisir ...</option>
-          <option value="#cmd_confort_logicalid#" class="cp_mode_button_#cmd_confort_show#">#cmd_confort_name#</option>
-          <option value="#cmd_eco_logicalid#" class="cp_mode_button_#cmd_eco_show#">#cmd_eco_name#</option>
-          <option value="#cmd_horsgel_logicalid#" class="cp_mode_button_#cmd_horsgel_show#">#cmd_horsgel_name#</option>
-          <option value="#cmd_off_logicalid#" class="cp_mode_button_#cmd_off_show#">#cmd_off_name#</option>
-          <option value="#cmd_auto_logicalid#" class="cp_mode_button_#cmd_auto_show#">#cmd_auto_name#</option>
-        </select><br>
-        #title_jusqua# 
+        #title_a# 
         <select class="cp_trigger_time" style="width:25%!important;">
           <option value="1">1h</option>
           <option value="2">2h</option>
-          <option value="3">3h</option>
-          <option value="4">4h</option>
-          <option value="5">5h</option>
-          <option value="6">6h</option>
         </select><select class="cp_trigger_time_min" style="width:25%!important;">
           <option value="0">00</option>
           <option value="15">15</option>
@@ -95,15 +82,18 @@
         </select>
         <input type="hidden" class="cp_trigger_time_ref" value="">
         <br>
-        #title_puis_mode# 
-        <select class="cp_trigger_return_mode" style="width:50%!important;">
+        #title_Mode#  
+        <select class="cp_trigger_mode" style="width:50%!important;">
+          <option value="-">Choisir ...</option>
           <option value="#cmd_confort_logicalid#" class="cp_mode_button_#cmd_confort_show#">#cmd_confort_name#</option>
           <option value="#cmd_eco_logicalid#" class="cp_mode_button_#cmd_eco_show#">#cmd_eco_name#</option>
           <option value="#cmd_horsgel_logicalid#" class="cp_mode_button_#cmd_horsgel_show#">#cmd_horsgel_name#</option>
           <option value="#cmd_off_logicalid#" class="cp_mode_button_#cmd_off_show#">#cmd_off_name#</option>
           <option value="#cmd_auto_logicalid#" class="cp_mode_button_#cmd_auto_show#">#cmd_auto_name#</option>
         </select>
-        <br><br>
+        <br>
+        <span class="cp_trigger_error_msg" style="font-size:12px;color:orange;display:none;"><i>Message</i></span>
+      <br>
     </div>
     <div class="col-sm-2">
       <br>
@@ -168,7 +158,7 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref').value(v_date.getTime());
       
       // ----- Select the current mode as the default return mode after trigger
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_return_mode option[value="#cmd_etat_value#"]').prop('selected', true);
+      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_return_mode option[value="#cmd_etat_value#"]').prop('selected', true);
     });
     
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_close").on('click', function () {
@@ -179,13 +169,13 @@
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_edit_validate").on('click', function () {
       v_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode option:selected').val();
       if (v_mode == '-') {
-        // missing valid mode escape
+        // ----- missing valid mode escape
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_error_msg ').html('#title_missing_mode#');
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_error_msg ').show();
+                
         return;
       }
 
-      // ----- Get return mode
-      v_return_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_return_mode option:selected').val();
-      
       // ----- Get hours and min to add
       v_time = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option:selected').val();      
       v_time_min = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_min option:selected').val();      
@@ -198,10 +188,8 @@
       
       // TBC : should check if time is already passed or not ....
 
-      // Trigger command with time in sec
-      jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'for_time', mode: v_mode, trigger_time:(v_trigger_time/1000), return_mode:v_return_mode}});
-
-//$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("time : "+dd2+",trigger time :'"+v_trigger_time+"' => "+dd.toString());
+      // ----- Trigger command with time in sec
+      jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'trigger_time', mode: v_mode, trigger_time:(v_trigger_time/1000)}});
 
       // ----- Close panel
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
