@@ -28,6 +28,8 @@
   <div class="row cp_pilotage_buttons">
     <div class="col-sm-12">
       <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_confort_show#" data-cmd_id="#cmd_confort_id#" style="#cmd_confort_style#" ><i class="#cmd_confort_icon#"></i> #cmd_confort_name#</a>
+      <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_confort_1_show#" data-cmd_id="#cmd_confort_1_id#" style="#cmd_confort_1_style#" ><i class="#cmd_confort_1_icon#"></i> #cmd_confort_1_name#</a>
+      <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_confort_2_show#" data-cmd_id="#cmd_confort_2_id#" style="#cmd_confort_2_style#" ><i class="#cmd_confort_2_icon#"></i> #cmd_confort_2_name#</a>
       <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_eco_show#" data-cmd_id="#cmd_eco_id#" style="#cmd_eco_style#" ><i class="#cmd_eco_icon#"></i> #cmd_eco_name#</a>
       <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_horsgel_show#" data-cmd_id="#cmd_horsgel_id#" style="#cmd_horsgel_style#" ><i class="#cmd_horsgel_icon#"></i> #cmd_horsgel_name#</a>
       <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_off_show#" data-cmd_id="#cmd_off_id#" style="#cmd_off_style#" ><i class="#cmd_off_icon#"></i> #cmd_off_name#</a>
@@ -35,14 +37,15 @@
     </div>
   </div>
   
-  
   <div class="row cp_area_normal cp_area">
     <div class="col-sm-6">
       <br>
-      <i class="icon jeedom-pilote-conf cp_etat_icon cp_etat_confort" style="font-size:60px;display:none;"></i>
-      <i class="icon jeedom-pilote-eco cp_etat_icon cp_etat_eco" style="font-size:60px;display:none;"></i>
-      <i class="icon jeedom-pilote-hg cp_etat_icon cp_etat_horsgel" style="font-size:60px;display:none;"></i>
-      <i class="icon jeedom-pilote-off cp_etat_icon cp_etat_off" style="font-size:60px;display:none;"></i>
+      <i class="#cmd_confort_large_icon# cp_etat_icon cp_etat_confort" style="font-size:60px;display:none;"></i>
+      <i class="#cmd_confort_1_large_icon# cp_etat_icon cp_etat_confort_1" style="font-size:60px;display:none;"></i>
+      <i class="#cmd_confort_2_large_icon# cp_etat_icon cp_etat_confort_2" style="font-size:60px;display:none;"></i>
+      <i class="#cmd_eco_large_icon# cp_etat_icon cp_etat_eco" style="font-size:60px;display:none;"></i>
+      <i class="#cmd_horsgel_large_icon# cp_etat_icon cp_etat_horsgel" style="font-size:60px;display:none;"></i>
+      <i class="#cmd_off_large_icon# cp_etat_icon cp_etat_off" style="font-size:60px;display:none;"></i>
       <br>
       <span class="cp_button_prog" style="font-size:12px;"><i>#title_programme# : 
       <span class="cp_programme_name">#programme_name#</span></i></span>
@@ -92,6 +95,8 @@
         <select class="cp_trigger_mode" style="width:50%!important;">
           <option value="-">Choisir ...</option>
           <option value="#cmd_confort_logicalid#" class="cp_mode_button_#cmd_confort_show#">#cmd_confort_name#</option>
+          <option value="#cmd_confort_1_logicalid#" class="cp_mode_button_#cmd_confort_1_show#">#cmd_confort_1_name#</option>
+          <option value="#cmd_confort_2_logicalid#" class="cp_mode_button_#cmd_confort_2_show#">#cmd_confort_2_name#</option>
           <option value="#cmd_eco_logicalid#" class="cp_mode_button_#cmd_eco_show#">#cmd_eco_name#</option>
           <option value="#cmd_horsgel_logicalid#" class="cp_mode_button_#cmd_horsgel_show#">#cmd_horsgel_name#</option>
           <option value="#cmd_off_logicalid#" class="cp_mode_button_#cmd_off_show#">#cmd_off_name#</option>

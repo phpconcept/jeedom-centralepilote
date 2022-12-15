@@ -286,6 +286,18 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpModeGetLargeIconClass()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpModeGetLargeIconClass($p_mode) {
+      return(centralepilote::cpModeGetAtt($p_mode, 'large_icon'));
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpModeGetColor()
      * Description :
      * Parameters :
@@ -321,21 +333,27 @@ class centralepilote extends eqLogic {
     public static function cpModeGetList($p_detail=false) {
       $v_mode_list = ['confort'   => ['name'=> __('Confort', __FILE__),
                                       'icon' => 'fab fa-hotjar',
+                                      'large_icon' => 'icon jeedom-pilote-conf',
                                       'color' => 'red'],
                       'confort_1' => ['name'=> __('Confort -1', __FILE__),
                                       'icon' => 'fab fa-hotjar',
+                                      'large_icon' => 'icon jeedom-pilote-conf',
                                       'color' => 'red'],
                       'confort_2' => ['name'=> __('Confort -2', __FILE__),
                                       'icon' => 'fab fa-hotjar',
+                                      'large_icon' => 'icon jeedom-pilote-conf',
                                       'color' => 'red'],
                       'eco'       => ['name'=> __('Eco', __FILE__),
                                       'icon' => 'fas fa-leaf',
+                                      'large_icon' => 'icon jeedom-pilote-eco',
                                       'color' => 'green'],
                       'horsgel'   => ['name'=> __('Hors-Gel', __FILE__),
                                       'icon' => 'far fa-snowflake',
+                                      'large_icon' => 'icon jeedom-pilote-hg',
                                       'color' => 'blue'],
                       'off'       => ['name'=> __('Off', __FILE__),
                                       'icon' => 'fas fa-power-off',
+                                      'large_icon' => 'icon jeedom-pilote-off',
                                       'color' => '']
                      ];
     
@@ -390,36 +408,6 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpPilotageExist()
-     * Description :
-     *   Will return true if the mode id $p_mode exists.
-     *   Sample : if (centralepilote::cpPilotageExist('horsgel')) {}
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpPilotageExist($p_mode) {
-      if ($p_mode == 'auto') return(true);
-      $v_list = centralepilote::cpModeGetList(true);
-      return(isset($v_list[$p_mode]));
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
-     * Method : cpPilotageGetName()
-     * Description :
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpPilotageGetName($p_pilotage_mode) {
-      if ($p_pilotage_mode == 'auto') return(__('Auto', __FILE__));
-      $v_name = centralepilote::cpModeGetName($p_pilotage_mode);
-      return($v_name);
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
      * Method : cpModeSupported()
      * Description :
      *   Look for supported mode by configuration.
@@ -467,6 +455,36 @@ class centralepilote extends eqLogic {
           $v_result = false;
       }
       return $v_result;
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpPilotageExist()
+     * Description :
+     *   Will return true if the mode id $p_mode exists.
+     *   Sample : if (centralepilote::cpPilotageExist('horsgel')) {}
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpPilotageExist($p_mode) {
+      if ($p_mode == 'auto') return(true);
+      $v_list = centralepilote::cpModeGetList(true);
+      return(isset($v_list[$p_mode]));
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpPilotageGetName()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpPilotageGetName($p_pilotage_mode) {
+      if ($p_pilotage_mode == 'auto') return(__('Auto', __FILE__));
+      $v_name = centralepilote::cpModeGetName($p_pilotage_mode);
+      return($v_name);
     }
     /* -------------------------------------------------------------------------*/
 
@@ -1086,8 +1104,8 @@ class centralepilote extends eqLogic {
         $v_cmd_order=1;
         // ----- Création des commandes par défaut
         $this->cpCmdCreate('confort', ['name'=>'Confort', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('confort')]);
-        //$this->cpCmdCreate('confort_1', ['name'=>'Confort -1', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('confort')]);
-        //$this->cpCmdCreate('confort_2', ['name'=>'Confort -1', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('confort')]);
+        $this->cpCmdCreate('confort_1', ['name'=>'Confort -1', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('confort_1')]);
+        $this->cpCmdCreate('confort_2', ['name'=>'Confort -2', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('confort_2')]);
         $this->cpCmdCreate('eco', ['name'=>'Eco', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('eco')]);
         $this->cpCmdCreate('horsgel', ['name'=>'HorsGel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('horsgel')]);
         $this->cpCmdCreate('off', ['name'=>'Off', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('off')]);
@@ -1691,6 +1709,7 @@ class centralepilote extends eqLogic {
            $replace['#cmd_'.$v_mode.'_logicalid#'] = $v_mode;
            $replace['#cmd_'.$v_mode.'_name#'] = centralepilote::cpModeGetName($v_mode);
            $replace['#cmd_'.$v_mode.'_icon#'] = centralepilote::cpModeGetIconClass($v_mode);
+           $replace['#cmd_'.$v_mode.'_large_icon#'] = centralepilote::cpModeGetLargeIconClass($v_mode);
            if ($this->cpGetConf('support_'.$v_mode) == 1) {
              $replace['#cmd_'.$v_mode.'_show#'] = 'show';
            }
@@ -1700,6 +1719,7 @@ class centralepilote extends eqLogic {
         }
         else {
           // TBC : should not occur ...
+          $replace['#cmd_'.$v_mode.'_show#'] = 'no_show';
         }
       }
       $v_cmd = $this->getCmd(null, 'auto');
