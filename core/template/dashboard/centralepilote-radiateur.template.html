@@ -151,7 +151,7 @@
     var trigger_list = trigger_list_str.split('|');
     for (var i in trigger_list) {
       var trigger = trigger_list[i].split(',');
-      v_html += '<a class="cp_trigger_delete" data-id="'+trigger[1]+'"><i class="far fa-trash-alt" style=""></i></a>&nbsp;&nbsp;';
+      v_html += '&nbsp;&nbsp;<a class="cp_trigger_delete" data-id="'+trigger[1]+'"><i class="far fa-trash-alt" style=""></i></a>&nbsp;&nbsp;';
       v_html += '#title_Mode# ';
       v_html += '\''+trigger[4]+'\'';
       v_html += ' #title_a_min# ';

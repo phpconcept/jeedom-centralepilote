@@ -115,6 +115,8 @@ Release v0.4 (beta) :
   
 - Bug corrections :
   - Lors de la création initiale, l'état de l'équipement "centrale" n'est pas correctement affiché.
+  - Ajout du contrôle que au minimum 2 modes sont sélectionnés
+  - Lors du changement de la programmation sur un horaire en cours, la mise à jour est maintenant prise en compte immédiatement et au prochain 'clock-tick'
 
 Release v0.3 (beta) :
 - Ajout de la fonction de délestage (bypass) au niveau de l'objet "Centrale". Cela permet d'envoyer un ordre centralisé obligatoire à tous les radiateurs (Off, Hors-Gel ou Eco). Les radiateurs resteront dans ce mode jusqu'à l'odre de retour à la normal. Ils reprendront alors le mode de pilotage dans lequel ils étaient.

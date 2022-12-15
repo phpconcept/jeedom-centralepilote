@@ -63,48 +63,6 @@ function refreshDeviceList() {
   $('#device_list').load('index.php?v=d&plugin=centralepilote&modal=modal.device_list');
 }
 
-function startRefreshDeviceList_DEPRECATED() {
-  $('#inclusion_message_container').show();
-  document.getElementById("inclusion_message_count").innerHTML =   "0";
-
-  refresh_timeout = setInterval(refreshDeviceCount, 3000);
-}
-
-function refreshDeviceCount_DEPRECATED() {
-
-  $.ajax({
-    type: "POST",
-    url: "plugins/centralepilote/core/ajax/centralepilote.ajax.php",
-    data: {
-      action: "getIncludedDeviceCount",
-      state: 'tbd'
-    },
-    dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
-    success: function (data) {
-      if (data.state != 'ok') {
-        $('#div_alert').showAlert({message: data.result, level: 'danger'});
-        return;
-      }
-      document.getElementById("inclusion_message_count").innerHTML = data.result.count;
-    }
-  });
-
-
-  //$('#device_list').load('index.php?v=d&plugin=centralepilote&modal=modal.device_list');
-  //$('#inclusion_message_container').append('.');
-  //document.getElementById("inclusion_message_count").innerHTML =   "1";
-}
-
-function stopRefreshDeviceList_DEPRECATED() {
-  clearInterval(refresh_timeout);
-  $('#device_list').load('index.php?v=d&plugin=centralepilote&modal=modal.device_list');
-  $('#inclusion_message_container').hide();
-}
-
-
 /*
  * Display programmation modal
  */
@@ -333,20 +291,6 @@ function cp_radiateur_display_init() {
   ($('.eqLogicAttr[data-l1key=configuration][data-l2key='+v_mode+']').value()==1 ? $('#cp_disp_'+v_mode+'').show() : $('#cp_disp_'+v_mode+'').hide()); 
   ($('.eqLogicAttr[data-l1key=configuration][data-l2key='+v_mode+']').value()==1 ? $('#cp_disp_no'+v_mode+'').hide() : $('#cp_disp_no'+v_mode+'').show()); 
   
-  /*
-  // ----- Remove all other Attr
-  $('.cp_attr_zone').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  // ----- Remove all other Attr
-  $('.cp_attr_centrale').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  */
 }
 
 /*
@@ -360,20 +304,6 @@ function cp_zone_display_init() {
   $('.cp_panel_radiateur_zone').show();
   $('.cp_panel_centrale').hide();
   
-  /*
-  // ----- Remove all other Attr
-  $('.cp_attr_radiateur').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  // ----- Remove all other Attr
-  $('.cp_attr_centrale').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  */
 }
 
 
@@ -391,8 +321,19 @@ $('.cp_support_mode').off('click').on('click', function () {
   }
   else {
     //alert('mode '+v_mode+' déselectionné');
-    $('#cp_disp_'+v_mode+'').hide();
-    $('#cp_disp_no'+v_mode+'').show();
+    // ----- Check at list 2 checked
+    var count = 0;
+    $('.cp_support_mode').each(function() { if (this.checked) count++; });
+    if (count < 2) {
+      //alert('Au moins 2 modes selectionnés !!');
+      $('#div_alert').showAlert({message: '{{Au minimum 2 modes doivent être selectionnés}}', level: 'warning'});
+      this.checked = true;
+    }
+    else {
+      $('#cp_disp_'+v_mode+'').hide();
+      $('#cp_disp_no'+v_mode+'').show();
+    }
+    
   }  
 });
 

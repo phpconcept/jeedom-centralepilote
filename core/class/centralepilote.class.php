@@ -654,7 +654,10 @@ class centralepilote extends eqLogic {
       centralepilote::cpProgSaveList($v_prog_list);
 
       // ----- Update equipement cmds
-      centralepilote::cpCmdAllProgrammeSelectUpdate();      
+      centralepilote::cpCmdAllProgrammeSelectUpdate();   
+      
+      // ----- Perform a tick to update modes if there is change for the current time
+      centralepilote::cpClockTick();
       
       // ----- Return the single programmation
       $v_prog_json = json_encode($v_prog_list[$p_id], JSON_FORCE_OBJECT);
@@ -836,6 +839,9 @@ class centralepilote extends eqLogic {
 
       // ----- Update equipement cmds
       centralepilote::cpCmdAllProgrammeSelectUpdate();      
+      
+      // ----- Perform a tick to update modes if there is change for the current time
+      centralepilote::cpClockTick();
       
       return(true);
     }
@@ -2175,13 +2181,8 @@ class centralepilote extends eqLogic {
       } 
       $v_cmd_tmp->setConfiguration('listValue', $p_value_list_str);
       
-      // TBC : Trick to update the widgets of all radiateurs ...
-      $v_val = $v_cmd_tmp->getIsVisible();
-      $v_cmd_tmp->setIsVisible(($v_val?0:1));
-      $v_cmd_tmp->save();
-      $v_cmd_tmp->setIsVisible(($v_val?1:0));
-      $v_cmd_tmp->save();
-    
+      // ----- Refresh list in widget
+      $this->refreshWidget();    
     }
     /* -------------------------------------------------------------------------*/
 
