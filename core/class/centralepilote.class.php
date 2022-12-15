@@ -2766,14 +2766,14 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpPilotageSetTrigger()
+     * Method : cpPilotageSetTriggerTime()
      * Description :
      * Parameters :
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpPilotageSetTrigger($p_trigger_type, $p_mode, $p_trigger_time) {
-      centralepilote::log('debug', "[".$this->getName()."]->cpPilotageSetTrigger('".$p_trigger_type."', '".$p_mode."', '".$p_trigger_time."')");
+    public function cpPilotageSetTriggerTime($p_mode, $p_trigger_time) {
+      centralepilote::log('debug', "[".$this->getName()."]->cpPilotageSetTriggerTime('".$p_mode."', '".$p_trigger_time."')");
       
       // ----- Check that the device is enable
       if (!$this->getIsEnable()) {
@@ -2798,43 +2798,40 @@ class centralepilote extends eqLogic {
         return;
       }
       
-      // ----- Check $p_for
-      // TBC
+      // ----- Get existing trigger list
+      $v_trigger_list = $this->cpGetConf('trigger_list');
+      centralepilote::log('debug', "Current trigger list : '".print_r($v_trigger_list,true)."'");
       
-      // ----- Look for trigger 'trigger_time'
-      if ($p_trigger_type == 'trigger_time') {
-        // ----- Get existing trigger list
-        $v_trigger_list = $this->cpGetConf('trigger_list');
-        centralepilote::log('debug', "Current trigger list : '".print_r($v_trigger_list,true)."'");
-        
-        // ----- Look for not empty list
-        if (sizeof($v_trigger_list) != 0) {
-          centralepilote::log('debug', "Today only one trigger is supported, replace with new trigger.");
-          $v_trigger_list = array();
-        }
-        
-//        $v_date1 = date("Y-m-d-H-i");        
-        $v_date = date("Y-m-d-H-i", $p_trigger_time);        
-//        centralepilote::log('debug', "date:".$v_date1.", date:".$v_date);
-        
-        // ----- Add new trigger
-        $v_trigger_item = array();
-        $v_trigger_item['type'] = 'trigger_time';
-        $v_trigger_item['mode'] = $p_mode;
-        $v_trigger_item['time'] = $v_date;
-        
-        $v_trigger_list[$v_date] = $v_trigger_item;
-        $this->setConfiguration('trigger_list', $v_trigger_list);
-        $this->save();
-        
-        // ----- Update widget
-        $this->refreshWidget();
-        
-        centralepilote::log('info', "Equipement '".$this->getName()."', new trigger at '".$v_date."' change to mode '".$p_mode."'.");
+      // ----- Look for not list
+      if (!is_array($v_trigger_list)) {
+        $v_trigger_list = array();
       }
-      else {
-        centralepilote::log('debug', "Unexpected trigger type : '".$p_trigger_type."'");
+
+      // ----- Format date from mUNIX time      
+      $v_date = date("Y-m-d-H-i", $p_trigger_time);        
+      //centralepilote::log('debug', "date:".date("Y-m-d-H-i").", trigger date:".$v_date);
+      
+      // ----- Add new trigger
+      $v_trigger_item = array();
+      $v_trigger_item['type'] = 'trigger_time';
+      $v_trigger_item['mode'] = $p_mode;
+      $v_trigger_item['time'] = $v_date;
+      
+      // ----- Look if existing trigger
+      if (isset($v_trigger_list[$v_date])) {
+        centralepilote::log('info', "Equipement '".$this->getName()."', trigger at '".$v_date."' already exists, will be overrided.");
       }
+      
+      // ----- Add  in list and save
+      $v_trigger_list[$v_date] = $v_trigger_item;
+      ksort($v_trigger_list);
+      $this->setConfiguration('trigger_list', $v_trigger_list);
+      $this->save();
+      
+      // ----- Update widget
+      $this->refreshWidget();
+      
+      centralepilote::log('info', "Equipement '".$this->getName()."', new trigger at '".$v_date."' change to mode '".$p_mode."'.");
       
     }
     /* -------------------------------------------------------------------------*/
@@ -3608,10 +3605,9 @@ class centralepiloteCmd extends cmd {
               centralepilotelog::log('warning', "Missing option 'trigger_time' while receiving command '".$v_logical_id."'."); 
             }
             else {
-              $v_trigger_type = $_options['trigger_type'];   // values : 'trigger_time', 'trigger_period' (future)
               $v_mode = $_options['mode'];
               $v_trigger_time = $_options['trigger_time'];
-              $eqLogic->cpPilotageSetTrigger($v_trigger_type, $v_mode, $v_trigger_time);
+              $eqLogic->cpPilotageSetTriggerTime($v_mode, $v_trigger_time);
             }
           }
           else if ($_options['trigger_type'] == 'trigger_delete') {
