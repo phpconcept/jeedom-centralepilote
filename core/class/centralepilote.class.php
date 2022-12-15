@@ -1797,6 +1797,8 @@ class centralepilote extends eqLogic {
       $replace['#title_a_min#'] = __("à", __FILE__);
       $replace['#title_missing_mode#'] = __("Missing mode", __FILE__);
       
+      $replace['#width#'] = '320px';
+      $replace['#height#'] = '160px';            
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
