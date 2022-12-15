@@ -406,6 +406,20 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpPilotageGetName()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpPilotageGetName($p_pilotage_mode) {
+      if ($p_pilotage_mode == 'auto') return(__('Auto', __FILE__));
+      $v_name = centralepilote::cpModeGetName($p_pilotage_mode);
+      return($v_name);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpModeSupported()
      * Description :
      *   Look for supported mode by configuration.
@@ -1630,7 +1644,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public function toHtml_radiateur($_version = 'dashboard') {
-      centralepilote::log('debug',  "Call toHtml_radiateur()");
+      //centralepilote::log('debug',  "Call toHtml_radiateur()");
 
       $replace = $this->preToHtml($_version);
 
@@ -1710,7 +1724,8 @@ class centralepilote extends eqLogic {
           // TBC
           $it = explode('-', $v_trigger['time']);
           $v_time_formatted = $it[3].'h'.$it[4].' ('.$it[2].'/'.$it[1].'/'.$it[0].')';
-          $v_str .= $v_trigger['type'].','.$v_trigger['time'].','.$v_time_formatted.','.$v_trigger['mode'].','.centralepilote::cpMOdeGetName($v_trigger['mode']);
+          $v_name = 
+          $v_str .= $v_trigger['type'].','.$v_trigger['time'].','.$v_time_formatted.','.$v_trigger['mode'].','.centralepilote::cpPilotageGetName($v_trigger['mode']);
         }
         $replace['#cmd_trigger_list#'] = $v_str;
       }

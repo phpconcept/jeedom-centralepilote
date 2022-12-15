@@ -109,7 +109,10 @@ Centrale en mode "Délestage":
 Release v0.4 (beta) :
 
 - Nouveautés :
-
+  - Ajout d'un widget "custom" pour les radiateurs et les zones.
+  - Possibilité de choisir le widget custom ou le widget système par configuration globale
+  - Ajout d'une notion de déclenchement (trigger) par radiateur/zone.
+  
 - Bug corrections :
   - Lors de la création initiale, l'état de l'équipement "centrale" n'est pas correctement affiché.
 
@@ -137,7 +140,7 @@ Release v0.1 (beta) :
 - Les commandes avec des options (select) ne sont pas encore bien gérées pour les retours d'état des contacteurs.
 - Il ne faut surtout pas détruire ou désactiver l'objet "Centrale". Le PlugIn essaie de l'empêcher, mais tout n'est pas encore contrôlé.
 - Il faut laisser au moins deux modes par radiateur (pour l'instant le plugIn ne vérifie pas ...)
-
+- L'affichage de la température actuelle dans le widget n'est pas mis à jour automatiquement mais uniquement lors d'un changement d'état
 
 ### Aspirations & Idées & Evolutions
 

@@ -118,7 +118,7 @@
     <div class="col-sm-2">
       <br>
       <a class="btn btn-sm btn-default tooltips cp_trigger_add" title="#title_Ajouter#"><i class="fas fa-plus-circle" style="font-size:16px;"></i></a><br>
-      <a class="btn btn-sm btn-default tooltips cp_trigger_close" title="#title_Annuler#"><i class="fas fa-reply" style="font-size:16px;"></i></a>
+      <a class="btn btn-sm btn-default tooltips cp_trigger_close" title="#title_Retour#"><i class="fas fa-reply" style="font-size:16px;"></i></a>
     </div>
   </div>
   
@@ -189,8 +189,8 @@
     });
     
     
-    
-    function fct_cp_trigger_add_open() {
+    // TBC : To be removed !!!!
+    function fct_cp_trigger_add_open_#uid#() {
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_add').show();      
       
@@ -220,27 +220,50 @@
       
     }
 
-    function fct_cp_trigger_show_open() {
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_show').show();    
-    }
-    
     // ----- Managed sub-window for trigger action
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open").on('click', function () {
     
       // ----- Look for existing trigger
       if ('#cmd_trigger_list#' != '') {
-        fct_cp_trigger_show_open();
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_show').show();    
       }
       
       else {
-        fct_cp_trigger_add_open();
+        //fct_cp_trigger_add_open_#uid#();
+        $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_add").click();
       }
 
     });
     
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_add").on('click', function () {
-        fct_cp_trigger_add_open();
+        //fct_cp_trigger_add_open_#uid#();
+        
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_add').show();      
+      
+      // ----- Display the right list of timing depending of the current time
+      const d = new Date();
+      let v_hour = d.getHours();
+      var v_html = '';
+      var v_hour_count = v_hour;
+      for (let i = 0; i < 12; i++) {
+        if (i == 1) {
+          v_html += '<option value="'+v_hour_count+'" selected>'+v_hour+'h</option>';
+        }
+        else {
+          v_html += '<option value="'+v_hour_count+'">'+v_hour+'h</option>';
+        }
+        v_hour_count++;
+        v_hour++;
+        if (v_hour == 24) v_hour = 0;
+      }
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').html(v_html);
+      
+      // ----- Storing reference date without h/m/s
+      const v_date = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref').value(v_date.getTime());
+                    
     });
     
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_delete").on('click', function () {
