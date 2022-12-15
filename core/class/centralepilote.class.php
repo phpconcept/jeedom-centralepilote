@@ -1168,7 +1168,7 @@ class centralepilote extends eqLogic {
     }
 
     public function preSaveRadiateur() {
-      //centralepilotelog::log('debug', "preSave()");
+      centralepilotelog::log('debug', "preSaveRadiateur()");
       
       // It's time to gather informations that will be used in postSave
       
@@ -1187,8 +1187,6 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('support_off', '1');        
         $this->setConfiguration('nature_fil_pilote', '2_commutateur');        
         
-        //$this->setConfiguration('admin_pilotage', 'manuel');
-        //$this->setConfiguration('admin_mode', 'eco');
         $this->setConfiguration('pilotage', 'eco');
         $this->setConfiguration('programme_id', '0');
 
@@ -1236,6 +1234,7 @@ class centralepilote extends eqLogic {
   
         
       }
+      centralepilotelog::log('debug', "preSaveRadiateur() done");
     }
 
     public function preSaveZone() {
@@ -1344,7 +1343,7 @@ class centralepilote extends eqLogic {
 
     public function postSaveRadiateur() {
 
-      //centralepilotelog::log('debug', "postSave()");
+      centralepilotelog::log('debug', "postSave() radiateur");
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
@@ -1406,10 +1405,11 @@ class centralepilote extends eqLogic {
             $v_value = $this->getConfiguration('support_'.$v_mode,'');
             $this->cpCmdHide($v_mode, ($v_value==0));
           }
+          
           // ----- Force current saved mode because it may not exist anymore
-          $v_pilote_mode = $this->getConfiguration('pilote','');
-          //$this->cpModeChangeTo($v_admin_mode);
-          $this->cpPiloteChangeTo($v_pilote_mode);
+          //$v_pilote_mode = $this->getConfiguration('pilotage','');
+          $v_pilote_mode = $this->cpPilotageGetAdminValue();
+          $this->cpPilotageChangeTo($v_pilote_mode);
         }
 
         // si zone passe de vide à set : alors changer le mode à celui de la zone
@@ -1428,6 +1428,7 @@ class centralepilote extends eqLogic {
   
       }
       
+      centralepilotelog::log('debug', "postSave() radiateur done");
     }
 
     public function postSaveZone() {
@@ -1495,9 +1496,10 @@ class centralepilote extends eqLogic {
             $this->cpCmdHide($v_mode, ($v_value==0));
           }
           // ----- Force current saved mode because it may not exist anymore
-          $v_pilote_mode = $this->getConfiguration('pilote','');
+          //$v_pilote_mode = $this->getConfiguration('pilotage','');
+          $v_pilote_mode = $this->cpPilotageGetAdminValue();
           //$this->cpModeChangeTo($v_admin_mode);
-          $this->cpPiloteChangeTo($v_pilote_mode);
+          $this->cpPilotageChangeTo($v_pilote_mode);
         }
 
       }
@@ -3370,7 +3372,7 @@ class centralepilote extends eqLogic {
     public function cpNatureChangeTo($p_nature) {
       // ----- Only for 'radiateur' 
       if (!$this->cpIsType('radiateur')) {
-        centralepilote::log('debug', "This method cpZoneClockTick() should not be used for not radiateur device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug', "This method cpNatureChangeTo() should not be used for not radiateur device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
@@ -3388,7 +3390,15 @@ class centralepilote extends eqLogic {
         $v_eq_id = str_replace('eqLogic', '', $v_eq_id);
         centralepilote::log('debug', "Commutateur is '".$v_eq_id."'");
         
-        // TBC : I should also check that the eq exists ...
+        // ----- Look if eq exists
+        /*
+        No need , the code will fill empty values for commands
+        if (($v_eq_id == '') || !is_object(($v_eq = eqLogic::byId($v_eq_id)))) {
+          centralepilote::log('debug', "Fail to find an equipement with id '".$v_eq_id."', return to virtual.");
+          $this->setConfiguration('nature_fil_pilote', 'virtuel');
+          return;
+        }
+        */
                 
         // ----- Get action command by logicalId
         $v_cmd_off_hname = '';
@@ -3397,7 +3407,6 @@ class centralepilote extends eqLogic {
           centralepilote::log('debug', "Fail to find cmd Off for eq '".$v_eq_id."'");
         }
         else {
-//          $v_cmd_off_hname = '#'.$v_cmd_off->getHumanName().'#';
           $v_cmd_off_hname = '#'.$v_cmd_off->getId().'#';
         }
         $v_cmd_on_hname = '';
@@ -3406,7 +3415,6 @@ class centralepilote extends eqLogic {
           centralepilote::log('debug', "Fail to find cmd On for eq '".$v_eq_id."'");
         }
         else {
-//          $v_cmd_on_hname = '#'.$v_cmd_on->getHumanName().'#';
           $v_cmd_on_hname = '#'.$v_cmd_on->getId().'#';
         }
         $v_cmd_etat_hname = '';
@@ -3415,7 +3423,6 @@ class centralepilote extends eqLogic {
           centralepilote::log('debug', "Fail to find cmd Etat for eq '".$v_eq_id."'");
         }
         else {
-//          $v_cmd_etat_hname = '#'.$v_cmd_etat->getHumanName().'#';
           $v_cmd_etat_hname = '#'.$v_cmd_etat->getId().'#';
         }
                
@@ -3477,8 +3484,6 @@ class centralepilote extends eqLogic {
         $v_eq_id_b = str_replace('eqLogic', '', $v_eq_id_b);
         centralepilote::log('debug', "Commutateur B is '".$v_eq_id_b."'");
         
-        // TBC : I should also check that the eq exists ...
-                
         // ----- Get action command by logicalId
         $v_cmd_off_hname_a = '';
         $v_cmd_off_a = cmd::byEqLogicIdCmdName($v_eq_id_a, __('Off', __FILE__));
@@ -3488,7 +3493,6 @@ class centralepilote extends eqLogic {
           return;
         }
         else {
-//          $v_cmd_off_hname_a = '#'.$v_cmd_off_a->getHumanName().'#';
           $v_cmd_off_hname_a = '#'.$v_cmd_off_a->getId().'#';
         }
         $v_cmd_on_hname_a = '';
@@ -3499,7 +3503,6 @@ class centralepilote extends eqLogic {
           return;
         }
         else {
-//          $v_cmd_on_hname_a = '#'.$v_cmd_on_a->getHumanName().'#';
           $v_cmd_on_hname_a = '#'.$v_cmd_on_a->getId().'#';
         }
         $v_cmd_etat_hname_a = '';
@@ -3508,7 +3511,6 @@ class centralepilote extends eqLogic {
           centralepilote::log('debug', "Fail to find cmd Etat for eq '".$v_eq_id_a."'");
         }
         else {
-//          $v_cmd_etat_hname_a = '#'.$v_cmd_etat_a->getHumanName().'#';
           $v_cmd_etat_hname_a = '#'.$v_cmd_etat_a->getId().'#';
         }
                
@@ -3519,7 +3521,6 @@ class centralepilote extends eqLogic {
           centralepilote::log('debug', "Fail to find cmd Off for eq '".$v_eq_id_b."'");
         }
         else {
-//          $v_cmd_off_hname_b = '#'.$v_cmd_off_b->getHumanName().'#';
           $v_cmd_off_hname_b = '#'.$v_cmd_off_b->GetId().'#';
         }
         $v_cmd_on_hname_b = '';
@@ -3528,7 +3529,6 @@ class centralepilote extends eqLogic {
           centralepilote::log('debug', "Fail to find cmd On for eq '".$v_eq_id_b."'");
         }
         else {
-//          $v_cmd_on_hname_b = '#'.$v_cmd_on_b->getHumanName().'#';
           $v_cmd_on_hname_b = '#'.$v_cmd_on_b->getId().'#';
         }
         $v_cmd_etat_hname_b = '';
@@ -3537,7 +3537,6 @@ class centralepilote extends eqLogic {
           centralepilote::log('debug', "Fail to find cmd Etat for eq '".$v_eq_id_b."'");
         }
         else {
-//          $v_cmd_etat_hname_b = '#'.$v_cmd_etat_b->getHumanName().'#';
           $v_cmd_etat_hname_b = '#'.$v_cmd_etat_b->getId().'#';
         }
         
