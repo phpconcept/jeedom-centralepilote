@@ -1865,7 +1865,9 @@ class centralepilote extends eqLogic {
 			'bypass_mode' => 'no',
 			'trigger_list' => array(),
             'zone' => '',
+            'temperature' => '',
             
+            // For centrale
             'temperature_confort' => '19',
             'temperature_confort_1' => '18',
             'temperature_confort_2' => '17',
@@ -2831,8 +2833,7 @@ class centralepilote extends eqLogic {
       // ----- Update widget
       $this->refreshWidget();
       
-      centralepilote::log('info', "Equipement '".$this->getName()."', new trigger at '".$v_date."' change to mode '".$p_mode."'.");
-      
+      centralepilote::log('info', "Equipement '".$this->getName()."', new trigger at '".$v_date."' change to mode '".$p_mode."'.");      
     }
     /* -------------------------------------------------------------------------*/
 
@@ -3193,9 +3194,23 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public function cpEqGetTemperatureActuelle() {
-      // TBC
+      //centralepilote::log('debug',  "cpEqGetTemperatureActuelle()");
       
-      return('15,55');
+      $v_virtual_cmd = $this->cpGetConf('temperature');
+      if ($v_virtual_cmd == '') {
+        return('');
+      }
+      //centralepilote::log('debug',  "Virtual temp ".$v_virtual_cmd." ");
+      
+      $cmd = cmd::byId(str_replace('#', '', $v_virtual_cmd));
+      if (!is_object($cmd)) {        
+        return('');
+      }
+      $v_value = $cmd->execCmd($p_options);
+      $v_value_round = round($v_value,1);
+      //centralepilote::log('debug',  "Value '".$v_value."', rounded : '".$v_value_round."'");
+      
+      return($v_value_round);
     }
     /* -------------------------------------------------------------------------*/
 
