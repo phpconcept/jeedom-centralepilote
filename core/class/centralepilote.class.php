@@ -1803,9 +1803,19 @@ class centralepilote extends eqLogic {
       $replace['#title_a#'] = __("A", __FILE__);
       $replace['#title_a_min#'] = __("à", __FILE__);
       $replace['#title_missing_mode#'] = __("Missing mode", __FILE__);
+      $replace['#title_Choisir#'] = __("Choisir ...", __FILE__);
       
       $replace['#width#'] = '320px';
-      $replace['#height#'] = '160px';            
+      $replace['#height#'] = '160px';       
+      $replace['#icon_button_trigger#'] = 'icon divers-circular114';       
+      $replace['#icon_button_window#'] = 'icon jeedom-fenetre-ouverte';       
+      $replace['#icon_button_prog#'] = 'icon divers-calendar2';    
+      $replace['#icon_button_trash#'] = 'far fa-trash-alt';    
+      $replace['#icon_button_validate#'] = 'fas fa-check';    
+      $replace['#icon_button_cancel#'] = 'fas fa-reply';    
+      $replace['#icon_button_add#'] = 'fas fa-plus-circle';    
+         
+      
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
