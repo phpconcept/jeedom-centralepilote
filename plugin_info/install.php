@@ -106,8 +106,9 @@ function centralepilote_update_v_0_4($v_from_version='') {
     if ($v_eq->getConfiguration('bypass_type', '') == '') {
       centralepilotelog::log('debug', "Add missing config 'bypass_type' to equipement '".$v_eq->getName()."'.");
       $v_bypass_mode = $v_eq->getConfiguration('bypass_mode', '');
-      if ($v_bypass_mode == 'no') { // 'no', 'delestage', 'eco', 'horsgel'
+      if (($v_bypass_mode == 'no') || ($v_bypass_mode == '')) { // 'no', 'delestage', 'eco', 'horsgel'
         $v_eq->setConfiguration('bypass_type', 'no');
+        $v_eq->setConfiguration('bypass_mode', 'no');
       }
       else {
         $v_eq->setConfiguration('bypass_type', 'delestage');
@@ -134,7 +135,7 @@ function centralepilote_update_v_0_4($v_from_version='') {
 
     $v_cmd = $v_eq->getCmd(null, 'confort_2');
     if (!is_object($v_cmd)) {
-      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'confort_1'");
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'confort_2'");
       $v_eq->cpCmdCreate('confort_2', ['name'=>'Confort -2', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>3, 'icon'=>centralepilote::cpModeGetIconClass('confort_2')]);
     }
 
