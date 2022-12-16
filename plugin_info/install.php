@@ -25,14 +25,11 @@ function centralepilote_install() {
 
   // ----- Default parameters
   config::save('prog_display_mode', 'icon_color', 'centralepilote');  // 'icon_color' or icon' or 'color'
-  config::save('prog_list', '', 'centralepilote');  
+  // DEPRECATED config::save('prog_list', '', 'centralepilote');  
   
   // ----- Create a default centrale objetc (if not exists)
   centralepilote::cpCentraleCreateDefault();
   
-  // ----- Créer le programme par défaut, l'ajouter dans la liste
-  //centralepilote::cpProgCreateDefault();
-
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
