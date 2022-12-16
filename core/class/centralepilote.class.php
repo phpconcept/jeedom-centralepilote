@@ -1119,7 +1119,7 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('programme_id', ['name'=>'Programme Id', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
         $this->cpCmdCreate('programme_select', ['name'=>'Programme Select', 'type'=>'action', 'subtype'=>'select', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>'icon divers-calendar2']);
         
-        $this->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'fas fa-edit']);
+        $this->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon divers-circular114']);
         
         // ----- Update value list for the command 'programme_select' which is of subtype 'select'
         $this->cpCmdProgrammeSelectUpdate(centralepilote::cpProgValueList());
@@ -1197,6 +1197,9 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('temperature', '');
         $this->setConfiguration('puissance', '');
         
+        // ----- Information concernant les declencheurs        
+        $this->setConfiguration('trigger_list', array());
+        
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }
@@ -1257,14 +1260,18 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('support_off', '1');        
         $this->setConfiguration('nature_fil_pilote', 'virtuel');        
         
-        //$this->setConfiguration('admin_pilotage', 'manuel');
-        //$this->setConfiguration('admin_mode', 'eco');
         $this->setConfiguration('pilotage', 'eco');
         $this->setConfiguration('programme_id', '0');
         
+        $this->setConfiguration('bypass_type', 'no');
+        $this->setConfiguration('bypass_mode', 'no');
+
         // ----- Information concernant les caractéristiques de la zone        
         $this->setConfiguration('temperature', '');
 
+        // ----- Information concernant les declencheurs        
+        $this->setConfiguration('trigger_list', array());
+        
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }

@@ -67,15 +67,84 @@ function centralepilote_update() {
 
 
 function centralepilote_update_v_0_4($v_from_version='') {
-  // Add icons pour Normal et Delestage ds cmd de Central
-  // Ajout de la conf bypass_type en fonction de la valeur de bypass_mode ... pour chaque rad/zone
-  // Ajout nouvelle commande : 
-  // $this->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'fas fa-edit']);
-  //Ajout de la configuration trigger_list mais pas la peine de l'initialisée cela se fera tout seul
+  if ($v_from_version == '0.2') {
+    // ----- First upgrade to 0.3
+    $this->centralepilote_update_v_0_3($v_version);
+  }
   
-  // Ajout des commandes -1 et -2 
-  // $this->cpCmdCreate('confort_1', ['name'=>'Confort -1', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('confort_1')]);
-  // $this->cpCmdCreate('confort_2', ['name'=>'Confort -2', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('confort_2')]);
+  // ----- Get centrale
+  $v_centrale = centralepilote::cpCentraleGet();
+  if ($v_centrale === null) {
+    centralepilotelog::log('debug', "Missing default Centrale object. Abort update.");
+    return;
+  }
+  
+  // ----- Add icons pour Normal et Delestage ds cmd de Central
+  $v_cmd = $v_centrale->getCmd(null, 'normal');
+  if (is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing icon to cmd 'normal' to Centrale equipement.");
+    $v_cmd->setDisplay('icon', '<i class="icon kiko-sun"></i>');
+    $v_cmd->setDisplay('showIconAndNamedashboard', "1");          
+  }
+  $v_cmd = $v_centrale->getCmd(null, 'delestage');
+  if (is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing icon to cmd 'delestage' to Centrale equipement.");
+    $v_cmd->setDisplay('icon', '<i class="'.centralepilote::cpModeGetIconClass('off').'"></i>');
+    $v_cmd->setDisplay('showIconAndNamedashboard', "1");          
+  }
+
+  // ----- Look for each equip
+  $eqLogics = eqLogic::byType('centralepilote');
+  foreach ($eqLogics as $v_eq) {
+    $v_flag_save = false;
+    
+    if (!$v_eq->cpIsType(array('radiateur','zone'))) {
+      continue;
+    }
+    
+    // ----- Ajout de la conf bypass_type en fonction de la valeur de bypass_mode
+    if ($v_eq->getConfiguration('bypass_type', '') == '') {
+      centralepilotelog::log('debug', "Add missing config 'bypass_type' to equipement '".$v_eq->getName()."'.");
+      $v_bypass_mode = $v_eq->getConfiguration('bypass_mode', '');
+      if ($v_bypass_mode == 'no') { // 'no', 'delestage', 'eco', 'horsgel'
+        $v_eq->setConfiguration('bypass_type', 'no');
+      }
+      else {
+        $v_eq->setConfiguration('bypass_type', 'delestage');
+      }
+      $v_flag_save = true;
+    }
+    
+    // ----- Ajout de la configuration trigger_list mais pas la peine de l'initialisée cela se fera tout seul
+    if ($v_eq->getConfiguration('trigger_list', '') == '') {
+      $v_eq->setConfiguration('trigger_list', array());
+      $v_flag_save = true;
+    }
+    
+    if ($v_flag_save) {
+      $this->save();
+    }
+    
+    // ----- Look to add cmd
+    $v_cmd = $v_eq->getCmd(null, 'confort_1');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'confort_1'");
+      $v_eq->cpCmdCreate('confort_1', ['name'=>'Confort -1', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>2, 'icon'=>centralepilote::cpModeGetIconClass('confort_1')]);
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'confort_2');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'confort_1'");
+      $v_eq->cpCmdCreate('confort_2', ['name'=>'Confort -2', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>3, 'icon'=>centralepilote::cpModeGetIconClass('confort_2')]);
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'trigger');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'trigger'");
+      $v_eq->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>13, 'icon'=>'icon divers-circular114']);
+    }
+    
+  }  
 
 }
 
