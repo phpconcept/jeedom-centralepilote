@@ -1788,7 +1788,7 @@ class centralepilote extends eqLogic {
       $replace['#temperature_actuelle#'] = $this->cpEqGetTemperatureActuelle();      
       
       // ----- Texte divers
-      $replace['#title_programme#'] = __("Prog", __FILE__);
+      $replace['#title_programme#'] = __("Auto", __FILE__);
       $replace['#title_select_programmation#'] = __("Choisir la programmation", __FILE__);
       $replace['#title_pilotage_zone#'] = __("Pilotage par Zone", __FILE__);
       $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
