@@ -134,16 +134,15 @@ Release v0.1 (beta) :
 
 
 
-### Problèmes connus
+### Questions Fréquentes (FAQ) et Problèmes connus
 
 - Les commmandes "Confort -1" et "Confort -2" ne sont pas encore complètement gérées.
 - Lorsqu'un contacteur est changé directement, sans passer par l'équipement "radiateur fil-pilote", l'état de ce dernier n'est pas automatiquement mis à jour.
-- Lors de création d'un radiateur en choisissant les 3 configurations à base de contacteurs, les modes affichés dans la page de configuration ne sont pas instantanément mis à jour sur la page. Ils le sont apès la sauvegarde du radiateur.
 - Les commandes avec des options (select) ne sont pas encore bien gérées pour les retours d'état des contacteurs.
 - Il ne faut surtout pas détruire ou désactiver l'objet "Centrale". Le PlugIn essaie de l'empêcher, mais tout n'est pas encore contrôlé.
-- Il faut laisser au moins deux modes par radiateur (pour l'instant le plugIn ne vérifie pas ...)
 - L'affichage de la température actuelle dans le widget n'est pas mis à jour automatiquement mais uniquement lors d'un changement d'état
 - La fonction de déclenchement n'est pas possible actuellement avec le widget standard.
+- Quand le mode bypass est déclenché, il ne s’applique que sur les radiateurs/zones actives. Si un radiateur/zone devient actif après le déclenchement du bypass, le bypass sera ignoré.
 
 ### Aspirations & Idées & Evolutions
 

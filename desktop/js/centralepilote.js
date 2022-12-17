@@ -437,6 +437,17 @@ function cp_nature_change(event) {
   $('#cp_disp_virtuel').hide();
   
   if (event.target.value == '1_commutateur_c_o') {
+    
+    // ----- Select only ther right ones
+    $('.cp_support_mode').each(function() { 
+      if (($(this).data('l2key') == 'support_confort') || (($(this).data('l2key') == 'support_off'))) {
+        this.checked = true;
+      }
+      else {
+        this.checked = false;
+      }
+    });
+    
     $('#cp_disp_1_commutateur').show();
     $('#img_1_commutateur_c_o').show();
     $('#img_1_commutateur_c_h').hide();
@@ -444,12 +455,33 @@ function cp_nature_change(event) {
   }
   
   else if (event.target.value == '1_commutateur_c_h') {
+    // ----- Select only ther right ones
+    $('.cp_support_mode').each(function() { 
+      if (($(this).data('l2key') == 'support_confort') || (($(this).data('l2key') == 'support_horsgel'))) {
+        this.checked = true;
+      }
+      else {
+        this.checked = false;
+      }
+    });
+
     $('#cp_disp_1_commutateur').show();
     $('#img_1_commutateur_c_h').show();
     $('#img_1_commutateur_c_o').hide();
   }
   
   else if (event.target.value == '2_commutateur') {
+    // ----- Select only ther right ones
+    $('.cp_support_mode').each(function() { 
+      if (    ($(this).data('l2key') == 'support_confort') || (($(this).data('l2key') == 'support_eco'))
+           || (($(this).data('l2key') == 'support_horsgel')) || (($(this).data('l2key') == 'support_off'))) {
+        this.checked = true;
+      }
+      else {
+        this.checked = false;
+      }
+    });
+
     $('#cp_disp_2_commutateur').show();
   }
   
