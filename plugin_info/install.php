@@ -24,15 +24,14 @@ function centralepilote_install() {
   log::add('centralepilote', 'info', "Start installation/activation of plugin 'centralepilote' version ".CP_VERSION);
 
   // ----- Default parameters
-  config::save('prog_display_mode', 'icon_color', 'centralepilote');  // 'icon_color' or icon' or 'color'
-  config::save('prog_list', '', 'centralepilote');  
+  $v_prog_display_mode = config::byKey('prog_display_mode', 'centralepilote', '');
+  if ($v_prog_display_mode == '') {
+    config::save('prog_display_mode', 'icon_color', 'centralepilote');  // 'icon_color' or icon' or 'color'
+  }
   
   // ----- Create a default centrale objetc (if not exists)
   centralepilote::cpCentraleCreateDefault();
   
-  // ----- Créer le programme par défaut, l'ajouter dans la liste
-  //centralepilote::cpProgCreateDefault();
-
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
@@ -55,11 +54,98 @@ function centralepilote_update() {
   else if (CP_VERSION == '0.3') {
     if ($v_version != '0.3') centralepilote_update_v_0_3($v_version);
   }
+  else if (CP_VERSION == '0.4') {
+    if ($v_version != '0.4') centralepilote_update_v_0_4($v_version);
+  }
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
+}
+
+
+function centralepilote_update_v_0_4($v_from_version='') {
+  if ($v_from_version == '0.2') {
+    // ----- First upgrade to 0.3
+    centralepilote_update_v_0_3($v_version);
+  }
+  
+  // ----- Get centrale
+  $v_centrale = centralepilote::cpCentraleGet();
+  if ($v_centrale === null) {
+    centralepilotelog::log('debug', "Missing default Centrale object. Abort update.");
+    return;
+  }
+  
+  // ----- Add icons pour Normal et Delestage ds cmd de Central
+  $v_cmd = $v_centrale->getCmd(null, 'normal');
+  if (is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing icon to cmd 'normal' to Centrale equipement.");
+    $v_cmd->setDisplay('icon', '<i class="icon kiko-sun"></i>');
+    $v_cmd->setDisplay('showIconAndNamedashboard', "1");          
+  }
+  $v_cmd = $v_centrale->getCmd(null, 'delestage');
+  if (is_object($v_cmd)) {
+    centralepilotelog::log('debug', "Add missing icon to cmd 'delestage' to Centrale equipement.");
+    $v_cmd->setDisplay('icon', '<i class="'.centralepilote::cpModeGetIconClass('off').'"></i>');
+    $v_cmd->setDisplay('showIconAndNamedashboard', "1");          
+  }
+
+  // ----- Look for each equip
+  $eqLogics = eqLogic::byType('centralepilote');
+  foreach ($eqLogics as $v_eq) {
+    $v_flag_save = false;
+    
+    if (!$v_eq->cpIsType(array('radiateur','zone'))) {
+      continue;
+    }
+    
+    // ----- Ajout de la conf bypass_type en fonction de la valeur de bypass_mode
+    if ($v_eq->getConfiguration('bypass_type', '') == '') {
+      centralepilotelog::log('debug', "Add missing config 'bypass_type' to equipement '".$v_eq->getName()."'.");
+      $v_bypass_mode = $v_eq->getConfiguration('bypass_mode', '');
+      if (($v_bypass_mode == 'no') || ($v_bypass_mode == '')) { // 'no', 'delestage', 'eco', 'horsgel'
+        $v_eq->setConfiguration('bypass_type', 'no');
+        $v_eq->setConfiguration('bypass_mode', 'no');
+      }
+      else {
+        $v_eq->setConfiguration('bypass_type', 'delestage');
+      }
+      $v_flag_save = true;
+    }
+    
+    // ----- Ajout de la configuration trigger_list mais pas la peine de l'initialisée cela se fera tout seul
+    if ($v_eq->getConfiguration('trigger_list', '') == '') {
+      $v_eq->setConfiguration('trigger_list', array());
+      $v_flag_save = true;
+    }
+    
+    if ($v_flag_save) {
+      $v_eq->save();
+    }
+    
+    // ----- Look to add cmd
+    $v_cmd = $v_eq->getCmd(null, 'confort_1');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'confort_1'");
+      $v_eq->cpCmdCreate('confort_1', ['name'=>'Confort -1', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>2, 'icon'=>centralepilote::cpModeGetIconClass('confort_1')]);
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'confort_2');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'confort_2'");
+      $v_eq->cpCmdCreate('confort_2', ['name'=>'Confort -2', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>3, 'icon'=>centralepilote::cpModeGetIconClass('confort_2')]);
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'trigger');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'trigger'");
+      $v_eq->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>13, 'icon'=>'icon divers-circular114']);
+    }
+    
+  }  
+
 }
 
 
@@ -201,3 +287,5 @@ function centralepilote_remove() {
 }
 
 ?>
+
+

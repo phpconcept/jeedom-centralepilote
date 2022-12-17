@@ -40,6 +40,7 @@ function addCmdToTable(_cmd) {
     if (is_numeric(_cmd.id)) {
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
         tr += '<a class="btn btn-default btn-xs cmdAction" data-action="test"><i class="fa fa-rss"></i> {{Tester}}</a>';
+        tr += '<span class="cmdAttr" data-l1key="htmlstate"></span>';
     }
     tr += '<i class="fa fa-minus-circle pull-right cmdAction cursor" data-action="remove"></i>';
     tr += '</td>';
@@ -61,48 +62,6 @@ var refresh_timeout;
 function refreshDeviceList() {
   $('#device_list').load('index.php?v=d&plugin=centralepilote&modal=modal.device_list');
 }
-
-function startRefreshDeviceList_DEPRECATED() {
-  $('#inclusion_message_container').show();
-  document.getElementById("inclusion_message_count").innerHTML =   "0";
-
-  refresh_timeout = setInterval(refreshDeviceCount, 3000);
-}
-
-function refreshDeviceCount_DEPRECATED() {
-
-  $.ajax({
-    type: "POST",
-    url: "plugins/centralepilote/core/ajax/centralepilote.ajax.php",
-    data: {
-      action: "getIncludedDeviceCount",
-      state: 'tbd'
-    },
-    dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
-    success: function (data) {
-      if (data.state != 'ok') {
-        $('#div_alert').showAlert({message: data.result, level: 'danger'});
-        return;
-      }
-      document.getElementById("inclusion_message_count").innerHTML = data.result.count;
-    }
-  });
-
-
-  //$('#device_list').load('index.php?v=d&plugin=centralepilote&modal=modal.device_list');
-  //$('#inclusion_message_container').append('.');
-  //document.getElementById("inclusion_message_count").innerHTML =   "1";
-}
-
-function stopRefreshDeviceList_DEPRECATED() {
-  clearInterval(refresh_timeout);
-  $('#device_list').load('index.php?v=d&plugin=centralepilote&modal=modal.device_list');
-  $('#inclusion_message_container').hide();
-}
-
 
 /*
  * Display programmation modal
@@ -332,20 +291,6 @@ function cp_radiateur_display_init() {
   ($('.eqLogicAttr[data-l1key=configuration][data-l2key='+v_mode+']').value()==1 ? $('#cp_disp_'+v_mode+'').show() : $('#cp_disp_'+v_mode+'').hide()); 
   ($('.eqLogicAttr[data-l1key=configuration][data-l2key='+v_mode+']').value()==1 ? $('#cp_disp_no'+v_mode+'').hide() : $('#cp_disp_no'+v_mode+'').show()); 
   
-  /*
-  // ----- Remove all other Attr
-  $('.cp_attr_zone').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  // ----- Remove all other Attr
-  $('.cp_attr_centrale').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  */
 }
 
 /*
@@ -359,20 +304,6 @@ function cp_zone_display_init() {
   $('.cp_panel_radiateur_zone').show();
   $('.cp_panel_centrale').hide();
   
-  /*
-  // ----- Remove all other Attr
-  $('.cp_attr_radiateur').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  // ----- Remove all other Attr
-  $('.cp_attr_centrale').each(function () {
-    if ($(this).hasClass('eqLogicAttr')) {
-      $(this).removeClass('eqLogicAttr').addClass('eqLogicAttrOff');
-    }
-  });
-  */
 }
 
 
@@ -390,8 +321,19 @@ $('.cp_support_mode').off('click').on('click', function () {
   }
   else {
     //alert('mode '+v_mode+' déselectionné');
-    $('#cp_disp_'+v_mode+'').hide();
-    $('#cp_disp_no'+v_mode+'').show();
+    // ----- Check at list 2 checked
+    var count = 0;
+    $('.cp_support_mode').each(function() { if (this.checked) count++; });
+    if (count < 2) {
+      //alert('Au moins 2 modes selectionnés !!');
+      $('#div_alert').showAlert({message: '{{Au minimum 2 modes doivent être selectionnés}}', level: 'warning'});
+      this.checked = true;
+    }
+    else {
+      $('#cp_disp_'+v_mode+'').hide();
+      $('#cp_disp_no'+v_mode+'').show();
+    }
+    
   }  
 });
 
@@ -495,6 +437,17 @@ function cp_nature_change(event) {
   $('#cp_disp_virtuel').hide();
   
   if (event.target.value == '1_commutateur_c_o') {
+    
+    // ----- Select only ther right ones
+    $('.cp_support_mode').each(function() { 
+      if (($(this).data('l2key') == 'support_confort') || (($(this).data('l2key') == 'support_off'))) {
+        this.checked = true;
+      }
+      else {
+        this.checked = false;
+      }
+    });
+    
     $('#cp_disp_1_commutateur').show();
     $('#img_1_commutateur_c_o').show();
     $('#img_1_commutateur_c_h').hide();
@@ -502,12 +455,33 @@ function cp_nature_change(event) {
   }
   
   else if (event.target.value == '1_commutateur_c_h') {
+    // ----- Select only ther right ones
+    $('.cp_support_mode').each(function() { 
+      if (($(this).data('l2key') == 'support_confort') || (($(this).data('l2key') == 'support_horsgel'))) {
+        this.checked = true;
+      }
+      else {
+        this.checked = false;
+      }
+    });
+
     $('#cp_disp_1_commutateur').show();
     $('#img_1_commutateur_c_h').show();
     $('#img_1_commutateur_c_o').hide();
   }
   
   else if (event.target.value == '2_commutateur') {
+    // ----- Select only ther right ones
+    $('.cp_support_mode').each(function() { 
+      if (    ($(this).data('l2key') == 'support_confort') || (($(this).data('l2key') == 'support_eco'))
+           || (($(this).data('l2key') == 'support_horsgel')) || (($(this).data('l2key') == 'support_off'))) {
+        this.checked = true;
+      }
+      else {
+        this.checked = false;
+      }
+    });
+
     $('#cp_disp_2_commutateur').show();
   }
   

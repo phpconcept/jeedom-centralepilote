@@ -13,7 +13,7 @@ En attendant une description dans cette page, vous pouvez aller voir : https://f
 Lors de la création d'un équipement de type "Radiateur", il va falloir indiquer comment est réalisé la fonction de fil-pilote pour ce radiateur. Autrement dit quels contacteurs sont utilisés pour envoyer les ordres fil-pilote au radiateur.
 Le plugin offre actuellement 4 possibilités. Les 3 premières sont à base de contacteurs simples on/off, la 4ème est à base d'objets virtuels, et permet (normalement) de couvrir tous les autres cas d'objets connectés permettant d'envoyer une commande fil-pilote sans être des contacteurs simples.
 
-Un schéma permet de bien expliciter comment est réalisé la fonction de fil pilote, et ainsi de simplifier la chose.
+Un schéma permet de bien expliciter comment est réalisé la fonction de fil pilote, et ainsi simplifier la chose.
 
 - Constitution du fil-pilote par deux commutateurs
 
@@ -43,7 +43,7 @@ Et vous allez aussi indiquer comment récupérer l'état des équipements connectés 
 Exemple pour le mode Confort :
 ![Programmation](docs/images/config_radiateur_4.png)
 
-Explications : lorsque vous allez commander au radiateur de passer en mode "Confort", le plugin va automatiquement exécuter les commandes "Off" sur l'équipement "ContacteurA" et l'équipement "ContacteurB". Et de même lorsque vous allez demander à voir l'état du radiateur, le plugin va calculer celui-ci en lisant l'information "Etat" des deux contacteurs.
+Explications de l'exemple : lorsque vous allez commander au radiateur de passer en mode "Confort", le plugin va automatiquement exécuter les commandes "Off" sur l'équipement "ContacteurA" et l'équipement "ContacteurB". Et de même lorsque vous allez demander à voir l'état du radiateur, le plugin va calculer celui-ci en lisant l'information "Etat" des deux contacteurs.
 
 ### Créer une Zone "Fil-Pilote"
 
@@ -51,6 +51,92 @@ Une "Zone" est simplement un regroupement de plusieurs radiateurs que vous voule
 Comme un radiateur, vous pouvez décider quelles commandes sont supportées ou non. Si vous choisissez un mode non supporté par l'un des radiateur de la zone, alors celui-ci utilisera le mode alternatif que vous avez configuré ou celui par défaut.
 
 Une fois la zone créée, c'est au niveau des radiateurs que vous allez indiquer s'ils sont dans une zone ou non. Si le radiateur est dans une zone, il ne peut alors plus être commandé directement. 
+
+### Affichage d'un radiateur ou d'une zone
+
+Par défaut le plugin utilise des widget customizés, mais une option globale du plugin permet de repasser en plugin standard.
+
+#### Description générale du Widget Custom
+
+![Widget custom](docs/images/radiateur_show_3.png) ![Widget custom](docs/images/radiateur_show_4.png)
+
+La première ligne contient les boutons de commandes des modes, avec comme dernier bouton 'auto'. Le bouton du mode actif est en vert.
+
+Le bouton 'auto' permet de mettre le radiateur en mode de programmation automatique. Lorsque le radiateur est en mode 'auto' le bouton est en bleu. Pour sortir du mode 'auto' il faut simplement choisir l'un des autres modes manuels (Confort, Eco, ...).
+
+La seconde partie contient :
+- dans une première colonne les boutons de configurations spécifiques :
+  - ![selection de la programmation](docs/images/bouton_trigger.png) : Configuration du déclenchement programmé. Il est en bleu si un mode déclenchement a été programmé.
+  - ![selection de la programmation](docs/images/bouton_fenetre.png) : Configuration du mode "fenêtre ouvert", qui permet de mettre le radiateur en mode "bypass" le temps de l'ouverture, puis de revenir à son mode d'origine.
+  - ![selection de la programmation](docs/images/bouton_programme.png) : Configuration du programme utilisé lorsque le radiateur est en mode 'auto'
+- dans la colonne du milieu, un pictogramme illustant le mode actif, ainsi qu'un rappel du programme courant si le radiateur est en mode 'auto'
+- dans le colonne de droite des informations complémentaires, comme le mode actuel du radiateur, la température cible (si elle est connue), la température mesurée (si une mesure de température a été associée au radiateur).
+ 
+#### Sélection du programme automatique
+
+En utilisant le bouton en bas à gauche ![selection de la programmation](docs/images/bouton_programme.png), une fenêtre additionnelle aparait et permet de configurer le programme associé au radiateur.
+
+![Widget custom](docs/images/radiateur_show_select_prog.png) ![Widget custom](docs/images/radiateur_show_select_prog_2.png)
+
+#### Création, suppression et visualisation des déclenchements unitaires programmés
+
+En utilisant le bouton en haut à gauche ![configuration trigger](docs/images/bouton_trigger.png), vous allez pouvoir créer des déclenchements unitaires programmés. Lorsqu'un déclencheur existe, le bouton devient bleu.
+
+![Configuration trigger](docs/images/radiateur_show_trigger_1.png) ![Configuration trigger](docs/images/radiateur_show_trigger_2.png)
+
+Un click sur le bouton bleu, permet de visualiser les programmations prévues, de les supprimer, ou d'en ajouter de nouvelles
+
+![Configuration trigger](docs/images/radiateur_show_trigger_3.png)
+
+Notez que les déclenchements ne sont pas persistant (ou récurrent), ils sont automatiquement supprimés une fois la date passée.
+
+#### Mode fenêtre ouverte
+
+Ce mode n'est pas encore disponible, bien que le bouton soit présent ...
+
+#### Affichage en mode "Délestage"
+
+Le mode "délestage" est une fonction globale, configurable au niveau de l'objet "Centrale Fil-Pilote", et qui met l'ensemble de toute l'installation dans un mode forcé de type "Off", "Eco" ou Hors-Gel".
+
+![Delestage](docs/images/radiateur_show_delestage.png)
+
+Lorsque l'on sort du mode "délestage", les radiateurs reprennent leur mode précédent. Si des déclenchements étaient programmés, les déclenchements programmés sont tous joués instantanement afin que le radiateur se retrouve dans l'état attendu à l'instant donné.
+
+#### Affichage d'une zone
+
+Un widget de zone se comporte de façon similaire à un radiateur.
+
+![Affichage zone](docs/images/zone_show_1.png)
+
+Les radiateurs associés à une zone, ne sont plus pilotables individuellement, ils affichent simplement leur état. 
+
+![Affichage zone](docs/images/zone_show_2.png)
+ 
+Il est possible de leur retirer leur visibilité, dans la configuration standard de l'objet, pour ne pas surcharger le panel d'une pièce.
+
+Il est fortement recommandé de mettre dans une zone des radiateurs de même "capacité" (ayant les mêmes modes). Cependant si un radiateur n'a pas le bon mode qu'impose la zone, il utilisera son mode alternatif, tel que configuré dans les propriétés de l'objet.
+
+Exemple d'un radiateur ne supportant pas le mode "Eco" et pour lequel le mode "Hors-Gel" a été configuré comme mode alternatif :
+
+![Affichage zone](docs/images/zone_show_3.png)
+
+#### Widget Standard
+
+Le widget standard est bien plus basique, mais il contient toutes les informations nécessaires. 
+
+Notez cependant qu'il ne permet pas de configurer le mode de déclenchement unitaire.
+
+Radiateur en mode manuel (Confort, Eco, etc... ) :
+
+![Programmation](docs/images/radiateur_show_1.png)
+
+Radiateur en mode programmé :
+
+![Programmation](docs/images/radiateur_show_2.png)
+
+Notez que l'affichage des informations de programmation est en deux parties : 
+- L'information "Programme" qui indique quel est le programme actif.
+- Le menu de sélection "Programme Select" qui permet de changer le programme actif. Il présente par défaut le texte "Aucun" qui ne peut pas être modifié (limitation du widget standard).
 
 ### Configurations des programmations horaires
 
@@ -71,40 +157,50 @@ Configuration des plages horaires :
 
 ### Utilisation des plages horaires
 
-La configuration d'un radiateur ou d'une zone pour qu'elle utilise une plage horaire ne se fait pas dans la configuration de l'équipement, mais en utilisant des commandes. Cela permet à une personne néofite de facilement passer un radiateur d'un mode manuel à un mode auto. Cela permet aussi à d'autres équipements ou scénarii de changer le mode de pilotage des radiateurs.
+La configuration d'un radiateur ou d'une zone pour qu'elle utilise une plage de programmation horaire ne se fait pas dans la configuration de l'équipement, mais en utilisant des commandes. Cela permet à une personne néofite de facilement passer un radiateur d'un mode manuel à un mode auto. Cela permet aussi à d'autres équipements ou scénarii de changer le mode de pilotage des radiateurs.
 
-Une fois le radiateur (ou la zone) mis en mode "Auto", la selection du programme se fait par le menu déroulant "Programme Select". Le fonctionnement actuel du core jeedom, fait que la liste commence par un choix "Aucun" (qui n'a aucun sens :-) ). Choisisez le bon programme et celui-ci s'affichera dans "Programme".
+Une fois le radiateur (ou la zone) mis en mode "Auto", la selection du programme se fait depuis le widget du radiateur. Voir ci-dessus les différentes possibilités offertes par le widget.
 
-Radiateur en mode manuel (Confort, Eco, etc... ) :
 
-![Programmation](docs/images/radiateur_show_1.png)
-
-Radiateur en mode programmé :
-
-![Programmation](docs/images/radiateur_show_2.png)
-
-### Objet "Centrale"
+### Objet "Centrale Fil-Pilote"
 
 Cet objet unique permet des actions globales sur les radiateurs. C'est lui aussi qui mémorise les différentes programmations (même si celles-ci sont accessibles par un bouton dédié).
 
 La centrale permet en particulier de réaliser une fonction de délestage (ou bypass - contournement), en imposant un mode à tous les radiateurs d'un coup et en les figeant dans ce mode jusqu'au retour à la normal.
 Le délestage se fait par des commandes 'delestage', 'horsgel' et 'eco'. Pour sortir de ce mode, une commande 'normal' est à utiliser.
 
-Le premier cas d'usage est celui du délestage à proprement parler. Il permet de couper tous les radiateurs et donc de réaliser un délestage sur les chauffages. Il peut être utilisé par les scénarii et de ce fait être couplé à EcoWatt.
-Le second cas d'usage est celui du départ en congés (ou pour une longue absence), le mode 'horsgel' permet de mettre toute la maison dans ce mode.
-Le troisième cas d'usage est celui d'un départ moins long de la maison (journée ?) et permet de mettre celle-ci d'un coup en mode 'eco'.
+Cas d'usages :
+- Le premier cas d'usage est celui du délestage à proprement parler. Il permet de couper tous les radiateurs et donc de réaliser un délestage sur les chauffages. Il peut être utilisé par les scénarii et de ce fait être couplé à EcoWatt.
+- Le second cas d'usage est celui du départ en congés (ou pour une longue absence), le mode 'horsgel' permet de mettre toute la maison dans ce mode.
+- Le troisième cas d'usage est celui d'un départ moins long de la maison (journée ?) et permet de mettre celle-ci d'un coup en mode 'eco'.
 
-Centrale en mode "normal" :
+Widget de l'objet "Central Fil-Pilote" :
+
 ![Centrale](docs/images/centrale_show_1.png)
 
-Centrale en mode "Délestage":
-![Centrale](docs/images/centrale_show_2.png)
+Il s'agit d'un widgeet standard, qui devrait évoluer dans le temps vers un widget custom apportant plus d'information sur l'état global de l'installation.
+
+Notez que la sortie d'un mode "Délestage" (mode Off), vers un mode "Normal" peut-être assez violent pour votre installation électrique et potentiellement faire sauter celle-ci.
+En effet si tous les radiateurs se rallument en même temps ils peuvent solliciter votre compteur au delà des KVA qu'il peut supporter.
+Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 
 ---
 ## Aspects Techniques
 
 ### Change Logs
+
+Release v0.4 (beta) :
+- Nouveautés :
+  - Ajout d'un widget "custom" pour les radiateurs et les zones.
+  - Possibilité de choisir le widget custom ou le widget système par configuration globale
+  - Ajout d'une notion de déclenchement (trigger) par radiateur/zone.
+  - Ajout de la gestion des modes "confort -1" et "confort -2" qui n'étaient pas correctement pris en compte.
+  
+- Bug corrections :
+  - Lors de la création initiale, l'état de l'équipement "centrale" n'est pas correctement affiché.
+  - Ajout du contrôle que au minimum 2 modes sont sélectionnés
+  - Lors du changement de la programmation sur un horaire en cours, la mise à jour est maintenant prise en compte immédiatement et au prochain 'clock-tick'
 
 Release v0.3 (beta) :
 - Ajout de la fonction de délestage (bypass) au niveau de l'objet "Centrale". Cela permet d'envoyer un ordre centralisé obligatoire à tous les radiateurs (Off, Hors-Gel ou Eco). Les radiateurs resteront dans ce mode jusqu'à l'odre de retour à la normal. Ils reprendront alors le mode de pilotage dans lequel ils étaient.
@@ -122,15 +218,16 @@ Release v0.1 (beta) :
 
 
 
-### Problèmes connus
+### Questions Fréquentes (FAQ) et Problèmes connus
 
-- Les commmandes "Confort -1" et "Confort -2" ne sont pas encore complètement gérées.
 - Lorsqu'un contacteur est changé directement, sans passer par l'équipement "radiateur fil-pilote", l'état de ce dernier n'est pas automatiquement mis à jour.
-- Lors de création d'un radiateur en choisissant les 3 configurations à base de contacteurs, les modes affichés dans la page de configuration ne sont pas instantanément mis à jour sur la page. Ils le sont apès la sauvegarde du radiateur.
 - Les commandes avec des options (select) ne sont pas encore bien gérées pour les retours d'état des contacteurs.
 - Il ne faut surtout pas détruire ou désactiver l'objet "Centrale". Le PlugIn essaie de l'empêcher, mais tout n'est pas encore contrôlé.
-- Il faut laisser au moins deux modes par radiateur (pour l'instant le plugIn ne vérifie pas ...)
-
+- L'affichage de la température actuelle dans le widget n'est pas mis à jour automatiquement mais uniquement lors d'un changement d'état
+- La fonction de déclenchement n'est pas possible actuellement avec le widget standard.
+- Quand le mode bypass est déclenché, il ne s’applique que sur les radiateurs/zones actives. Si un radiateur/zone devient actif après le déclenchement du bypass, le bypass sera ignoré.
+- Lorsqu'une page ou un widget est redimensionné par l'utilisateur, les widget en mode custom (mode par défaut) ne se rafraichissent pas bien lors de la sortie du mode redimensionnement. Recharger simplement la page pour résoudre le problème.
+- Dans le widget custom (mode par defaut) le bouton "fenêtre ouverte" ne fait rien pour l'instant (en beta v0.4).
 
 ### Aspirations & Idées & Evolutions
 
@@ -138,11 +235,8 @@ Une petite liste d'idées ou de fonctions que l'on pourrait rajouter dans Central
 
 - Détection automatique de fenêtre ouverte
 - Améliorer la précision horaire : ajouter une programmation au 1/4 d'heure
-- Créer des widgets plus "jolis" et intuitifs.
-- Ajouter une fonction de déclenchement (passage à un mode à heure fixe) avec éventuellement un retour à un mode donné au bout d'un certain temps.
 - Ajouter le cas d'un radiateur ne supportant pas le fil-pilote (mode on/off = confort/off).
 - Ajouter un nom court aux programmations
-- Bouton "Boost" : cas d'usage lancer le mode "Confort" dans une salle de bain, juste pendant 1h ou 2h et revenir à l'état normal automatiquement.
 - Utiliser les informations (optionnelles) de température de la pièce et de la puissance du radiateur pour proposer des analyses ou des audits.
 
 
