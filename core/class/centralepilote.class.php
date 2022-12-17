@@ -2222,8 +2222,20 @@ class centralepilote extends eqLogic {
       } 
       $v_cmd_tmp->setConfiguration('listValue', $p_value_list_str);
       
-      // ----- Refresh list in widget
-      $this->refreshWidget();    
+      // ----- Trick to update the widgets of all radiateurs ...
+      // For standard widget change of listValue is not enough to clean the cache of the widget
+      // The trick is to swap the visibility to trigger a cache cleaning
+      if (config::byKey('standard_widget', 'centralepilote') == 1) {            
+        $v_val = $v_cmd_tmp->getIsVisible();
+        $v_cmd_tmp->setIsVisible(($v_val?0:1));
+        $v_cmd_tmp->save();
+        $v_cmd_tmp->setIsVisible(($v_val?1:0));
+        $v_cmd_tmp->save();
+      }
+      else {
+        // ----- Refresh list in widget
+        $this->refreshWidget();    
+      }                  
     }
     /* -------------------------------------------------------------------------*/
 

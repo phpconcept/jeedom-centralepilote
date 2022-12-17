@@ -143,6 +143,7 @@ Release v0.1 (beta) :
 - Il ne faut surtout pas détruire ou désactiver l'objet "Centrale". Le PlugIn essaie de l'empêcher, mais tout n'est pas encore contrôlé.
 - Il faut laisser au moins deux modes par radiateur (pour l'instant le plugIn ne vérifie pas ...)
 - L'affichage de la température actuelle dans le widget n'est pas mis à jour automatiquement mais uniquement lors d'un changement d'état
+- La fonction de déclenchement n'est pas possible actuellement avec le widget standard.
 
 ### Aspirations & Idées & Evolutions
 
