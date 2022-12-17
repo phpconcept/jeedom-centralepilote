@@ -68,7 +68,7 @@ function centralepilote_update() {
 function centralepilote_update_v_0_4($v_from_version='') {
   if ($v_from_version == '0.2') {
     // ----- First upgrade to 0.3
-    $this->centralepilote_update_v_0_3($v_version);
+    centralepilote_update_v_0_3($v_version);
   }
   
   // ----- Get centrale
@@ -122,7 +122,7 @@ function centralepilote_update_v_0_4($v_from_version='') {
     }
     
     if ($v_flag_save) {
-      $this->save();
+      $v_eq->save();
     }
     
     // ----- Look to add cmd
