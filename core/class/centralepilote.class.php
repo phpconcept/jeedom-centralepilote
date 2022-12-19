@@ -1583,11 +1583,13 @@ class centralepilote extends eqLogic {
       }
       
       if ($this->cpIsType('radiateur')) {
+      //$_version = 'mobile';
         if ($_version == 'dashboard') {
           return $this->toHtml_radiateur($_version);
         }
         else if ($_version == 'mobile') {
-          return $this->toHtml_mobile_radiateur($_version);
+//          return $this->toHtml_mobile_radiateur($_version);
+          return $this->toHtml_radiateur($_version);
         }
         else {
           return parent::toHtml($_version);
@@ -1976,7 +1978,9 @@ class centralepilote extends eqLogic {
       $replace['#icon_button_validate#'] = 'fas fa-check';    
       $replace['#icon_button_cancel#'] = 'fas fa-reply';    
       $replace['#icon_button_add#'] = 'fas fa-plus-circle';    
-         
+    
+      // TBC : trick je ne sais pas pourquoi sinon j'ai 2 fois le nom dans le titre
+      //$replace['#name_display#'] = '';    
       
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
