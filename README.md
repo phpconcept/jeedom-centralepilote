@@ -190,6 +190,10 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v0.5 (beta) :
+- Bug corrections :
+  - Aucun affichage de widget custom sur mobile
+
 Release v0.4 (beta) :
 - Nouveautés :
   - Ajout d'un widget "custom" pour les radiateurs et les zones.

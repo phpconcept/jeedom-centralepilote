@@ -21,7 +21,7 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) . '/../../../../plugins/centralepilote/core/php/centralepilote.inc.php';
 
   // ----- Current version
-  define('CP_VERSION', '0.4');
+  define('CP_VERSION', '0.5');
   
 
 class centralepilote extends eqLogic {
@@ -1583,7 +1583,16 @@ class centralepilote extends eqLogic {
       }
       
       if ($this->cpIsType('radiateur')) {
-        return $this->toHtml_radiateur($_version);
+        if ($_version == 'dashboard') {
+          return $this->toHtml_radiateur($_version);
+        }
+        else if ($_version == 'mobile') {
+//          return $this->toHtml_mobile_radiateur($_version);
+          return $this->toHtml_radiateur($_version);
+        }
+        else {
+          return parent::toHtml($_version);
+        }
       }
       else if ($this->cpIsType('zone')) {
         //return parent::toHtml($_version);
@@ -1815,6 +1824,163 @@ class centralepilote extends eqLogic {
       $replace['#icon_button_cancel#'] = 'fas fa-reply';    
       $replace['#icon_button_add#'] = 'fas fa-plus-circle';    
          
+      
+      
+      // postToHtml() : fait en fait le remplacement dans template + le cache du widget
+      return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : toHtml_radiateur()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+     // TBC : voir s'il faut garder cela .... pas utilisé
+    public function toHtml_mobile_radiateur($_version = 'mobile') {
+      //centralepilote::log('debug',  "Call toHtml_mobile_radiateur()");
+
+      $replace = $this->preToHtml($_version);
+
+      if (!is_array($replace)) {
+        return $replace;
+      }      
+      $version = jeedom::versionAlias($_version);
+      
+      $v_cmd = $this->getCmd(null, 'pilotage');
+      if (is_object($v_cmd)) {         
+        $v_pilotage_value = $v_cmd->execCmd();
+        $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
+      }
+      
+      $v_cmd = $this->getCmd(null, 'etat');
+      if (is_object($v_cmd)) {         
+        $v_etat_name = $v_cmd->execCmd();
+        $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
+        $replace['#cmd_etat_id#'] = $v_cmd->getId();
+        $replace['#cmd_etat_value#'] = $v_etat;
+        $replace['#cmd_etat_name#'] = $v_etat_name;     
+      }
+      
+      $v_pilotage_current = $this->cpCmdGetValue('pilotage');
+      if ($v_pilotage_current == 'auto') {
+        $replace['#cmd_auto_style#'] = "background-color: #4ABAF2!important; color: white!important;";
+        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #2C941A!important; color: white!important;";
+      }
+      else {
+        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #2C941A!important; color: white!important;";
+      }
+
+      $v_list = centralepilote::cpModeGetList();
+      foreach ($v_list as $v_mode) {
+        $v_cmd = $this->getCmd(null, $v_mode);
+        if (is_object($v_cmd)) {         
+           $replace['#cmd_'.$v_mode.'_id#'] = $v_cmd->getId();
+           $replace['#cmd_'.$v_mode.'_logicalid#'] = $v_mode;
+           $replace['#cmd_'.$v_mode.'_name#'] = centralepilote::cpModeGetName($v_mode);
+           $replace['#cmd_'.$v_mode.'_icon#'] = centralepilote::cpModeGetIconClass($v_mode);
+           $replace['#cmd_'.$v_mode.'_large_icon#'] = centralepilote::cpModeGetLargeIconClass($v_mode);
+           if ($this->cpGetConf('support_'.$v_mode) == 1) {
+             $replace['#cmd_'.$v_mode.'_show#'] = 'show';
+           }
+           else {
+             $replace['#cmd_'.$v_mode.'_show#'] = 'no_show';
+           }
+        }
+        else {
+          // TBC : should not occur ...
+          $replace['#cmd_'.$v_mode.'_show#'] = 'no_show';
+        }
+      }
+      $v_cmd = $this->getCmd(null, 'auto');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_auto_id#'] = $v_cmd->getId();
+         $replace['#cmd_auto_logicalid#'] = 'auto';
+         $replace['#cmd_auto_name#'] = __("Auto", __FILE__);
+         $replace['#cmd_auto_icon#'] = 'far fa-clock';
+      }
+
+      $v_cmd = $this->getCmd(null, 'programme_select');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_programme_select_id#'] = $v_cmd->getId();
+      }
+
+      // ----- Look for triggers
+      $v_cmd = $this->getCmd(null, 'trigger');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_trigger_id#'] = $v_cmd->getId();
+      }
+      if ($this->cpEqHasTrigger() > 0) {
+        $replace['#cmd_trigger_style#'] = "background-color: #4ABAF2!important; color: white!important;";
+        
+        $v_trigger_list = $this->cpGetConf('trigger_list');
+        $v_str = '';
+        foreach ($v_trigger_list as $v_trigger) {
+          if ($v_str != '') $v_str .='|';
+          // TBC
+          $it = explode('-', $v_trigger['time']);
+          $v_time_formatted = $it[3].'h'.$it[4].' ('.$it[2].'/'.$it[1].'/'.$it[0].')';
+          $v_name = 
+          $v_str .= $v_trigger['type'].','.$v_trigger['time'].','.$v_time_formatted.','.$v_trigger['mode'].','.centralepilote::cpPilotageGetName($v_trigger['mode']);
+        }
+        $replace['#cmd_trigger_list#'] = $v_str;
+      }
+      else {
+        $replace['#cmd_trigger_style#'] = '';
+        $replace['#cmd_trigger_list#'] = "";
+      }
+      
+      // ----- List of programmation
+      $replace['#list_programmation#'] = centralepilote::cpProgValueList();
+      $replace['#programme_id#'] = $this->cpGetConf('programme_id');
+      $replace['#programme_name#'] = centralepilote::cpProgGetName($this->cpGetConf('programme_id'));
+      
+      // ----- Bypass mode
+      $replace['#bypass_type#'] = $this->cpGetConf('bypass_type');
+      $replace['#bypass_mode#'] = $this->cpGetConf('bypass_mode');
+        
+      // ----- Zone mode
+      $replace['#zone_mode#'] = $this->cpRadGetZoneId();
+      $replace['#cmd_zone_name#'] = $this->cpRadGetZoneName();
+        
+      // ----- Temperatures
+      // TBC
+      $replace['#temperature_cible#'] = $this->cpEqGetTemperatureCible();      
+      $replace['#temperature_actuelle#'] = $this->cpEqGetTemperatureActuelle();      
+      
+      // ----- Texte divers
+      $replace['#title_programme#'] = __("Auto", __FILE__);
+      $replace['#title_select_programmation#'] = __("Choisir la programmation", __FILE__);
+      $replace['#title_pilotage_zone#'] = __("Pilotage par Zone", __FILE__);
+      $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      $replace['#title_Retour#'] = __("Retour", __FILE__);
+      $replace['#title_Annuler#'] = __("Annuler", __FILE__);
+      $replace['#title_Valider#'] = __("Valider", __FILE__);
+      $replace['#title_Ajouter#'] = __("Ajouter", __FILE__);
+      $replace['#title_etat#'] = __("Etat", __FILE__);
+      $replace['#title_cible#'] = __("Cible", __FILE__);
+      $replace['#title_actuelle#'] = __("Actuelle", __FILE__);
+      $replace['#title_Mode#'] = __("Mode", __FILE__);
+      $replace['#title_a#'] = __("A", __FILE__);
+      $replace['#title_a_min#'] = __("à", __FILE__);
+      $replace['#title_missing_mode#'] = __("Missing mode", __FILE__);
+      $replace['#title_Choisir#'] = __("Choisir ...", __FILE__);
+      
+      $replace['#width#'] = '320px';
+      $replace['#height#'] = '160px';       
+      $replace['#icon_button_trigger#'] = 'icon divers-circular114';       
+      $replace['#icon_button_window#'] = 'icon jeedom-fenetre-ouverte';       
+      $replace['#icon_button_prog#'] = 'icon divers-calendar2';    
+      $replace['#icon_button_trash#'] = 'far fa-trash-alt';    
+      $replace['#icon_button_validate#'] = 'fas fa-check';    
+      $replace['#icon_button_cancel#'] = 'fas fa-reply';    
+      $replace['#icon_button_add#'] = 'fas fa-plus-circle';    
+    
+      // TBC : trick je ne sais pas pourquoi sinon j'ai 2 fois le nom dans le titre
+      //$replace['#name_display#'] = '';    
       
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
