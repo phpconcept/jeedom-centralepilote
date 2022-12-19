@@ -1583,7 +1583,6 @@ class centralepilote extends eqLogic {
       }
       
       if ($this->cpIsType('radiateur')) {
-      //$_version = 'mobile';
         if ($_version == 'dashboard') {
           return $this->toHtml_radiateur($_version);
         }
@@ -1840,6 +1839,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
+     // TBC : voir s'il faut garder cela .... pas utilisé
     public function toHtml_mobile_radiateur($_version = 'mobile') {
       //centralepilote::log('debug',  "Call toHtml_mobile_radiateur()");
 
