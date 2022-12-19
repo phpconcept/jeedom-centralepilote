@@ -57,6 +57,9 @@ function centralepilote_update() {
   else if (CP_VERSION == '0.4') {
     if ($v_version != '0.4') centralepilote_update_v_0_4($v_version);
   }
+  else if (CP_VERSION == '0.5') {
+    // Nothing to do
+  }
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
