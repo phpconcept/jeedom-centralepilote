@@ -196,6 +196,8 @@ Release v0.6 (beta) :
   
 - Bug corrections :
   - Sur app mobile, le mode déclenchement ne prenait pas les bons horaires pour les créneaux en 15,30 ou 45 minutes.
+  - Sur app mobile, lors de la création d'un déclenchement, tous les modes étaient affichés et non pas seulement les modes supportés par le radiateur.
+  - Sur app mobile, lors de la création d'un déclenchement, affichage par défaut de "Choisir ..." au lieu d'une zone vide.
 
 Release v0.5 (beta) :
 - Bug corrections :
