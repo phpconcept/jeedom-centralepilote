@@ -85,11 +85,11 @@
       <table style="width:100%">
       <tr>
       <td >
-        <select class="cp_trigger_time" style="font-size:12px!important;">
+        <select class="cp_trigger_time" style="font-size:10px!important;">
           <option value="1">1h</option>
-          <option value="2">2h</option>
+          <option value="2">2h</option>          
         </select>
-        <select class="cp_trigger_mode" style="font-size:12px!important;">
+        <select class="cp_trigger_mode" style="font-size:10px!important;">
           <option value="-">#title_Choisir#</option>
           <option value="#cmd_confort_logicalid#" class="cp_mode_button_#cmd_confort_show#">#cmd_confort_name#</option>
           <option value="#cmd_confort_1_logicalid#" class="cp_mode_button_#cmd_confort_1_show#">#cmd_confort_1_name#</option>
@@ -108,8 +108,6 @@
       </td>
       </tr>
       </table>
-
-        <br>
         <span class="cp_trigger_error_msg" style="font-size:12px;color:orange;display:none;"><i>Message</i></span>
         <input type="hidden" class="cp_trigger_time_ref" value="">
       <br>
@@ -171,16 +169,11 @@
         var v_time = trigger[2].split('(');
         v_time = v_time[0];
 
-      v_html += '&nbsp;&nbsp;<a class="cp_trigger_delete" data-id="'+trigger[1]+'" style="font-size:18px;"><i class="#icon_button_trash#" ></i></a>&nbsp;&nbsp;';
-/*
-      v_html += '#title_Mode# ';
-      v_html += '\''+trigger[4]+'\'';
-      v_html += ' #title_a_min# ';
-      v_html += ''+trigger[2]+'';
-*/
-      v_html += ''+v_time+':';
-      v_html += ' \''+trigger[4]+'\'';
-      v_html += '<br>';
+        v_html += '&nbsp;&nbsp;<span class="cp_trigger_delete_txt" data-id="'+trigger[1]+'">';
+        v_html += '<a class="cp_trigger_delete" data-id="'+trigger[1]+'" style="font-size:18px;"><i class="#icon_button_trash#" ></i></a>&nbsp;&nbsp;';
+        v_html += ''+v_time+':';
+        v_html += ' \''+trigger[4]+'\'';
+        v_html += '</span><br>';
       }
 
     }
@@ -271,7 +264,7 @@
       // ----- Display the right list of timing depending of the current time
       const d = new Date();
       let v_hour = d.getHours();
-      var v_html = '';
+      var v_html = '<option value="-">#title_Choisir#</option>';
       var v_hour_count = v_hour;
       var v_mem = 0;
       for (let i = 0; i < 12; i++) {
@@ -290,19 +283,52 @@
         if (v_hour == 24) v_hour = 0;
       }
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').html(v_html);
+      // TBC : sur mobile, ne veut pas selectionner cette heure la ...
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option[value="'+v_mem+'"]').prop('selected', true);
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').css("font-size", "10px");
       
       // ----- Storing reference date without h/m/s
       const v_date = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref').value(v_date.getTime());
-                    
+      
+      // ----- Display only mode supported
+      var v_html = '<option value="-">#title_Choisir#</option>';
+      if ("#cmd_confort_show#" == "show") {
+        v_html += '<option value="#cmd_confort_logicalid#">#cmd_confort_name#</option>';
+      }
+      if ("#cmd_confort_1_show#" == "show") {
+        v_html += '<option value="#cmd_confort_1_logicalid#">#cmd_confort_1_name#</option>';
+      }
+      if ("#cmd_confort_2_show#" == "show") {
+        v_html += '<option value="#cmd_confort_2_logicalid#">#cmd_confort_2_name#</option>';
+      }
+      if ("#cmd_eco_show#" == "show") {
+        v_html += '<option value="#cmd_eco_logicalid#">#cmd_eco_name#</option>';
+      }
+      if ("#cmd_auto_show#" == "show") {
+        v_html += '<option value="#cmd_auto_logicalid#">#cmd_auto_name#</option>';
+      }
+      if ("#cmd_horsgel_show#" == "show") {
+        v_html += '<option value="#cmd_horsgel_logicalid#">#cmd_horsgel_name#</option>';
+      }
+      if ("#cmd_off_show#" == "show") {
+        v_html += '<option value="#cmd_off_logicalid#">#cmd_off_name#</option>';
+      }          
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode ').html(v_html);
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode ').css("font-size", "10px");
     });
     
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_delete").on('click', function () {
         var v_id = $(this).data('id');
         //$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("id :"+v_id);
         
+        // ----- Remove text, will allow for some demay sometimes before widget redisplay
+        //$(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_delete_txt[data-id="+v_id+"]").html('- - - - - - - - - -');
+
+        // ----- Close trigger area        
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
+
         // ----- Trigger command with time in sec
         jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'trigger_delete', id: v_id}});
     });
@@ -313,18 +339,20 @@
     });
     
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_validate").on('click', function () {
+      // ----- Get selected mode
       v_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode option:selected').val();
-      if (v_mode == '-') {
+      
+      // ----- Get hours and min to add
+      v_time = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option:selected').val();      
+
+      // ----- Check selection are done      
+      if ((v_mode == '-') || (v_time == '-')) {
         // ----- missing valid mode escape
         $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_error_msg ').html('#title_missing_mode#');
         $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_error_msg ').show();
                 
         return;
       }
-
-      // ----- Get hours and min to add
-      v_time = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option:selected').val();      
-      v_time_min = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_min option:selected').val();      
       
       // ----- Calculate trigger time (in milli sec)
       const v_now = new Date();
