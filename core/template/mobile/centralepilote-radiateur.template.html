@@ -282,9 +282,9 @@
         else {
           v_html += '<option value="'+(v_hour_count*60)+'">'+v_hour+'h00</option>';
         }
-        v_html += '<option value="'+(v_hour_count*60)+15+'">'+v_hour+'h15</option>';
-        v_html += '<option value="'+(v_hour_count*60)+30+'">'+v_hour+'h30</option>';
-        v_html += '<option value="'+(v_hour_count*60)+45+'">'+v_hour+'h45</option>';
+        v_html += '<option value="'+((v_hour_count*60)+15)+'">'+v_hour+'h15</option>';
+        v_html += '<option value="'+((v_hour_count*60)+30)+'">'+v_hour+'h30</option>';
+        v_html += '<option value="'+((v_hour_count*60)+45)+'">'+v_hour+'h45</option>';
         v_hour_count++;
         v_hour++;
         if (v_hour == 24) v_hour = 0;
