@@ -190,6 +190,14 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v0.6 (beta) :
+- Nouveautés :
+  -
+  
+- Bug corrections :
+  - 
+
+
 Release v0.5 (beta) :
 - Bug corrections :
   - Aucun affichage de widget custom sur mobile
