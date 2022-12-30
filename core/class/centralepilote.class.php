@@ -1583,7 +1583,7 @@ class centralepilote extends eqLogic {
       }
       
       if ($this->cpIsType('radiateur')) {
-      //$_version = 'mobile'; // dev trick
+      $_version = 'mobile'; // dev trick
         if ($_version == 'dashboard') {
           return $this->toHtml_radiateur($_version);
         }

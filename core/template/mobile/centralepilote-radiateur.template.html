@@ -82,23 +82,20 @@
   
   <div class="row cp_area_trigger_add cp_area" style="display:none;">
     <div class="col-sm-12" style="font-size:10px!important;">
+      <br>
       <table style="width:100%">
       <tr>
       <td >
-        <select class="cp_trigger_time" style="font-size:10px!important;">
-          <option value="1">1h</option>
-          <option value="2">2h</option>          
-        </select>
-        <select class="cp_trigger_mode" style="font-size:10px!important;">
-          <option value="-">#title_Choisir#</option>
-          <option value="#cmd_confort_logicalid#" class="cp_mode_button_#cmd_confort_show#">#cmd_confort_name#</option>
-          <option value="#cmd_confort_1_logicalid#" class="cp_mode_button_#cmd_confort_1_show#">#cmd_confort_1_name#</option>
-          <option value="#cmd_confort_2_logicalid#" class="cp_mode_button_#cmd_confort_2_show#">#cmd_confort_2_name#</option>
-          <option value="#cmd_eco_logicalid#" class="cp_mode_button_#cmd_eco_show#">#cmd_eco_name#</option>
-          <option value="#cmd_horsgel_logicalid#" class="cp_mode_button_#cmd_horsgel_show#">#cmd_horsgel_name#</option>
-          <option value="#cmd_off_logicalid#" class="cp_mode_button_#cmd_off_show#">#cmd_off_name#</option>
-          <option value="#cmd_auto_logicalid#" class="cp_mode_button_#cmd_auto_show#">#cmd_auto_name#</option>
-        </select>
+        <div class="cp_trigger_time_div" style="width:100%">
+          <select class="cp_trigger_time">
+            <option value="-">#title_Choisir#</option>          
+          </select>
+        </div>
+        <div class="cp_trigger_mode_div" style="width:100%">
+          <select class="cp_trigger_mode" style="font-size:10px!important;">
+            <option value="-">#title_Choisir#</option>
+          </select>
+        </div>
 
       </td>
       <td style="width:20px;">
@@ -156,7 +153,7 @@
       //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_temperature_actuelle').hide();
     }
 
-    // ----- Update the list of triggers
+    // ----- In trigger Area : Update the list of triggers
     var v_html = '';
     var trigger_list_str = "#cmd_trigger_list#";
     var trigger_list = trigger_list_str.split('|');
@@ -179,23 +176,42 @@
     }
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_list_show').html(v_html);
       
+      
     
-    // ----- Action for buttons
+    /**---------------------------------------------------------------------------
+     * Method : $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on()
+     * Description : Action for command buttons
+     * ---------------------------------------------------------------------------
+     */
     $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on('click', function() {
       jeedom.cmd.execute({id: $(this).data('cmd_id')});
     });
     
-    // ----- Action for prog select button
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select_open").on()
+     * Description : Action to open prog select area
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select_open").on('click', function () {
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_prog_select').show();      
     });
+
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select_close").on()
+     * Description : Action to close prog select area
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select_close").on('click', function () {
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
     
-    // ----- Action for select
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .selectCmd").on()
+     * Description : Action called when a new program is selected
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .selectCmd").on('change', function () {
       jeedom.cmd.execute({id: '#cmd_programme_select_id#', value: {select: $(this).value()}});
       // ----- Change name in prog span
@@ -206,40 +222,13 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
-    
-    
-    // TBC : To be removed !!!!
-    function fct_cp_trigger_add_open_#uid#() {
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_add').show();      
-      
-      // ----- Display the right list of timing depending of the current time
-      const d = new Date();
-      let v_hour = d.getHours();
-      var v_html = '';
-      var v_hour_count = v_hour;
-      for (let i = 0; i < 12; i++) {
-        if (i == 1) {
-          v_html += '<option value="'+v_hour_count+'" selected>'+v_hour+'h</option>';
-        }
-        else {
-          v_html += '<option value="'+v_hour_count+'">'+v_hour+'h</option>';
-        }
-        v_hour_count++;
-        v_hour++;
-        if (v_hour == 24) v_hour = 0;
-      }
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').html(v_html);
-      
-      // ----- Storing reference date without h/m/s
-      const v_date = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref').value(v_date.getTime());
-      
-      
-      
-    }
 
-    // ----- Managed sub-window for trigger action
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open").on()
+     * Description : Open trigger area. On trigger list if list not empty, on
+     * add new trigger if lsit is empty
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open").on('click', function () {
     
       // ----- Look for existing trigger
@@ -249,22 +238,31 @@
       }
       
       else {
-        //fct_cp_trigger_add_open_#uid#();
         $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_add").click();
       }
 
-    });
-    
+    });    
+
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_add").on()
+     * Description :
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_add").on('click', function () {
         //fct_cp_trigger_add_open_#uid#();
         
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_add').show();      
       
+      
+      //var v_obj = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').clone();
+      
       // ----- Display the right list of timing depending of the current time
       const d = new Date();
       let v_hour = d.getHours();
-      var v_html = '<option value="-">#title_Choisir#</option>';
+      var v_html = '<select class="cp_trigger_time" style="color:grey;"><option value="-">#title_Choisir#</option>';
+      //var v_html = '<option value="-">#title_Choisir#</option>';
+//      var v_html = '';
       var v_hour_count = v_hour;
       var v_mem = 0;
       for (let i = 0; i < 12; i++) {
@@ -273,26 +271,36 @@
           v_mem = (v_hour_count*60);
         }
         else {
-          v_html += '<option value="'+(v_hour_count*60)+'">'+v_hour+'h00</option>';
+          v_html += '<option value="'+(v_hour_count*60)+'"  >'+v_hour+'h00</option>';
         }
-        v_html += '<option value="'+((v_hour_count*60)+15)+'">'+v_hour+'h15</option>';
-        v_html += '<option value="'+((v_hour_count*60)+30)+'">'+v_hour+'h30</option>';
-        v_html += '<option value="'+((v_hour_count*60)+45)+'">'+v_hour+'h45</option>';
+        v_html += '<option value="'+((v_hour_count*60)+15)+'" >'+v_hour+'h15</option>';
+        v_html += '<option value="'+((v_hour_count*60)+30)+'" >'+v_hour+'h30</option>';
+        v_html += '<option value="'+((v_hour_count*60)+45)+'" >'+v_hour+'h45</option>';
         v_hour_count++;
         v_hour++;
         if (v_hour == 24) v_hour = 0;
       }
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').html(v_html);
+      v_html += '</select>';      
+      
+      //v_obj.html(v_html);
+      
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_div ').html(v_html);
+      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_div ').append(v_obj);
+      
+      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').remove(".value_item");
+
+      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').append(v_html);
       // TBC : sur mobile, ne veut pas selectionner cette heure la ...
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time option[value="'+v_mem+'"]').prop('selected', true);
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').css("font-size", "10px");
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time ').css("font-size", "16px");
       
       // ----- Storing reference date without h/m/s
       const v_date = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_time_ref').value(v_date.getTime());
       
-      // ----- Display only mode supported
-      var v_html = '<option value="-">#title_Choisir#</option>';
+      // ----- In trigger Area : Display only mode supported
+      //var v_html = '';
+      var v_html = '<select class="cp_trigger_mode" style="color:grey;"><option value="-">#title_Choisir#</option>';
       if ("#cmd_confort_show#" == "show") {
         v_html += '<option value="#cmd_confort_logicalid#">#cmd_confort_name#</option>';
       }
@@ -314,10 +322,17 @@
       if ("#cmd_off_show#" == "show") {
         v_html += '<option value="#cmd_off_logicalid#">#cmd_off_name#</option>';
       }          
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode ').html(v_html);
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode ').css("font-size", "10px");
+      v_html += '</select>';      
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode_div ').html(v_html);
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode ').css("font-size", "16px");
+      
     });
     
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_delete").on()
+     * Description : Delete a trigger
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_delete").on('click', function () {
         var v_id = $(this).data('id');
         //$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("id :"+v_id);
@@ -326,18 +341,29 @@
         //$(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_delete_txt[data-id="+v_id+"]").html('- - - - - - - - - -');
 
         // ----- Close trigger area        
-        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
-        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
+        $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_close").click();
+        //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+        //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
 
         // ----- Trigger command with time in sec
         jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'trigger_delete', id: v_id}});
     });
     
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_close").on()
+     * Description : Close trigger area
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_close").on('click', function () {
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
     
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_validate").on()
+     * Description : Validate new trigger for eq.
+     * ---------------------------------------------------------------------------
+     */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_validate").on('click', function () {
       // ----- Get selected mode
       v_mode = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_mode option:selected').val();
@@ -367,9 +393,13 @@
       jeedom.cmd.execute({id: '#cmd_trigger_id#', value: {trigger_type: 'trigger_time', mode: v_mode, trigger_time:(v_trigger_time/1000)}});
 
       // ----- Close panel
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
+      $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_close").click();
+      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
+      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
+    
+    
+    
     
     //$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("etat value :#cmd_etat_value#");
     
