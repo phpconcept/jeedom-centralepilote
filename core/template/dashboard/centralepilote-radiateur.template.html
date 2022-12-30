@@ -63,7 +63,7 @@
             <br>
             <span style="font-size:12px;">#title_etat#: #cmd_etat_name#</span><br>
             <span class="cp_temperature_cible" style="font-size:12px;">#title_cible#: #temperature_cible#&deg;C</span><br>
-            <span class="cp_temperature_actuelle" style="font-size:12px;">#title_actuelle#: #temperature_actuelle#&deg;C</span>    
+            <span class="cp_temperature_actuelle" style="font-size:12px;">#title_actuelle#: <span class="cp_temperature_actuelle_value">#temperature_actuelle#</span>&deg;C</span>    
           </div>
         </div>
         <div class="row" >
@@ -162,6 +162,17 @@
     if ('#temperature_actuelle#' == '') {
       // ----- Hide target temperature line
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_temperature_actuelle').hide();
+    }
+    else {
+      // ----- Add an event handler to catch temperature change
+      jeedom.cmd.addUpdateFunction('#temperature_actuelle_id#',function(_options) {
+        /*
+        _options {"cmd_id":"3697","value":10,"display_value":10,"unit":"","valueDate":"2022-12-30 19:18:47","collectDate":"2022-12-30 19:18:47","alertLevel":"none"}
+        */
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_temperature_actuelle_value').html(_options.display_value);
+        //alert('changed');
+        //$('#div_alert').showAlert({message: JSON.stringify(_options), level: 'info'});
+      });
     }
 
     // ----- Update the list of triggers
@@ -422,8 +433,8 @@
       // ----- Close panel
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
-    });
-
+    }); 
+ 
   </script>
 
 
