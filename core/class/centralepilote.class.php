@@ -21,7 +21,7 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) . '/../../../../plugins/centralepilote/core/php/centralepilote.inc.php';
 
   // ----- Current version
-  define('CP_VERSION', '0.5');
+  define('CP_VERSION', '0.6');
   
 
 class centralepilote extends eqLogic {
@@ -1583,6 +1583,7 @@ class centralepilote extends eqLogic {
       }
       
       if ($this->cpIsType('radiateur')) {
+      //$_version = 'mobile'; // dev trick
         if ($_version == 'dashboard') {
           return $this->toHtml_radiateur($_version);
         }
@@ -1746,6 +1747,10 @@ class centralepilote extends eqLogic {
          $replace['#cmd_auto_logicalid#'] = 'auto';
          $replace['#cmd_auto_name#'] = __("Auto", __FILE__);
          $replace['#cmd_auto_icon#'] = 'far fa-clock';
+         $replace['#cmd_auto_show#'] = 'show';
+      }
+      else {
+         $replace['#cmd_auto_show#'] = 'no_show';
       }
 
       $v_cmd = $this->getCmd(null, 'programme_select');
@@ -1811,7 +1816,7 @@ class centralepilote extends eqLogic {
       $replace['#title_Mode#'] = __("Mode", __FILE__);
       $replace['#title_a#'] = __("A", __FILE__);
       $replace['#title_a_min#'] = __("à", __FILE__);
-      $replace['#title_missing_mode#'] = __("Missing mode", __FILE__);
+      $replace['#title_missing_mode#'] = __("Faire un choix", __FILE__);
       $replace['#title_Choisir#'] = __("Choisir ...", __FILE__);
       
       $replace['#width#'] = '320px';
@@ -1822,9 +1827,7 @@ class centralepilote extends eqLogic {
       $replace['#icon_button_trash#'] = 'far fa-trash-alt';    
       $replace['#icon_button_validate#'] = 'fas fa-check';    
       $replace['#icon_button_cancel#'] = 'fas fa-reply';    
-      $replace['#icon_button_add#'] = 'fas fa-plus-circle';    
-         
-      
+      $replace['#icon_button_add#'] = 'fas fa-plus-circle';
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
