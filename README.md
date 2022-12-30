@@ -190,6 +190,13 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v0.7 (beta) :
+- Nouveautés :
+  - 
+
+- Bug corrections :
+  - 
+
 Release v0.6 (beta) :
 - Nouveautés :
   - Extension à 24h des créneaux pour la création des déclencheurs.
