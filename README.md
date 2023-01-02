@@ -190,6 +190,9 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v0.8 (beta) :
+- Bug corrections :
+
 Release v0.7 (beta) :
 - Bug corrections :
   - Lorsqu'une température est associée au radiateur, la valeur est maintenant mise à jour dynamiquement sur le widet du radiateur.
