@@ -21,7 +21,7 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) . '/../../../../plugins/centralepilote/core/php/centralepilote.inc.php';
 
   // ----- Current version
-  define('CP_VERSION', '0.6');
+  define('CP_VERSION', '0.7');
   
 
 class centralepilote extends eqLogic {
@@ -1800,6 +1800,7 @@ class centralepilote extends eqLogic {
       // TBC
       $replace['#temperature_cible#'] = $this->cpEqGetTemperatureCible();      
       $replace['#temperature_actuelle#'] = $this->cpEqGetTemperatureActuelle();      
+      $replace['#temperature_actuelle_id#'] = $this->cpEqGetTemperatureActuelleCmdId();
       
       // ----- Texte divers
       $replace['#title_programme#'] = __("Auto", __FILE__);
@@ -3449,6 +3450,32 @@ class centralepilote extends eqLogic {
       //centralepilote::log('debug',  "Value '".$v_value."', rounded : '".$v_value_round."'");
       
       return($v_value_round);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpEqGetTemperatureActuelleCmdId()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpEqGetTemperatureActuelleCmdId() {
+      //centralepilote::log('debug',  "cpEqGetTemperatureActuelle()");
+      
+      $v_virtual_cmd = $this->cpGetConf('temperature');
+      if ($v_virtual_cmd == '') {
+        return('');
+      }
+      //centralepilote::log('debug',  "Virtual temp ".$v_virtual_cmd." ");
+      
+      $v_cmd_id = str_replace('#', '', $v_virtual_cmd);
+      $cmd = cmd::byId($v_cmd_id);
+      if (!is_object($cmd)) {        
+        return('');
+      }
+      
+      return($v_cmd_id);
     }
     /* -------------------------------------------------------------------------*/
 

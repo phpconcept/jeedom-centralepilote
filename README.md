@@ -190,6 +190,10 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v0.7 (beta) :
+- Bug corrections :
+  - Lorsqu'une température est associée au radiateur, la valeur est maintenant mise à jour dynamiquement sur le widet du radiateur.
+
 Release v0.6 (beta) :
 - Nouveautés :
   - Extension à 24h des créneaux pour la création des déclencheurs.
