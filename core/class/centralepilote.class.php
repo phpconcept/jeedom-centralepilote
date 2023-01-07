@@ -249,7 +249,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public static function cpGetProgDisplayMode() {
+    public static function cpGetProgDisplayMode_DEPRECATED() {
       $v_value = config::byKey('prog_display_mode', 'centralepilote');
       $v_result = ($v_value == 'color' ? 'color' : 'icon');
       return $v_result;

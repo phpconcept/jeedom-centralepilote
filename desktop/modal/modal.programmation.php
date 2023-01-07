@@ -158,7 +158,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
                   'dimanche' => __('Dimanche', __FILE__));
 
   // ----- Get display mode
-  $v_display_mode = centralepilote::cpGetProgDisplayMode();
+  //$v_display_mode = centralepilote::cpGetProgDisplayMode();
   
   // Display each day, each hour 
   foreach ($v_days as $v_day => $v_day_name) {
@@ -181,16 +181,19 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
       // TBC
       $v_mode = 'eco';
       
-      if ($v_display_mode == 'color') {
+/*      if ($v_display_mode == 'color') {
         $v_icon = '';
         $v_color = "background-color: ".centralepilote::cpModeGetColor($v_mode).";";
         $v_color_icon = "";
       }
       else {
+      */
         $v_icon = centralepilote::cpModeGetIconClass($v_mode);
         $v_color = '';
         $v_color_icon = "color: ".centralepilote::cpModeGetColor($v_mode).";";
+/*
       }
+      */
 
       echo '<td style="'.$v_color.'"><i id="cp_'.$v_day.'_'.$i.'" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-jour="'.$v_day.'" data-heure="'.$i.'" data-mode="'.$v_mode.'"></i></td>';
     }

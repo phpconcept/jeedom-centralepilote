@@ -24,12 +24,14 @@ function centralepilote_install() {
   log::add('centralepilote', 'info', "Start installation/activation of plugin 'centralepilote' version ".CP_VERSION);
 
   // ----- Default parameters
+  /*
   $v_prog_display_mode = config::byKey('prog_display_mode', 'centralepilote', '');
   if ($v_prog_display_mode == '') {
     config::save('prog_display_mode', 'icon_color', 'centralepilote');  // 'icon_color' or icon' or 'color'
   }
+  */
   
-  // ----- Create a default centrale objetc (if not exists)
+  // ----- Create a default centrale object (if not exists)
   centralepilote::cpCentraleCreateDefault();
   
   // ----- Save current version

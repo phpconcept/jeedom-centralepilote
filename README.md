@@ -192,6 +192,7 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 Release v0.8 (beta) :
 - Bug corrections :
+  - Code optimisation : changement du mode de stockage des programmes dans les configurations jeedom de la centrale.
 
 Release v0.7 (beta) :
 - Bug corrections :

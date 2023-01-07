@@ -29,21 +29,6 @@ if (!isConnect()) {
     <fieldset>
 
         <div class="row form-group">
-            <label class="col-lg-4 control-label">{{Affichage des modes : }}
-            <sup><i class="fa fa-question-circle tooltips" title="{{Choisir comment seront affichés les modes fil-pilote}}"></i></sup>
-            </label>
-            <div class="col-lg-5">
-
-                <select class="configKey form-control" data-l1key="prog_display_mode">
-                  <option value="icon_color">{{Icones et Couleurs}}</option>
-                  <option value="icon">{{Icones}}</option>
-                  <option value="color">{{Couleurs}}</option>
-                </select>
-
-            </div>
-        </div>
-
-        <div class="row form-group">
             <label class="col-lg-4 control-label">{{Widgets par d&eacute;faut : }}</label>
             <div class="col-lg-5">
                 <input type="checkbox" class="configKey form-control" data-l1key="standard_widget">
