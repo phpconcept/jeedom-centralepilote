@@ -77,23 +77,21 @@ class centralepilote extends eqLogic {
 
     /*
      * Fonction exécutée automatiquement toutes les minutes par Jeedom
+	public static function cron() {}
      */
-	public static function cron() {
-    
-    /*
+    public static function cron5() {
+        
       // ----- Recalculate mode for each radiateur
       $v_list = centralepilote::cpRadList(['_isEnable'=>true]);
       foreach ($v_list as $v_radiateur) {
         $v_radiateur->cpRefresh();
       }
-      */
       
 	}
 
 
     /*
      * Fonction exécutée automatiquement toutes les 5,10,15 minutes par Jeedom
-      public static function cron5() {}
       public static function cron10() {}
      */
       public static function cron15() {
@@ -2484,34 +2482,58 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
 	public function cpRefresh() {
+      centralepilote::log('debug',  "cpRefresh() Equipement '".$this->getName()."'.");
+
       // ----- No need for Central for now
       if (!$this->cpIsType(array('radiateur','zone'))) {
         return;
       }
 
+      $v_pilotage = $this->cpGetConf('pilotage');
+      
+      // ----- Quick check the expected status
+      if (jeedom::evaluateExpression($this->getConfiguration('statut_'.$v_pilotage, '')) == 1) {
+        // ----- Everything is ok
+        return;
+      }
+      
+      // ----- Look what is the status of the device
+      $v_real_pilotage = '';
       if (jeedom::evaluateExpression($this->getConfiguration('statut_confort', '')) == 1) {
-        $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort'));
+        //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort'));
+        $v_real_pilotage = 'confort';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_confort_1', '')) == 1) {
-        $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort_1'));
+        //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort_1'));
+        $v_real_pilotage = 'confort_1';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_confort_2', '')) == 1) {
-        $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort_2'));
+        //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort_2'));
+        $v_real_pilotage = 'confort_2';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_eco', '')) == 1) {
-        $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('eco'));
+        //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('eco'));
+        $v_real_pilotage = 'eco';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_horsgel', '')) == 1) {
-        $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('horsgel'));
+        //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('horsgel'));
+        $v_real_pilotage = 'horsgel';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_off', '')) == 1) {
-        $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('off'));
+        //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('off'));
+        $v_real_pilotage = 'off';
       }
       else {
         // ----- Do not change the mode if no valid status
         centralepilotelog::log('debug', "Unable to find the mode from the status evaluation for device '".$this->getName()."'.");
+        return;
       }
-        
+
+      if ($v_pilotage != $v_real_pilotage) {
+        centralepilote::log('warning',  "L'équipement '".$this->getName()."' n'a pas l'état attendu (".$v_pilotage.") par rapport à celui des commutateurs associés (".$v_real_pilotage."). Force l'état attendu.");
+        $this->cpPilotageChangeTo($v_pilotage, true);
+      }
+
 	}
     /* -------------------------------------------------------------------------*/
     
