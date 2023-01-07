@@ -46,22 +46,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     <label class="col-sm-3 control-label" style="margin-left: 20px;">{{Sélectionner une programmation : }}</label>
     <div class="col-sm-7">
       <select id="cp_prog_select" class=" form-control">
-      
-<?php       
-  // This will be filled with javascript
-  if (0) {
-  $v_list = centralepilote::cpProgList();
-  
-                foreach ($v_list as $v_prog ) {
-?>
-      
-          <option value="<?php echo $v_prog["id"]; ?>"><?php $v_prog["name"]; ?></option>
-<?php
-
-                }
-  }  
-?>
-          
+        <option value="0">Filled by javascript</option>
      </select>
     </div>
   </div>

@@ -52,7 +52,7 @@ try {
 	}
 
 	if (init('action') == 'cpProgList') {
-		$v_val = centralepilote::cpProgList();
+		$v_val = centralepilote::cpProgGetList();
 		ajax::success(json_encode($v_val, JSON_FORCE_OBJECT));
 	}
 

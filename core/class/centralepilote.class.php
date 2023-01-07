@@ -847,7 +847,7 @@ class centralepilote extends eqLogic {
       centralepilote::cpProgCreateDefault();      
       
       // ----- Return new list
-      return(centralepilote::cpProgList());
+      return(centralepilote::cpProgGetList());
     }
     /* -------------------------------------------------------------------------*/
 
@@ -917,7 +917,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public static function cpProgList($p_details=false) {    
+    public static function cpProgList_DEPRECATED($p_details=false) {    
       $v_prog_list = centralepilote::cpProgGetList();
       return($v_prog_list);
     }
