@@ -1598,6 +1598,37 @@ class centralepilote extends eqLogic {
       centralepilotelog::log('debug', "postSave() : end");
     }
 
+    public function start() {
+      centralepilotelog::log('info', "Start plugIn");
+      
+      if (centralepilote::cpCentraleGet() === null) {
+        centralepilotelog::log('debug', "First time the plugin is starting.");
+        return;
+      }
+      
+      // ----- Look for clean start
+      if (config::byKey('clean_stop', 'centralepilote') != '') {
+        centralepilotelog::log('debug', "PlugIn was clean stopped at : ".config::byKey('clean_stop', 'centralepilote'));
+
+        // ----- Reset clean stop flag
+        config::save('clean_stop', '', 'centralepilote');
+
+        return;
+      }
+
+      // ----- Not clean
+      centralepilotelog::log('debug', "PlugIn was not clean stopped");
+
+    }
+
+    public function stop() {
+      centralepilotelog::log('info', "Stop plugIn");
+
+      // ----- Set clean stop flag
+     // config::save('clean_stop', date("d-m-Y H:i", 'centralepilote');
+        
+    }
+
     public function preUpdate() {
         
     }
@@ -2485,43 +2516,45 @@ class centralepilote extends eqLogic {
       centralepilote::log('debug',  "cpRefresh() Equipement '".$this->getName()."'.");
 
       // ----- No need for Central for now
-      if (!$this->cpIsType(array('radiateur','zone'))) {
+      if (!$this->cpIsType(array('radiateur'))) {
         return;
       }
-
-      $v_pilotage = $this->cpGetConf('pilotage');
       
+      // ----- Get mode value
+      // Need to take the command value to take all the situations : zone, bypass, alternative, ...
+       $v_mode = $this->cpModeGetFromCmd();
+
       // ----- Quick check the expected status
-      if (jeedom::evaluateExpression($this->getConfiguration('statut_'.$v_pilotage, '')) == 1) {
+      if (jeedom::evaluateExpression($this->getConfiguration('statut_'.$v_mode, '')) == 1) {
         // ----- Everything is ok
         return;
       }
       
       // ----- Look what is the status of the device
-      $v_real_pilotage = '';
+      $v_real_mode = '';
       if (jeedom::evaluateExpression($this->getConfiguration('statut_confort', '')) == 1) {
         //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort'));
-        $v_real_pilotage = 'confort';
+        $v_real_mode = 'confort';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_confort_1', '')) == 1) {
         //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort_1'));
-        $v_real_pilotage = 'confort_1';
+        $v_real_mode = 'confort_1';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_confort_2', '')) == 1) {
         //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('confort_2'));
-        $v_real_pilotage = 'confort_2';
+        $v_real_mode = 'confort_2';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_eco', '')) == 1) {
         //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('eco'));
-        $v_real_pilotage = 'eco';
+        $v_real_mode = 'eco';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_horsgel', '')) == 1) {
         //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('horsgel'));
-        $v_real_pilotage = 'horsgel';
+        $v_real_mode = 'horsgel';
       }
       else if (jeedom::evaluateExpression($this->getConfiguration('statut_off', '')) == 1) {
         //$this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName('off'));
-        $v_real_pilotage = 'off';
+        $v_real_mode = 'off';
       }
       else {
         // ----- Do not change the mode if no valid status
@@ -2529,9 +2562,34 @@ class centralepilote extends eqLogic {
         return;
       }
 
-      if ($v_pilotage != $v_real_pilotage) {
-        centralepilote::log('warning',  "L'équipement '".$this->getName()."' n'a pas l'état attendu (".$v_pilotage.") par rapport à celui des commutateurs associés (".$v_real_pilotage."). Force l'état attendu.");
-        $this->cpPilotageChangeTo($v_pilotage, true);
+      // ----- Get pilotage for radiateur
+      $v_pilotage = $this->cpGetConf('pilotage');
+      
+      // ----- Look for radiateur in zone : pilotage is the value from zone to use
+      if ($this->cpPilotageIsZone()) {
+        // ----- Get zone
+        $v_zone = $this->cpGetConf('zone');
+        if ($v_zone == '') {
+          centralepilote::log('debug', "!! Unexpected empty zone here (".__FILE__.",".__LINE__.")");
+          return;
+        }
+
+        $v_zone_object = eqLogic::byId($v_zone);
+        if (!is_object($v_zone_object)) {
+          centralepilote::log('debug', "!! Unexpected missing zone object '".$v_zone."' here (".__FILE__.",".__LINE__.")");
+          return;
+        }
+        
+        $v_pilotage = $v_zone_object->cpGetConf('pilotage');
+      }
+      
+      centralepilote::log('warning',  "L'équipement '".$this->getName()."' n'a pas l'état attendu (".$v_mode.") par rapport à celui des commutateurs associés (".$v_real_mode."). Force l'état attendu.");
+
+      if ($v_pilotage == 'auto') {
+        $this->cpPilotageChangeTo('auto', true);
+      }
+      else {
+        $this->cpPilotageChangeTo($v_mode, true);
       }
 
 	}
@@ -2827,11 +2885,11 @@ class centralepilote extends eqLogic {
         
         // ----- Force display of current programme
         $v_prog_id = $this->cpGetConf('programme_id');
-        $this->cpPilotageProgSelect($v_prog_id);
+        $this->cpPilotageProgSelect($v_prog_id, $p_force);
                 
         // ----- Call the clock tick to get the good mode depending on programme and clock
         // TBC : already done in previous
-        //$this->cpRadClockTick();
+        //$this->cpRadClockTick('','','',$p_force);
       }
       
       // ----- Look for pilotage mode 'confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off'
@@ -3197,7 +3255,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpPilotageProgSelect($p_selected_id=-1) {
+    public function cpPilotageProgSelect($p_selected_id=-1, $p_force=false) {
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
         centralepilote::log('debug', "This method cpPilotageProgSelect() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
@@ -3228,7 +3286,7 @@ class centralepilote extends eqLogic {
         $this->checkAndUpdateCmd('programme', $v_prog['name']);
         
         // ----- Force a 'tick' to update radiateur status (will be ignored if not in auto mode)
-        $this->cpEqClockTick();
+        $this->cpEqClockTick('','','',$p_force);
       }
 
       // ----- No programme with this ID
@@ -3296,7 +3354,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpRadClockTick($p_jour='', $p_heure='', $p_minute='') {
+    public function cpRadClockTick($p_jour='', $p_heure='', $p_minute='', $p_force=false) {
       // ----- Only for 'radiateur' 
       if (!$this->cpIsType('radiateur')) {
         centralepilote::log('debug', "This method cpRadClockTick() should not be used for not radiateur device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
@@ -3309,7 +3367,7 @@ class centralepilote extends eqLogic {
         return;
       }
       
-      $this->cpEqClockTick($p_jour, $p_heure, $p_minute);      
+      $this->cpEqClockTick($p_jour, $p_heure, $p_minute, $p_force);      
     }
     /* -------------------------------------------------------------------------*/
 
@@ -3410,7 +3468,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpZoneClockTick($p_jour, $p_heure, $p_minute='') {
+    public function cpZoneClockTick($p_jour, $p_heure, $p_minute='', $p_force=false) {
       // ----- Only for 'zone' 
       if (!$this->cpIsType('zone')) {
         centralepilote::log('debug', "This method cpZoneClockTick() should not be used for not zone device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
@@ -3423,7 +3481,7 @@ class centralepilote extends eqLogic {
         return;
       }
 
-      $this->cpEqClockTick($p_jour, $p_heure, $p_minute);      
+      $this->cpEqClockTick($p_jour, $p_heure, $p_minute, $p_force);      
     }
     /* -------------------------------------------------------------------------*/
 
@@ -3549,7 +3607,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpEqClockTick($p_jour='', $p_heure='', $p_minute='') {
+    public function cpEqClockTick($p_jour='', $p_heure='', $p_minute='', $p_force=false) {
     
       // ----- Check only radiateur & zone
       if (!$this->cpIsType(array('radiateur','zone'))) {
@@ -3591,7 +3649,7 @@ class centralepilote extends eqLogic {
       centralepilote::log('debug',  "ClockTick mode for '".$this->getName()."' is ".$v_mode);
 
       // ----- Appliquer le mode à l'équipement (fct qui check fenetre ouverte, etc )
-      $this->cpModeChangeTo($v_mode);      
+      $this->cpModeChangeTo($v_mode, $p_force);      
     }
     /* -------------------------------------------------------------------------*/
 
