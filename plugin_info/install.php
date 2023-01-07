@@ -60,6 +60,9 @@ function centralepilote_update() {
   else if (CP_VERSION == '0.5') {
     // Nothing to do
   }
+  else if (CP_VERSION == '0.8') {
+    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
+  }
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
@@ -67,6 +70,28 @@ function centralepilote_update() {
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
 }
 
+
+function centralepilote_update_v_0_8($v_from_version='') {
+  if ($v_from_version == '0.3') {
+    // ----- First upgrade to 0.4
+    centralepilote_update_v_0_4($v_version);
+  }
+    
+  // ----- Get programmation list in old format, and change to array format
+  $v_prog_list_str = centralepilote::cpCentraleGetConfig('prog_list');
+  if (is_string($v_prog_list_str) && ($v_prog_list_str != '')) {
+  
+    // ----- Parse string value
+    try {
+      $v_prog_list = json_decode($v_prog_list_str, true);
+      centralepilote::cpProgSaveList($v_prog_list);
+    }
+    catch (Exception $exc) {
+      centralepilotelog::log('debug', "Update : fail to reformat program list");
+    }
+  }
+  
+}
 
 function centralepilote_update_v_0_4($v_from_version='') {
   if ($v_from_version == '0.2') {
@@ -150,7 +175,6 @@ function centralepilote_update_v_0_4($v_from_version='') {
   }  
 
 }
-
 
 function centralepilote_update_v_0_3($v_from_version='') {
   // TBC
