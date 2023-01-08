@@ -190,6 +190,16 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v0.8 (beta) :
+- Nouveautés :
+  - Suppression de la configuration globale du plugIn "Affichage des modes", qui n'était pas réellement implémenté.
+  - Lors du refresh d'un radiateur, celui-ci va vérifier l'état des commutateurs associés, si l'état n'est pas le même il va être forcé.
+  - Un refresh des radiateurs est fait toutes les 5 minutes par une tache cron.
+  - Mise en place d'un mécanisme de détection d'un arrêt non propre du plugin (genre coupure de courant), et capacité à détecter cet arrêt au redémarrage. C'est important pour les coupures de courant, qui peuvent avoir remis à zéro les états de commutateurs associés aux radiateurs.
+  
+- Bug corrections :
+  - Code optimisation : changement du mode de stockage des programmes dans les configurations jeedom de la centrale.
+
 Release v0.7 (beta) :
 - Bug corrections :
   - Lorsqu'une température est associée au radiateur, la valeur est maintenant mise à jour dynamiquement sur le widet du radiateur.
@@ -240,11 +250,12 @@ Release v0.1 (beta) :
 - Lorsqu'un contacteur est changé directement, sans passer par l'équipement "radiateur fil-pilote", l'état de ce dernier n'est pas automatiquement mis à jour.
 - Les commandes avec des options (select) ne sont pas encore bien gérées pour les retours d'état des contacteurs.
 - Il ne faut surtout pas détruire ou désactiver l'objet "Centrale". Le PlugIn essaie de l'empêcher, mais tout n'est pas encore contrôlé.
-- L'affichage de la température actuelle dans le widget n'est pas mis à jour automatiquement mais uniquement lors d'un changement d'état
-- La fonction de déclenchement n'est pas possible actuellement avec le widget standard.
+- La fonction de déclenchement n'est pas possible avec le widget standard.
 - Quand le mode bypass est déclenché, il ne s’applique que sur les radiateurs/zones actives. Si un radiateur/zone devient actif après le déclenchement du bypass, le bypass sera ignoré.
 - Lorsqu'une page ou un widget est redimensionné par l'utilisateur, les widget en mode custom (mode par défaut) ne se rafraichissent pas bien lors de la sortie du mode redimensionnement. Recharger simplement la page pour résoudre le problème.
-- Dans le widget custom (mode par defaut) le bouton "fenêtre ouverte" ne fait rien pour l'instant (en beta v0.4).
+- Dans le widget custom (mode par defaut) le bouton "fenêtre ouverte" ne fait rien pour l'instant.
+- Lorsqu'un radiateur fait parti d'une zone et que l'on modifie la configuration du mode alternatif correspondant à l'état actuel de la zone, le mode alternatif n'est pas tout de suite pris en compte. Il faut soit le frocer manuellement (en reforçant le mode de la zone), soit attendre le tick d'horloge en mode 'auto'.
+
 
 ### Aspirations & Idées & Evolutions
 
