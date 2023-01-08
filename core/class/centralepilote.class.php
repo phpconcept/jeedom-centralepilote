@@ -1686,7 +1686,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public function toHtml_centrale($_version = 'dashboard') {
-      centralepilote::log('debug',  "Call toHtml_centrale()");
+      //centralepilote::log('debug',  "Call toHtml_centrale()");
 
       $replace = $this->preToHtml($_version);
 
@@ -2736,6 +2736,7 @@ class centralepilote extends eqLogic {
           $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
         }
         
+        centralepilote::log('info',  "Equipement '".$this->getName()."' change mode to '".$p_mode."'");
       }
 
       else if ($this->cpGetType() == 'zone') {
@@ -2755,8 +2756,6 @@ class centralepilote extends eqLogic {
       
       // ----- Update widget
       $this->refreshWidget();
-
-      centralepilote::log('info',  "Equipement '".$this->getName()."' change mode to '".$p_mode."'");
               
     }
     /* -------------------------------------------------------------------------*/
