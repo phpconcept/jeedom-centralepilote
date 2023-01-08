@@ -195,6 +195,7 @@ Release v0.8 (beta) :
   - Suppression de la configuration globale du plugIn "Affichage des modes", qui n'était pas réellement implémenté.
   - Lors du refresh d'un radiateur, celui-ci va vérifier l'état des commutateurs associés, si l'état n'est pas le même il va être forcé.
   - Un refresh des radiateurs est fait toutes les 5 minutes par une tache cron.
+  - Mise en place d'un mécanisme de détection d'un arrêt non propre du plugin (genre coupure de courant), et capacité à détecter cet arrêt au redémarrage. C'est important pour les coupures de courant, qui peuvent avoir remis à zéro les états de commutateurs associés aux radiateurs.
   
 - Bug corrections :
   - Code optimisation : changement du mode de stockage des programmes dans les configurations jeedom de la centrale.
