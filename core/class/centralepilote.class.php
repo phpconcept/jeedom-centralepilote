@@ -384,7 +384,10 @@ class centralepilote extends eqLogic {
         }
       }
       
-      centralepilote::log('debug', "!! Unexpected mode name '".$p_mode_name."' here (".__FILE__.",".__LINE__.")");
+      if ($p_mode_name != '') {
+        centralepilote::log('debug', "!! Unexpected mode name '".$p_mode_name."' here (".__FILE__.",".__LINE__.")");
+      }
+
       $v_result = 'eco';
       return $v_result;
     }
@@ -1599,7 +1602,7 @@ class centralepilote extends eqLogic {
     }
 
     public function start() {
-      centralepilotelog::log('info', "Start plugIn");
+      centralepilotelog::log('info', "Start plugin Centrale Fil-Pilote");
       
       if (centralepilote::cpCentraleGet() === null) {
         centralepilotelog::log('debug', "First time the plugin is starting.");
@@ -1618,19 +1621,23 @@ class centralepilote extends eqLogic {
 
       // ----- Not clean
       centralepilotelog::log('debug', "PlugIn was not clean stopped");
-
+      
+      // ----- Refresh all radiators to ensure default commutateur values are changed to expected one
+      $v_list = centralepilote::cpRadList(['_isEnable'=>true]);
+      foreach ($v_list as $v_radiateur) {
+        $v_radiateur->cpRefresh();
+      }
+      
     }
 
     public function stop() {
-      centralepilotelog::log('info', "Stop plugIn");
+      centralepilotelog::log('info', "Stop plugin Centrale Fil-Pilote");
 
       // ----- Set clean stop flag
-     // config::save('clean_stop', date("d-m-Y H:i", 'centralepilote');
-        
+      config::save('clean_stop', date("d-m-Y H:i"), 'centralepilote');
     }
 
     public function preUpdate() {
-        
     }
 
     public function postUpdate() {
