@@ -190,6 +190,13 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v0.9 (beta) :
+- Nouveautés :
+  - 
+  
+- Bug corrections :
+  - 
+
 Release v0.8 (beta) :
 - Nouveautés :
   - Suppression de la configuration globale du plugIn "Affichage des modes", qui n'était pas réellement implémenté.
