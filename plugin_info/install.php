@@ -65,6 +65,9 @@ function centralepilote_update() {
   else if (CP_VERSION == '0.8') {
     if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
   }
+  else if (CP_VERSION == '1.0') {
+    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
+  }
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
