@@ -1,0 +1,17 @@
+{
+	"id" : "centralepilote",
+	"name" : "Centrale Fil-Pilote",
+    "description": "Le plugIn 'Centrale Fil-Pilote' cr&eacute;&eacute; une centrale de programmation des radiateurs pilotable par fil-pilote. Il offre une programmation visuelle des modes 'Confort', 'Eco', 'Hors-Gel', etc ... par radiateur ou par groupe de radiateurs. Il permet bien s&ucirc;r un pilotage manuel par radiateur et une fonction de d&eacute;lestage global de l'installation. Les fil-pilotes sont r&eacute;alis&eacute;s par des commutateurs standards fournis par les autres plugIn (zigbee, Enocean, WiFi, ...).",        
+	"licence" : "AGPL",
+	"author" : "Vincent",
+	"require" : "4.0",
+    "version": "1.0",
+	"category" : "energy",
+	"hasDependency" : false,
+    "maxDependancyInstallTime" : 10,
+	"hasOwnDeamon" : false,
+	"changelog" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
+	"documentation" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
+	"language" : ["fr_FR","en_US"],
+	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"]
+}
