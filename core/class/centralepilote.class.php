@@ -1873,12 +1873,30 @@ class centralepilote extends eqLogic {
       $replace['#bypass_type#'] = $this->cpGetConf('bypass_type');
       $replace['#bypass_mode#'] = $this->cpGetConf('bypass_mode');
         
+      // ----- Look for open window
+      if ($this->cpGetConf('bypass_type') == 'open_window') {
+        $replace['#cmd_window_style#'] = "background-color: #4ABAF2!important; color: white!important;";
+      }
+      else {
+        $replace['#cmd_window_style#'] = '';     
+      }
+      
+      // ----- Get window swap command id
+      $v_cmd = $this->getCmd(null, 'window_swap');
+      if (is_object($v_cmd)) {         
+        $replace['#cmd_window_swap_id#'] = $v_cmd->getId();
+      }
+      else {
+        // ----- Abnormal case : a window_swap command should exists
+        $replace['#cmd_window_swap_id#'] = '';
+      }
+      
+      
       // ----- Zone mode
       $replace['#zone_mode#'] = $this->cpRadGetZoneId();
       $replace['#cmd_zone_name#'] = $this->cpRadGetZoneName();
         
       // ----- Temperatures
-      // TBC
       $replace['#temperature_cible#'] = $this->cpEqGetTemperatureCible();      
       $replace['#temperature_actuelle#'] = $this->cpEqGetTemperatureActuelle();      
       $replace['#temperature_actuelle_id#'] = $this->cpEqGetTemperatureActuelleCmdId();
@@ -2872,6 +2890,10 @@ class centralepilote extends eqLogic {
       
       // ----- Look if device is in bypass mode
       if (($v_bypass_type = $this->cpGetConf('bypass_type')) == 'delestage') {
+        centralepilote::log('info',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_type."', exit from bypass mode before changing pilotage mode to '".$p_pilotage."'.");
+        return;
+      }
+      if (($v_bypass_type = $this->cpGetConf('bypass_type')) == 'open_window') {
         centralepilote::log('info',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_type."', exit from bypass mode before changing pilotage mode to '".$p_pilotage."'.");
         return;
       }

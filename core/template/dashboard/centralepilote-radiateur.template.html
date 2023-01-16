@@ -43,7 +43,7 @@
         <br>      
         <a class="btn btn-sm btn-default tooltips cp_area_button cp_trigger_open" style="#cmd_trigger_style#"><i class="#icon_button_trigger# " style="font-size:16px;"></i></a>
         <br>      
-        <a class="btn btn-sm btn-default tooltips cp_area_button cp_window_open" ><i class="#icon_button_window#" style="font-size:16px;"></i></a>
+        <a class="btn btn-sm btn-default tooltips cp_area_button cp_window_swap" style="#cmd_window_style#" ><i class="#icon_button_window#" style="font-size:16px;"></i></a>
         <br>      
         <a class="btn btn-sm btn-default tooltips cp_area_button cp_prog_select_open cp_button_prog" ><i class="#icon_button_prog# " style="font-size:16px;"></i></a>
         <br>      
@@ -196,7 +196,7 @@
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_icon').hide();
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_#cmd_etat_value#').show();
     
-    if ("#bypass_mode#" != 'no') {
+    if ("#bypass_type#" == 'delestage') {
     
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();   
@@ -434,6 +434,19 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     }); 
+ 
+ 
+    /**---------------------------------------------------------------------------
+     * Method : $('.eqLogic[data-eqLogic_uid=#uid#] .cp_window_swap').on()
+     * Description : Swap the window open status from open to close
+     * ---------------------------------------------------------------------------
+     */
+    $('.eqLogic[data-eqLogic_uid=#uid#] .cp_window_swap').on('click', function() {
+      if ('#cmd_window_swap_id#' != '') {
+        jeedom.cmd.execute({id: '#cmd_window_swap_id#'});
+      }
+    });
+    
  
   </script>
 
