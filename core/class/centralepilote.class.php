@@ -1167,6 +1167,8 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('window_close', ['name'=>'Window Close', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ferme']);
         $this->cpCmdCreate('window_swap', ['name'=>'Window Swap', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ouverte']);
         
+        $this->cpCmdCreate('window_status', ['name'=>'Window Status', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        
         // ----- Update value list for the command 'programme_select' which is of subtype 'select'
         $this->cpCmdProgrammeSelectUpdate(centralepilote::cpProgValueList());
       }
@@ -1401,7 +1403,7 @@ class centralepilote extends eqLogic {
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
         centralepilotelog::log('debug', "postSave() : new radiateur");
-
+        
 /* Herité du plugIn Virtual */
 		$createRefreshCmd = true;
 		$refresh = $this->getCmd(null, 'refresh');
@@ -3141,6 +3143,7 @@ class centralepilote extends eqLogic {
         }
         else {
           $v_mode = 'off';
+          $this->checkAndUpdateCmd('window_status', 'open');
         }
       }
       
@@ -3200,6 +3203,9 @@ class centralepilote extends eqLogic {
       $this->setConfiguration('bypass_type', 'no');
       $this->setConfiguration('bypass_mode', 'no');
       $this->save();
+      
+      // ----- Change open window status
+      $this->checkAndUpdateCmd('window_status', 'close');
 
       // ----- Change to last stored admin pilotage mode
       $v_pilotage = $this->cpPilotageGetAdminValue();
@@ -3489,23 +3495,31 @@ class centralepilote extends eqLogic {
         return;
       }
 
-      // ----- Check current programme id of the device not empty
-      /*
-      $v_programme_id = $this->cpCmdGetValue('programme_id');
-      if ($v_programme_id == '') {
-        $this->checkAndUpdateCmd('programme_id', 0);
+      // ----- Set default values if needed
+      if ($this->cpCmdGetValue('programme_id') == '') {
+        $this->cpPilotageProgSelect(0);
       }
-      */
-          
+      
       // ----- Look for pilotage by zone
       if ($this->cpPilotageIsZone()) {
         $this->cpPilotageChangeToZone();
         return;
       }
       
-      // ----- Force pilotage to the one stored in conf
-      $v_pilotage = $this->cpGetConf('pilotage');
-      $this->cpPilotageChangeTo($v_pilotage, true);
+      // ----- Check delestage ...
+      $v_bypass = centralepilote::cpCentraleGet()->cpCmdGetValue('etat');
+      if (($v_bypass != '') && ($v_bypass != 'normal')) {
+        $this->cpPilotageChangeToBypass('delestage', $v_bypass);
+      }
+      else {
+        // ----- Reset window_open to close
+        $this->cpPilotageChangeToBypass('no');
+      
+        // ----- Force pilotage to the one stored in conf
+        $v_pilotage = $this->cpGetConf('pilotage');
+        $this->cpPilotageChangeTo($v_pilotage, true);
+      }
+      
     }
     /* -------------------------------------------------------------------------*/
 
@@ -3558,9 +3572,24 @@ class centralepilote extends eqLogic {
         return;
       }
           
-      // ----- Force pilotage (hence mode) to the one stored in conf
-      $v_pilotage = $this->cpGetConf('pilotage');
-      $this->cpPilotageChangeTo($v_pilotage, true);
+      // ----- Set default values if needed
+      if ($this->cpCmdGetValue('programme_id') == '') {
+        $this->cpPilotageProgSelect(0);
+      }
+
+      // ----- Check delestage ...
+      $v_bypass = centralepilote::cpCentraleGet()->cpCmdGetValue('etat');
+      if (($v_bypass != '') && ($v_bypass != 'normal')) {
+        $this->cpPilotageChangeToBypass('delestage', $v_bypass);
+      }
+      else {
+        // ----- Reset window_open to close
+        $this->cpPilotageChangeToBypass('no');
+      
+        // ----- Force pilotage to the one stored in conf
+        $v_pilotage = $this->cpGetConf('pilotage');
+        $this->cpPilotageChangeTo($v_pilotage, true);
+      }
     
     }
     /* -------------------------------------------------------------------------*/
@@ -3597,6 +3626,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public function cpEqChangeToEnable() {    
+
       switch ($this->cpGetType()) {
         case 'radiateur' :
           $this->cpRadChangeToEnable();
