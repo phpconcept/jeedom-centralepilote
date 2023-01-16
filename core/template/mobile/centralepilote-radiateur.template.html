@@ -241,6 +241,10 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').hide();
     }
 
+    if ("#bypass_type#" == 'open_window') {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open').hide();    
+    }
+
   //  $('.eqLogic[data-eqLogic_uid=#uid#]').resize(function() { alert('Resize !');});
      
     /**---------------------------------------------------------------------------
@@ -255,6 +259,7 @@
      * ---------------------------------------------------------------------------
      */
     $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on('click', function() {
+      if ("#bypass_type#" == 'open_window') return;
       jeedom.cmd.execute({id: $(this).data('cmd_id')});
     });
     

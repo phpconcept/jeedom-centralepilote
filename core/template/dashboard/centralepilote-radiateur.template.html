@@ -28,13 +28,13 @@
     
     <div class="row cp_pilotage_buttons">
       <div class="col-sm-12">
-        <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_confort_show#" data-cmd_id="#cmd_confort_id#" style="#cmd_confort_style#" ><i class="#cmd_confort_icon#"></i> #cmd_confort_name#</a>
-        <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_confort_1_show#" data-cmd_id="#cmd_confort_1_id#" style="#cmd_confort_1_style#" ><i class="#cmd_confort_1_icon#"></i> #cmd_confort_1_name#</a>
-        <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_confort_2_show#" data-cmd_id="#cmd_confort_2_id#" style="#cmd_confort_2_style#" ><i class="#cmd_confort_2_icon#"></i> #cmd_confort_2_name#</a>
-        <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_eco_show#" data-cmd_id="#cmd_eco_id#" style="#cmd_eco_style#" ><i class="#cmd_eco_icon#"></i> #cmd_eco_name#</a>
-        <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_horsgel_show#" data-cmd_id="#cmd_horsgel_id#" style="#cmd_horsgel_style#" ><i class="#cmd_horsgel_icon#"></i> #cmd_horsgel_name#</a>
-        <a class="btn btn-sm btn-default cmd tooltips cp_mode_button_#cmd_off_show#" data-cmd_id="#cmd_off_id#" style="#cmd_off_style#" ><i class="#cmd_off_icon#"></i> #cmd_off_name#</a>
-        <a class="btn btn-sm btn-default cmd tooltips" data-cmd_id="#cmd_auto_id#" style="#cmd_auto_style#" ><i class="#cmd_auto_icon#"></i> #cmd_auto_name#</a>
+        <a class="btn btn-sm btn-default cmd tooltips cp_cursor_mode cp_mode_button_#cmd_confort_show#" data-cmd_id="#cmd_confort_id#" style="#cmd_confort_style#" ><i class="#cmd_confort_icon#" style="#cmd_confort_icon_style#"></i> #cmd_confort_name#</a>
+        <a class="btn btn-sm btn-default cmd tooltips cp_cursor_mode cp_mode_button_#cmd_confort_1_show#" data-cmd_id="#cmd_confort_1_id#" style="#cmd_confort_1_style#" ><i class="#cmd_confort_1_icon#" style="#cmd_confort_1_icon_style#"></i> #cmd_confort_1_name#</a>
+        <a class="btn btn-sm btn-default cmd tooltips cp_cursor_mode cp_mode_button_#cmd_confort_2_show#" data-cmd_id="#cmd_confort_2_id#" style="#cmd_confort_2_style#" ><i class="#cmd_confort_2_icon#" style="#cmd_confort_2_icon_style#"></i> #cmd_confort_2_name#</a>
+        <a class="btn btn-sm btn-default cmd tooltips cp_cursor_mode cp_mode_button_#cmd_eco_show#" data-cmd_id="#cmd_eco_id#" style="#cmd_eco_style#" ><i class="#cmd_eco_icon#" style="#cmd_eco_icon_style#"></i> #cmd_eco_name#</a>
+        <a class="btn btn-sm btn-default cmd tooltips cp_cursor_mode cp_mode_button_#cmd_horsgel_show#" data-cmd_id="#cmd_horsgel_id#" style="#cmd_horsgel_style#" ><i class="#cmd_horsgel_icon#" style="#cmd_horsgel_icon_style#"></i> #cmd_horsgel_name#</a>
+        <a class="btn btn-sm btn-default cmd tooltips cp_cursor_mode cp_mode_button_#cmd_off_show#" data-cmd_id="#cmd_off_id#" style="#cmd_off_style#" ><i class="#cmd_off_icon#" style="#cmd_off_icon_style#"></i> #cmd_off_name#</a>
+        <a class="btn btn-sm btn-default cmd tooltips cp_cursor_mode " data-cmd_id="#cmd_auto_id#" style="#cmd_auto_style#" ><i class="#cmd_auto_icon#" style="#cmd_auto_icon_style#"></i> #cmd_auto_name#</a>
       </div>
     </div>
     
@@ -261,6 +261,10 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').hide();
     }
 
+    if ("#bypass_type#" == 'open_window') {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open').hide();    
+    }
+    
   //  $('.eqLogic[data-eqLogic_uid=#uid#]').resize(function() { alert('Resize !');});
      
      
@@ -279,6 +283,7 @@
      * ---------------------------------------------------------------------------
      */
     $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on('click', function() {
+      if ("#bypass_type#" == 'open_window') return;
       jeedom.cmd.execute({id: $(this).data('cmd_id')});
     });
     

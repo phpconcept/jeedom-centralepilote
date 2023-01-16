@@ -1777,6 +1777,17 @@ class centralepilote extends eqLogic {
       }      
       $version = jeedom::versionAlias($_version);
       
+      $replace['#cmd_confort_style#'] = '';
+      $replace['#cmd_confort_1_style#'] = '';
+      $replace['#cmd_confort_2_style#'] = '';
+      $replace['#cmd_eco_style#'] = '';
+      $replace['#cmd_horsgel_style#'] = '';
+      $replace['#cmd_off_style#'] = '';
+      $replace['#cmd_auto_style#'] = '';
+
+      $replace['#cmd_auto_style#'] = '';
+      $replace['#cmd_auto_style#'] = '';
+      
       $v_cmd = $this->getCmd(null, 'pilotage');
       if (is_object($v_cmd)) {         
         $v_pilotage_value = $v_cmd->execCmd();
@@ -1794,11 +1805,13 @@ class centralepilote extends eqLogic {
       
       $v_pilotage_current = $this->cpCmdGetValue('pilotage');
       if ($v_pilotage_current == 'auto') {
-        $replace['#cmd_auto_style#'] = "background-color: #4ABAF2!important; color: white!important;";
-        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #2C941A!important; color: white!important;";
+//        $replace['#cmd_auto_style#'] .= "background-color: #4ABAF2!important; color: white!important;";
+//        $replace['#cmd_'.$v_etat.'_style#'] .= "background-color: #2C941A!important; color: white!important;";
+        $replace['#cmd_auto_style#'] .= "background-color: #2C941A!important; color: white!important;";
+        $replace['#cmd_'.$v_etat.'_style#'] .= "background-color: #4ABAF2!important; color: white!important;";
       }
       else {
-        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #2C941A!important; color: white!important;";
+        $replace['#cmd_'.$v_etat.'_style#'] .= "background-color: #2C941A!important; color: white!important;";
       }
 
       $v_list = centralepilote::cpModeGetList();
@@ -1875,7 +1888,24 @@ class centralepilote extends eqLogic {
         
       // ----- Look for open window
       if ($this->cpGetConf('bypass_type') == 'open_window') {
-        $replace['#cmd_window_style#'] = "background-color: #4ABAF2!important; color: white!important;";
+        $replace['#cmd_window_style#'] = "background-color: #2C941A!important; color: white!important;";        
+        $replace['#cmd_'.$v_etat.'_style#'] = "background-color: #4ABAF2!important; color: white!important;";
+        
+        $replace['#cmd_confort_style#'] .= 'cursor:not-allowed!important;';
+        $replace['#cmd_confort_1_style#'] .= 'cursor:not-allowed!important;';
+        $replace['#cmd_confort_2_style#'] .= 'cursor:not-allowed!important;';
+        $replace['#cmd_eco_style#'] .= 'cursor:not-allowed!important;';
+        $replace['#cmd_horsgel_style#'] .= 'cursor:not-allowed!important;';
+        $replace['#cmd_off_style#'] .= 'cursor:not-allowed!important;';
+        $replace['#cmd_auto_style#'] .= 'cursor:not-allowed!important;';
+        
+        $replace['#cmd_confort_icon_style#'] = 'cursor:not-allowed!important;';
+        $replace['#cmd_confort_1_icon_style#'] = 'cursor:not-allowed!important;';
+        $replace['#cmd_confort_2_icon_style#'] = 'cursor:not-allowed!important;';
+        $replace['#cmd_eco_icon_style#'] = 'cursor:not-allowed!important;';
+        $replace['#cmd_horsgel_icon_style#'] = 'cursor:not-allowed!important;';
+        $replace['#cmd_off_icon_style#'] = 'cursor:not-allowed!important;';
+        $replace['#cmd_auto_icon_style#'] = 'cursor:not-allowed!important;';
       }
       else {
         $replace['#cmd_window_style#'] = '';     
