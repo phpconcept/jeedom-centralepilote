@@ -190,6 +190,8 @@ Une amélioration, peut-être avec un mode progressif est à l'étude.
 
 ### Change Logs
 
+Release v1.1 (beta) :
+
 Release v1.0 :
 - Première version classée "stable". 
 
