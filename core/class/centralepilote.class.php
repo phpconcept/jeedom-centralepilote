@@ -1163,6 +1163,10 @@ class centralepilote extends eqLogic {
         
         $this->cpCmdCreate('trigger', ['name'=>'Trigger', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon divers-circular114']);
         
+        $this->cpCmdCreate('window_open', ['name'=>'Window Open', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ouverte']);
+        $this->cpCmdCreate('window_close', ['name'=>'Window Close', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ferme']);
+        $this->cpCmdCreate('window_swap', ['name'=>'Window Swap', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ouverte']);
+        
         // ----- Update value list for the command 'programme_select' which is of subtype 'select'
         $this->cpCmdProgrammeSelectUpdate(centralepilote::cpProgValueList());
       }
@@ -3047,7 +3051,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpPilotageChangeToBypass($p_bypass_type, $p_bypass_mode) {
+    public function cpPilotageChangeToBypass($p_bypass_type, $p_bypass_mode='off') {
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
         centralepilote::log('debug', "This method cpPilotageChangeToBypass() should not be used for a device other than a radiateur/zone  '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
@@ -3068,11 +3072,27 @@ class centralepilote extends eqLogic {
       }
       */
       
-      //if ($p_bypass_mode == 'normal') {
+      // ----- Get current bypass mode
+      $v_current_bypass = $this->cpGetConf('bypass_type');
+      
+      // ----- Get out of bypass mode
       if ($p_bypass_type == 'no') {
         $this->cpPilotageExitFromBypass();
         return;
       }
+      
+      // ----- Look for 'delestage' bypass mode
+      else if ($p_bypass_type == 'open_window') {
+        if ($v_current_bypass == 'delestage') {
+          centralepilote::log('info',  "Equipement '".$this->getName()."' en mode 'delestage', fonction fenêtre ouverte indisponible.");
+          return;
+        }
+        else {
+          $v_mode = 'off';
+        }
+      }
+      
+      // ----- Look for 'delestage' bypass mode
       else if (($p_bypass_type == 'delestage') && ($p_bypass_mode == 'delestage')) {
         $v_mode = 'off';
       }
@@ -3082,6 +3102,8 @@ class centralepilote extends eqLogic {
       else if (($p_bypass_type == 'delestage') && ($p_bypass_mode == 'horsgel')) {
         $v_mode = 'horsgel';
       }
+      
+      // ----- Unexpected values
       else {
         centralepilote::log('debug',  "Error : unexpected bypass mode '".$p_bypass_mode."' here (".__FILE__.",".__LINE__.")");
         return;
@@ -3130,6 +3152,30 @@ class centralepilote extends eqLogic {
       // ----- Change to last stored admin pilotage mode
       $v_pilotage = $this->cpPilotageGetAdminValue();
       $this->cpPilotageChangeTo($v_pilotage);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpPilotageOpenWindowSwap()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public function cpPilotageOpenWindowSwap() {
+      $v_current_bypass = $this->cpGetConf('bypass_type');
+      if ($v_current_bypass == 'delestage') {
+        centralepilote::log('info',  "Equipement '".$this->getName()."' en mode 'delestage', fonction fenêtre ouverte indisponible.");
+      }
+      else if ($v_current_bypass == 'open_window') {
+        $this->cpPilotageChangeToBypass('no');
+      }
+      else if ($v_current_bypass == 'no') {
+        $this->cpPilotageChangeToBypass('open_window');
+      }
+      else {
+        centralepilote::log('debug',  "Error : unexpected bypass mode '".$v_current_bypass."' here (".__FILE__.",".__LINE__.")");
+      }
     }
     /* -------------------------------------------------------------------------*/
 
@@ -4027,6 +4073,21 @@ class centralepiloteCmd extends cmd {
         
 		if ($v_logical_id == 'auto') {        
           $eqLogic->cpPilotageChangeTo($v_logical_id);
+		  return;
+		}
+
+		if ($v_logical_id == 'window_open') {        
+          $eqLogic->cpPilotageChangeToBypass('open_window');
+		  return;
+		}
+
+		if ($v_logical_id == 'window_close') {        
+          $eqLogic->cpPilotageChangeToBypass('no');
+		  return;
+		}
+
+		if ($v_logical_id == 'window_swap') {   
+          $eqLogic->cpPilotageOpenWindowSwap();
 		  return;
 		}
 
