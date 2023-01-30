@@ -903,6 +903,78 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpProgNextModeFromClockTick()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpProgNextModeFromClockTick($p_id, &$p_next_mode, &$p_next_jour, &$p_next_time, $p_jour='', $p_heure='', $p_minute='') {
+      // TBC : conifgurable defautl value ?
+      $p_next_mode = '';
+      $p_next_jour = '';
+      $p_next_time = '';
+      $v_jour_nom = [1=>'lundi',2=>'mardi',3=>'mercredi',4=>'jeudi',5=>'vendredi',6=>'samedi',7=>'dimanche'];
+      $v_jour_index = ['lundi'=>1,'mardi'=>2,'mercredi'=>3,'jeudi'=>4,'vendredi'=>5,'samedi'=>6,'dimanche'=>7];
+
+      // ----- Look for empty info
+      if ($p_jour == '') {
+        $v_jour = date("N");  // lundi:1 ... dimanche:7        
+        $p_jour = $v_jour_nom[$v_jour];
+      }
+      if ($p_heure == '') {
+        $p_heure = date("G");  // de 0 à 23
+      }
+      if ($p_minute == '') {
+        $p_minute = date("i");  // de 00 à 59
+      }
+      
+      $v_prog = centralepilote::cpProgLoad($p_id);
+      if (!is_array($v_prog)) {
+        centralepilote::log('debug', "cpProgNextModeFromClockTick() : Unknown programme id '".$p_id."'.");
+        return(false);
+      }
+      
+      // ----- Get mode from jour/heure/minute
+      if (!isset($v_prog['agenda'][$p_jour][$p_heure])) {
+        centralepilote::log('debug', "cpProgNextModeFromClockTick() : Missing value for '".$p_jour."' '".$p_heure."h' for programme '".$p_id."'.");
+        return(false);
+      }
+      $v_current_mode = $v_prog['agenda'][$p_jour][$p_heure];
+      
+      $i_jour = $v_jour_index[$p_jour];
+      $i_heure = $p_heure;
+      $v_loop_detected = false;
+      $v_loop_count = 0; // for sanity check ...
+      while (!$v_loop_detected) {
+        $v_loop_count++;
+        $i_heure++;
+        if ($i_heure > 23) { $i_heure = 0; $i_jour++; }
+        if ($i_jour > 7) { $i_jour = 1; }
+        $i_nom_jour = $v_jour_nom[$i_jour];
+        if ($v_prog['agenda'][$i_nom_jour][$i_heure] != $v_prog['agenda'][$p_jour][$p_heure]) {
+          $p_next_mode = $v_prog['agenda'][$i_nom_jour][$i_heure];
+          if ($i_nom_jour != $p_jour) $p_next_jour = $i_nom_jour;
+          $p_next_time = $i_heure.'h';
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Next mode :'".$p_next_mode."', time :'".$p_next_time."'.");
+          return(true);
+        }
+        if (($i_heure == $p_heure) && ($i_jour == $v_jour_index[$p_jour])) {
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Full week with same mode.");
+          $v_loop_detected = true;
+        }
+        if ($v_loop_count > 250) {
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Error : Loop detected.");
+          return(false);
+        }
+      }      
+      
+      return(false);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpEqList()
      * Description :
      *   centralepilote::cpEqList('radiateur', ['zone'=>'', 'ddd'=>'vvv'])
@@ -1769,11 +1841,6 @@ class centralepilote extends eqLogic {
          $replace['#cmd_auto_show#'] = 'no_show';
       }
 
-      $v_cmd = $this->getCmd(null, 'programme_select');
-      if (is_object($v_cmd)) {         
-         $replace['#cmd_programme_select_id#'] = $v_cmd->getId();
-      }
-
       // ----- Look for triggers
       $v_cmd = $this->getCmd(null, 'trigger');
       if (is_object($v_cmd)) {         
@@ -1799,10 +1866,32 @@ class centralepilote extends eqLogic {
         $replace['#cmd_trigger_list#'] = "";
       }
       
+      $v_cmd = $this->getCmd(null, 'programme_select');
+      if (is_object($v_cmd)) {         
+         $replace['#cmd_programme_select_id#'] = $v_cmd->getId();
+      }
+
       // ----- List of programmation
-      $replace['#list_programmation#'] = centralepilote::cpProgValueList();
-      $replace['#programme_id#'] = $this->cpGetConf('programme_id');
-      $replace['#programme_name#'] = centralepilote::cpProgGetName($this->cpGetConf('programme_id'));
+      $replace['#list_programmation#'] = '';
+      $replace['#programme_id#'] = '';
+      $replace['#programme_name#'] = '';
+      $replace['#programme_next_mode#'] = '';
+      $replace['#programme_next_jour#'] = '';
+      $replace['#programme_next_time#'] = '';
+      if ($v_pilotage_current == 'auto') {
+        $replace['#list_programmation#'] = centralepilote::cpProgValueList();
+        $v_prog_id = $this->cpGetConf('programme_id');
+        $replace['#programme_id#'] = $v_prog_id;
+        $replace['#programme_name#'] = centralepilote::cpProgGetName($this->cpGetConf('programme_id'));
+        $v_next_mode = '';
+        $v_next_jour = '';
+        $v_next_time = '';
+        $this->cpProgNextModeFromClockTick($v_prog_id, $v_next_mode, $v_next_jour, $v_next_time);
+        centralepilote::log('debug', "Next mode  '".$v_next_mode."' '".$v_next_time."' ");
+        $replace['#programme_next_mode#'] = centralepilote::cpModeGetName($v_next_mode);
+        $replace['#programme_next_jour#'] = $v_next_jour;
+        $replace['#programme_next_time#'] = $v_next_time;
+      }
       
       // ----- Bypass mode
       $replace['#bypass_type#'] = $this->cpGetConf('bypass_type');
@@ -1870,6 +1959,7 @@ class centralepilote extends eqLogic {
       $replace['#title_a_min#'] = __("à", __FILE__);
       $replace['#title_missing_mode#'] = __("Faire un choix", __FILE__);
       $replace['#title_Choisir#'] = __("Choisir ...", __FILE__);
+      $replace['#title_next_mode#'] = __("Next", __FILE__);      
       
       $replace['#width#'] = '320px';
       $replace['#height#'] = '160px';       
