@@ -241,20 +241,6 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpGetProgDisplayMode()
-     * Description :
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpGetProgDisplayMode_DEPRECATED() {
-      $v_value = config::byKey('prog_display_mode', 'centralepilote');
-      $v_result = ($v_value == 'color' ? 'color' : 'icon');
-      return $v_result;
-   }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
      * Method : cpModeGetAtt()
      * Description :
      * Parameters :
@@ -492,34 +478,6 @@ class centralepilote extends eqLogic {
     /**---------------------------------------------------------------------------
      * Method : cpProgGetList()
      * Description :
-     *   
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpProgGetList_OLD() {
-      $v_prog_list_str = centralepilote::cpCentraleGetConfig('prog_list');
-      if (!is_string($v_prog_list_str) || ($v_prog_list_str == '')) {
-        centralepilotelog::log('debug', "cpProgGetList() : missing or empty prog_list.");
-        return(array());
-      }
-      
-      // ----- Parse string value
-      try {
-        $v_prog_list = json_decode($v_prog_list_str, true);
-      }
-      catch (Exception $exc) {
-        centralepilotelog::log('debug', "cpProgGetList() : error parsing JSON prog_list.");
-        return(array());
-      }
-      
-      return($v_prog_list);
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
-     * Method : cpProgGetList()
-     * Description :
      *   Get the list of saved programs.
      * Parameters :
      * Returned value : 
@@ -535,30 +493,6 @@ class centralepilote extends eqLogic {
       }
             
       return($v_prog_list);
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
-     * Method : cpProgSaveList()
-     * Description :
-     *   
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpProgSaveList_OLD($p_prog_list) {
-    
-      // ----- Sanity checks
-      if (!is_array($p_prog_list)) {
-        centralepilotelog::log('debug', "cpProgSaveList() : prog_list is not an array. Use empty array instead.");
-        $p_prog_list = array();
-      }
-    
-      // ----- Encode & save
-      $v_prog_list_json = json_encode($p_prog_list, JSON_FORCE_OBJECT);
-      centralepilote::cpCentraleSetConfig('prog_list', $v_prog_list_json);
-      
-      return;
     }
     /* -------------------------------------------------------------------------*/
 
@@ -907,20 +841,6 @@ class centralepilote extends eqLogic {
       centralepilote::cpClockTick();
       
       return(true);
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
-     * Method : cpProgList()
-     * Description :
-     *   
-     * Parameters :
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    public static function cpProgList_DEPRECATED($p_details=false) {    
-      $v_prog_list = centralepilote::cpProgGetList();
-      return($v_prog_list);
     }
     /* -------------------------------------------------------------------------*/
 
