@@ -195,6 +195,7 @@ Release v1.1 (beta) :
   - Changement de couleur des boutons lorsque l'on sélectionne le mode "auto" : le bouton "auto" devient vert, le bouton du mode réellement actif du à la programmation devient "bleu". En effet cela était incohérent que le bouton en vert ne soit pas le mode choisit par l'utilisateur.
   - Ajout des commandes "window_open", "window_close" et "window_swap" qui permettent respectivement d'activer le mode fenêtre ouverte, de le désactiver et de passer de l'un à l'autre. Le fait de créer 3 commandes pour cela devrait permettre de simplifier l'appel des commandes par des scénarii externes.
   - Le mode "fenêtre ouverte" est désormais disponible grâce à l'utilisation de la commande "window_swap". Pour en sortir il faut recliquer sur le bouton de la fenêtre.
+  - Ajout sur le widget dashboard de l'information du prochain mode programmé et de l'heure de celui-ci. Si aucun mode nouveau sur une semaine, aucun affichage.
 
 - Bug corrections :
   - Lorsqu'un équipement est activé/désactivé les modes de bypass sont correctement pris en compte : le mode opan_window est remis à zéro (close) lors de l'activation d'un équipement. Le mode de délestage de la centrale est appliqué à l'équipement qui redevient actif.

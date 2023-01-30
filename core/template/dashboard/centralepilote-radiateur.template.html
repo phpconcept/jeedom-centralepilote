@@ -194,6 +194,14 @@
           
     //$('.eqLogic[data-eqLogic_uid=#uid#] #cp_debug_text').html("etat value :#cmd_etat_value#");
     
+    
+    if ('#programme_next_mode#' == '') {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_next_mode').hide();
+    }
+    else {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_next_mode').show();
+    }
+    
     // ----- Show the icon depending on etat
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_icon').hide();
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_#cmd_etat_value#').show();

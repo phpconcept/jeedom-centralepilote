@@ -3407,6 +3407,8 @@ class centralepilote extends eqLogic {
         
         // ----- Force a 'tick' to update radiateur status (will be ignored if not in auto mode)
         $this->cpEqClockTick('','','',$p_force);
+        
+        $this->refreshWidget();
       }
 
       // ----- No programme with this ID
