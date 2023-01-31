@@ -56,7 +56,9 @@
           <i class="#cmd_horsgel_large_icon# cp_etat_icon cp_etat_horsgel" style="font-size:45px;display:none;"></i>
           <i class="#cmd_off_large_icon# cp_etat_icon cp_etat_off" style="font-size:45px;display:none;"></i>
           <br>
-          <span class="cp_button_prog" style="font-size:12px;"><i><span class="cp_programme_name">#programme_name#</span></i></span>
+          <span class="cp_button_prog" style="font-size:12px;"><i>
+          <span class="cp_programme_next_mode">#programme_next_mode# #title_a_min# #programme_next_time# #programme_next_jour#</span>
+          </i></span>
         </td>
         <td style="width:10px;"></td>
         <td >
@@ -171,6 +173,12 @@
     }
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_list_show').html(v_html);
       
+    if ('#programme_next_mode#' == '') {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_next_mode').hide();
+    }
+    else {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_next_mode').show();
+    }
           
     // ----- Show the icon depending on etat
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_icon').hide();
