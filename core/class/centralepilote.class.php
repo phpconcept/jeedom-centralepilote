@@ -1240,6 +1240,9 @@ class centralepilote extends eqLogic {
         // ----- Information concernant les declencheurs        
         $this->setConfiguration('trigger_list', array());
         
+        // ----- Permet de décaler la sortie du délestage de x minutes x ne pouvant être que 0,30,60,90,120,150,180 (tranches de 30 minutes)
+        $v_eq->setConfiguration('delestage_sortie_delai', 0);
+        
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }
@@ -3145,7 +3148,7 @@ class centralepilote extends eqLogic {
         return;
       }
       
-      // ----- Look for 'delestage' bypass mode
+      // ----- Look for 'open_window' bypass mode
       else if ($p_bypass_type == 'open_window') {
         if ($v_current_bypass == 'delestage') {
           centralepilote::log('info',  "Equipement '".$this->getName()."' en mode 'delestage', fonction fenêtre ouverte indisponible.");
@@ -3158,14 +3161,19 @@ class centralepilote extends eqLogic {
       }
       
       // ----- Look for 'delestage' bypass mode
-      else if (($p_bypass_type == 'delestage') && ($p_bypass_mode == 'delestage')) {
-        $v_mode = 'off';
-      }
-      else if (($p_bypass_type == 'delestage') && ($p_bypass_mode == 'eco')) {
-        $v_mode = 'eco';
-      }
-      else if (($p_bypass_type == 'delestage') && ($p_bypass_mode == 'horsgel')) {
-        $v_mode = 'horsgel';
+      else if ($p_bypass_type == 'delestage') {
+        if ($p_bypass_mode == 'delestage') {
+          $v_mode = 'off';
+        }
+        else if ($p_bypass_mode == 'eco') {
+          $v_mode = 'eco';
+        }
+        else if ($p_bypass_mode == 'horsgel') {
+          $v_mode = 'horsgel';
+        }
+        
+        // ----- When in delestage mode reset open_window status to close
+        $this->checkAndUpdateCmd('window_status', 'close');
       }
       
       // ----- Unexpected values
@@ -3202,23 +3210,56 @@ class centralepilote extends eqLogic {
     /**---------------------------------------------------------------------------
      * Method : cpPilotageExitFromBypass()
      * Description :
+     *   Cette fonction permet de sortir du mode bypass, que ce soit un bypass
+     *   de type "delestage" ou "open_window".
      * Parameters :
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
     public function cpPilotageExitFromBypass() {
       centralepilote::log('info',  "Radiateur or Zone '".$this->getName()."' exit from 'bypass' mode.");      
-
-      // ----- Store bypass mode
+      
+      $v_current_bypass_type = $this->cpGetConf('bypass_type');
+      $v_current_bypass_mode = $this->cpGetConf('bypass_mode');
+      
+      // ----- Reset bypass mode to no bypass
       $this->setConfiguration('bypass_type', 'no');
       $this->setConfiguration('bypass_mode', 'no');
       $this->save();
       
-      // ----- Change open window status
-      $this->checkAndUpdateCmd('window_status', 'close');
-
-      // ----- Change to last stored admin pilotage mode
+      // ----- Get last stored admin pilotage mode
       $v_pilotage = $this->cpPilotageGetAdminValue();
+      
+      if ($v_current_bypass_type == 'delestage') {
+        // ----- Look for progressive out of delestage         
+        $v_delestage_sortie_delai = $this->cpGetConf('delestage_sortie_delai');
+        if ($v_delestage_sortie_delai > 0) {
+        
+          // ----- On fixe un trigger dans le délais imparti avec le mode de pilotage cible.
+          $v_trigger_time = time()+$v_delestage_sortie_delai*60;
+          $this->cpPilotageSetTriggerTime($v_pilotage, $v_trigger_time);
+          
+          // ----- On reste sur le mode du bypass
+          $v_pilotage = $v_current_bypass_mode;
+        }
+        
+        // ----- Pas de delai donc on passe au pilotage d'avant
+        else {
+          // rien à faire
+        }
+        
+        
+      }
+      
+      else if ($v_current_bypass_type == 'open_window') {
+        $this->checkAndUpdateCmd('window_status', 'close');
+      }
+      
+      else {
+        centralepilote::log('debug',  "Error : unknown bypass_type '".$v_current_bypass_type."' here (".__FILE__.",".__LINE__.") ");
+        $v_pilotage = 'eco';
+      }
+      
       $this->cpPilotageChangeTo($v_pilotage);
     }
     /* -------------------------------------------------------------------------*/
@@ -3251,6 +3292,7 @@ class centralepilote extends eqLogic {
      * Method : cpPilotageSetTriggerTime()
      * Description :
      * Parameters :
+     *   $p_trigger_time : UNix timestamp
      * Returned value : 
      * ---------------------------------------------------------------------------
      */

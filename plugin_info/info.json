@@ -12,6 +12,8 @@
 	"hasOwnDeamon" : false,
 	"changelog" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
 	"documentation" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
+	"changelog_beta" : "https://github.com/phpconcept/jeedom-centralepilote/blob/beta/README.md",
+	"documentation_beta" : "https://github.com/phpconcept/jeedom-centralepilote/blob/beta/README.md",
 	"language" : ["fr_FR","en_US"],
 	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"]
 }

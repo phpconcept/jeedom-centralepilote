@@ -74,6 +74,12 @@ function centralepilote_update_v_1_1($v_from_version='') {
       continue;
     }
     
+    // ----- Ajout de la configuration de sortie progressive du delestage
+    if ($v_eq->getConfiguration('delestage_sortie_delai', '') == '') {
+      $v_eq->setConfiguration('delestage_sortie_delai', 0);
+      $v_flag_save = true;
+    }
+    
     // ----- Look to add cmd
     $v_cmd = $v_eq->getCmd(null, 'window_open');
     if (!is_object($v_cmd)) {
