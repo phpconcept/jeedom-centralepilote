@@ -60,16 +60,16 @@ Par défaut le plugin utilise des widget customizés, mais une option globale du p
 
 ![Widget custom](docs/images/radiateur_show_3.png) ![Widget custom](docs/images/radiateur_show_4.png)
 
-La première ligne contient les boutons de commandes des modes, avec comme dernier bouton 'auto'. Le bouton du mode actif est en vert.
+La première ligne contient les boutons de commandes des modes, avec comme dernier bouton 'auto'. Le bouton du pilotage actif est en vert.
 
-Le bouton 'auto' permet de mettre le radiateur en mode de programmation automatique. Lorsque le radiateur est en mode 'auto' le bouton est en bleu. Pour sortir du mode 'auto' il faut simplement choisir l'un des autres modes manuels (Confort, Eco, ...).
+Le bouton 'auto' permet de mettre le radiateur en mode de programmation automatique. Lorsque le radiateur est en pilotage 'auto' le bouton est en vert, le mode actif est en vert. Pour sortir du pilotage 'auto' il faut simplement choisir l'un des autres modes de pilotage manuels (Confort, Eco, ...).
 
 La seconde partie contient :
 - dans une première colonne les boutons de configurations spécifiques :
   - ![selection de la programmation](docs/images/bouton_trigger.png) : Configuration du déclenchement programmé. Il est en bleu si un mode déclenchement a été programmé.
   - ![selection de la programmation](docs/images/bouton_fenetre.png) : Configuration du mode "fenêtre ouvert", qui permet de mettre le radiateur en mode "bypass" le temps de l'ouverture, puis de revenir à son mode d'origine.
   - ![selection de la programmation](docs/images/bouton_programme.png) : Configuration du programme utilisé lorsque le radiateur est en mode 'auto'
-- dans la colonne du milieu, un pictogramme illustant le mode actif, ainsi qu'un rappel du programme courant si le radiateur est en mode 'auto'
+- dans la colonne du milieu, un pictogramme illustant le mode actif. Sous le radiateur est indiqué l'heure et le mode du prochain changement, si le radiateur est en pilotage 'auto'
 - dans le colonne de droite des informations complémentaires, comme le mode actuel du radiateur, la température cible (si elle est connue), la température mesurée (si une mesure de température a été associée au radiateur).
  
 #### Sélection du programme automatique
@@ -92,7 +92,9 @@ Notez que les déclenchements ne sont pas persistant (ou récurrent), ils sont aut
 
 #### Mode fenêtre ouverte
 
-Ce mode n'est pas encore disponible, bien que le bouton soit présent ...
+Lorsque l'on appuie sur le bouton ![selection de la programmation](docs/images/bouton_fenetre.png) on passe en pilotage "fenêtre ouverte". Le radiateur passe en mode éteint, le bouton devient vert, et le bouton du mode actif devient bleu. Pour revenir en mode normal, il faut simplement appuyer sur le même bouton.
+
+![Configuration trigger](docs/images/radiateur_show_window.png)
 
 #### Affichage en mode "Délestage"
 
@@ -124,7 +126,7 @@ Exemple d'un radiateur ne supportant pas le mode "Eco" et pour lequel le mode "H
 
 Le widget standard est bien plus basique, mais il contient toutes les informations nécessaires. 
 
-Notez cependant qu'il ne permet pas de configurer le mode de déclenchement unitaire.
+Notez cependant qu'il ne permet pas de configurer le mode de déclenchement unitaire, ni la gestion de la fenêtre ouverte.
 
 Radiateur en mode manuel (Confort, Eco, etc... ) :
 
@@ -180,9 +182,17 @@ Widget de l'objet "Central Fil-Pilote" :
 
 Il s'agit d'un widgeet standard, qui devrait évoluer dans le temps vers un widget custom apportant plus d'information sur l'état global de l'installation.
 
-Notez que la sortie d'un mode "Délestage" (mode Off), vers un mode "Normal" peut-être assez violent pour votre installation électrique et potentiellement faire sauter celle-ci.
+#### Sortie de délestage différé
+La sortie d'un mode "Délestage" (mode Off), vers un mode "Normal" peut-être assez violent pour votre installation électrique et potentiellement faire disjoncter celle-ci. 
 En effet si tous les radiateurs se rallument en même temps ils peuvent solliciter votre compteur au delà des KVA qu'il peut supporter.
-Une amélioration, peut-être avec un mode progressif est à l'étude.
+Cela est ennuyeux lorsque jsutement on est à distance et que l'on veut rallumer son chauffage avant de rentrer.
+Afin de permettre une sortie du delestage plus progressive, il est possible de configurer un radiateur ou une zone avec un délai de sortie du délestage.
+
+![Centrale](docs/images/config_radiateur_sortie_delestage.png)
+
+Lorsque le délestage est remis en mode "normal", les radiateurs/zones, ayant un délai de configuré, vont rester dans le mode du délestage (eco, hors-gel ou off), mais un déclenchement unitaire programmé sera mis en place avec le délai configuré pour qu'il reprenne sont pilotage mémorisé au bout de ce délai.
+
+De plus, à partir du moment où le délestage n'est plus actif, il est possible de reprendre la main sur les radiateurs et de modifier le mode de pilotage ou de supprimer les déclenchements unitaires. 
 
 
 ---
