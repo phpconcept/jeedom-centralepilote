@@ -265,6 +265,23 @@ if (0) {
         </div>
       </div>
 
+    <div class="row form-group cp_panel_radiateur_zone">
+      <label class="col-sm-3 control-label">{{Sortie délestage}}</label>
+      <div class="col-sm-9">
+          <select class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="delestage_sortie_delai">
+            <option value="0">{{immédiate}}</option>
+            <option value="5">{{délai 5 minutes}}</option>
+            <option value="30">{{délai 30 minutes}}</option>
+            <option value="60">{{délai 1h}}</option>
+            <option value="90">{{délai 1h30}}</option>
+            <option value="120">{{délai 2h}}</option>
+            <option value="150">{{délai 2h30}}</option>
+            <option value="180">{{délai 3h}}</option>
+          </select>
+
+      </div>
+    </div>
+
     <div class="row form-group">
       <label class="col-sm-3 control-label">{{Notes}}</label>
       <div class="col-sm-9">

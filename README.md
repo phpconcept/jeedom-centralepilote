@@ -196,6 +196,8 @@ Release v1.1 (beta) :
   - Ajout des commandes "window_open", "window_close" et "window_swap" qui permettent respectivement d'activer le mode fenêtre ouverte, de le désactiver et de passer de l'un à l'autre. Le fait de créer 3 commandes pour cela devrait permettre de simplifier l'appel des commandes par des scénarii externes.
   - Le mode "fenêtre ouverte" est désormais disponible grâce à l'utilisation de la commande "window_swap". Pour en sortir il faut recliquer sur le bouton de la fenêtre.
   - Ajout sur le widget dashboard de l'information du prochain mode programmé et de l'heure de celui-ci. Si aucun mode nouveau sur une semaine, aucun affichage.
+  - Ajout du paramètre de configuration "delestage_sortie_delai", qui permet de configurer une sortie du mode delestage décalée par radiateur ou par zone. Cette fonction permet en particulier de ne pas rallumer tout d'un coup et risquer de dépasser la capacité du compteur électrique et donc de disjoncter.
+  - Le calcul des modes pour le pilotage 'auto' ou pour les déclenchements est déplacé d'un cron toutes les 15 minutes à un cron toutes les 5 minutes.
 
 - Bug corrections :
   - Lorsqu'un équipement est activé/désactivé les modes de bypass sont correctement pris en compte : le mode opan_window est remis à zéro (close) lors de l'activation d'un équipement. Le mode de délestage de la centrale est appliqué à l'équipement qui redevient actif.
