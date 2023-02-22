@@ -1243,7 +1243,7 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('trigger_list', array());
         
         // ----- Permet de décaler la sortie du délestage de x minutes x ne pouvant être que 0, 5, 30,60,90,120,150,180 (tranches de 30 minutes)
-        $v_eq->setConfiguration('delestage_sortie_delai', 0);
+        $this->setConfiguration('delestage_sortie_delai', 0);
         
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
