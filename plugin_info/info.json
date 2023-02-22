@@ -10,9 +10,9 @@
 	"hasDependency" : false,
     "maxDependancyInstallTime" : 10,
 	"hasOwnDeamon" : false,
-	"changelog" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
+	"changelog" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md#change-logs",
 	"documentation" : "https://github.com/phpconcept/jeedom-centralepilote/blob/main/README.md",
-	"changelog_beta" : "https://github.com/phpconcept/jeedom-centralepilote/blob/beta/README.md",
+	"changelog_beta" : "https://github.com/phpconcept/jeedom-centralepilote/blob/beta/README.md#change-logs",
 	"documentation_beta" : "https://github.com/phpconcept/jeedom-centralepilote/blob/beta/README.md",
 	"language" : ["fr_FR","en_US"],
 	"compatibility" : ["miniplus","smart","rpi","docker","diy","mobile","v4","atlas"]
