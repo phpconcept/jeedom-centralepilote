@@ -493,11 +493,8 @@ function cp_nature_change(event) {
 
 
 
+
 /*
-* Code / Tests depuis autres plugin
-* *
-* /
-* /**
  * saveEqLogic callback called by plugin.template before saving an eqLogic
  */
 function saveEqLogic(_eqLogic) {
@@ -569,7 +566,8 @@ function saveEqLogic(_eqLogic) {
                            "command_off":1,
                            "statut_off":1,
                            "fallback_off":1,
-                           "puissance":1}
+                           "puissance":1,
+                           "delestage_sortie_delai":1}
                         };
 
 
@@ -589,51 +587,10 @@ function saveEqLogic(_eqLogic) {
   // ----- Change for filtered list
   _eqLogic.configuration = v_new_conf;
   
-/*
-	if (_eqLogic.configuration.type != 'broker' && _eqLogic.configuration.type != 'eqpt') {
-		// not on an jMQTT eqLogic, to fix issue #153
-		return _eqLogic;
-	}
-
-	// pass the log level when defined for a broker object
-	if (_eqLogic.configuration.type == 'broker') {
-		var log_level = $('#div_broker_log').getValues('.configKey')[0];
-		if (!$.isEmptyObject(log_level)) {
-			_eqLogic.loglevel =  log_level;
-		}
-	}
-
-	// remove non existing commands added for the JSON view and add new commands at the end
-	for(var i = _eqLogic.cmd.length - 1; i >= 0; i--) {
-		if (_eqLogic.cmd[i].id == "" && _eqLogic.cmd[i].name == "") {
-			_eqLogic.cmd.splice(i, 1);
-		}
-	}
-
-	// a function that substract properties of b from a (r = a - b)
-	function substract(a, b) {
-		var r = {};
-
-		for (var key in a) {
-			if (typeof(a[key]) == 'object') {
-				if (b[key] === undefined) b[key] = {};
-				r[key] = substract(a[key], b[key]);
-			} else {
-				if (a[key] !== undefined && b[key] === undefined) {
-					r[key] = a[key];
-				}
-			}
-		}
-		return r;
-	}
-
-	// if this eqLogic is not a broker
-	if (_eqLogic.configuration.type != 'broker') {
-		// get hiden settings for Broker and remove them of eqLogic
-		_eqLogic = substract(_eqLogic, $('#brokertab').getValues('.eqLogicAttr')[0]);
-	}
-
-*/
-
-	return _eqLogic;
+  return _eqLogic;
 }
+
+/*
+* Code / Tests depuis autres plugin
+* *
+*/

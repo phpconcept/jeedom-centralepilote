@@ -45,7 +45,7 @@
           <br>
           <a class="btn btn-sm btn-default tooltips cp_area_button cp_trigger_open" style="#cmd_trigger_style# font-size:22px;" >&nbsp;<i class="#icon_button_trigger# " ></i>&nbsp;</a>
           <br>
-          <a class="btn btn-sm btn-default tooltips cp_area_button cp_window_open"  style="font-size:22px;">&nbsp;<i class="#icon_button_window#"></i>&nbsp;</a>
+          <a class="btn btn-sm btn-default tooltips cp_area_button cp_window_swap"  style="#cmd_window_style# font-size:22px;">&nbsp;<i class="#icon_button_window#"></i>&nbsp;</a>
         </td>
         <td style="width:10px;"></td>
         <td >
@@ -56,7 +56,7 @@
           <i class="#cmd_horsgel_large_icon# cp_etat_icon cp_etat_horsgel" style="font-size:45px;display:none;"></i>
           <i class="#cmd_off_large_icon# cp_etat_icon cp_etat_off" style="font-size:45px;display:none;"></i>
           <br>
-          <span class="cp_button_prog" style="font-size:12px;"><i><span class="cp_programme_name">#programme_name#</span></i></span>
+          <span class="cp_programme_next_mode" style="font-size:12px;display:none;"><i>#programme_next_mode# #title_a_min# #programme_next_time# #programme_next_jour#</i></span>
         </td>
         <td style="width:10px;"></td>
         <td >
@@ -171,12 +171,18 @@
     }
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_list_show').html(v_html);
       
+    if ('#programme_next_mode#' == '') {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_next_mode').hide();
+    }
+    else {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_programme_next_mode').show();
+    }
           
     // ----- Show the icon depending on etat
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_icon').hide();
     $('.eqLogic[data-eqLogic_uid=#uid#] .cp_etat_#cmd_etat_value#').show();
     
-    if ("#bypass_mode#" != 'no') {
+    if ("#bypass_type#" == 'delestage') {
     
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();   
@@ -241,6 +247,10 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').hide();
     }
 
+    if ("#bypass_type#" == 'open_window') {
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open').hide();    
+    }
+
   //  $('.eqLogic[data-eqLogic_uid=#uid#]').resize(function() { alert('Resize !');});
      
     /**---------------------------------------------------------------------------
@@ -255,6 +265,7 @@
      * ---------------------------------------------------------------------------
      */
     $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on('click', function() {
+      if ("#bypass_type#" == 'open_window') return;
       jeedom.cmd.execute({id: $(this).data('cmd_id')});
     });
     
@@ -467,6 +478,17 @@
       $(".eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_close").click();
       //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
+    });
+    
+    /**---------------------------------------------------------------------------
+     * Method : $('.eqLogic[data-eqLogic_uid=#uid#] .cp_window_swap').on()
+     * Description : Swap the window open status from open to close
+     * ---------------------------------------------------------------------------
+     */
+    $('.eqLogic[data-eqLogic_uid=#uid#] .cp_window_swap').on('click', function() {
+      if ('#cmd_window_swap_id#' != '') {
+        jeedom.cmd.execute({id: '#cmd_window_swap_id#'});
+      }
     });
     
     
