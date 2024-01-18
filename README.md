@@ -200,7 +200,7 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
-Release v1.1 (beta) :
+Release v1.1 :
 - Nouveautés :
   - Changement de couleur des boutons lorsque l'on sélectionne le mode "auto" : le bouton "auto" devient vert, le bouton du mode réellement actif du à la programmation devient "bleu". En effet cela était incohérent que le bouton en vert ne soit pas le mode choisit par l'utilisateur.
   - Ajout des commandes "window_open", "window_close" et "window_swap" qui permettent respectivement d'activer le mode fenêtre ouverte, de le désactiver et de passer de l'un à l'autre. Le fait de créer 3 commandes pour cela devrait permettre de simplifier l'appel des commandes par des scénarii externes.
