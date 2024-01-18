@@ -21,7 +21,7 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) . '/../../../../plugins/centralepilote/core/php/centralepilote.inc.php';
 
   // ----- Current version
-  define('CP_VERSION', '1.1');
+  define('CP_VERSION', '1.2');
   
 
 class centralepilote extends eqLogic {
@@ -2537,6 +2537,7 @@ class centralepilote extends eqLogic {
         return;
       } 
       $v_cmd_tmp->setConfiguration('listValue', $p_value_list_str);
+      $v_cmd_tmp->save();
       
       // ----- Trick to update the widgets of all radiateurs ...
       // For standard widget change of listValue is not enough to clean the cache of the widget

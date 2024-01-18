@@ -200,6 +200,13 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
+Release v1.2-beta :
+- Nouveautés :
+  - 
+  
+- Bug corrections :
+  - La liste des programmations s'affiche correctement dans les scenarii. A noter cependant que la valeur "Aucun" est affichée par défaut, si elle est selectionnée alors c'est le programme par defaut qui est selectionné.
+
 Release v1.1 :
 - Nouveautés :
   - Changement de couleur des boutons lorsque l'on sélectionne le mode "auto" : le bouton "auto" devient vert, le bouton du mode réellement actif du à la programmation devient "bleu". En effet cela était incohérent que le bouton en vert ne soit pas le mode choisit par l'utilisateur.
