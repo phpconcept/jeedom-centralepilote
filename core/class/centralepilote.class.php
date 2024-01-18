@@ -1903,7 +1903,7 @@ class centralepilote extends eqLogic {
       // ----- Bypass mode
       $replace['#bypass_type#'] = $this->cpGetConf('bypass_type');
       $replace['#bypass_mode#'] = $this->cpGetConf('bypass_mode');
-        
+      
       // ----- Look for open window
       if ($this->cpGetConf('bypass_type') == 'open_window') {
         $replace['#cmd_window_style#'] = "background-color: #2C941A!important; color: white!important;";        
