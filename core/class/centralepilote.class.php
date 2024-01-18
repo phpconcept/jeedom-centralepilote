@@ -1793,14 +1793,16 @@ class centralepilote extends eqLogic {
         $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
       }
       
+      $v_etat = 'eco';
+      $v_etat_name = centralepilote::cpModeGetName($v_etat);
       $v_cmd = $this->getCmd(null, 'etat');
       if (is_object($v_cmd)) {         
         $v_etat_name = $v_cmd->execCmd();
         $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
         $replace['#cmd_etat_id#'] = $v_cmd->getId();
-        $replace['#cmd_etat_value#'] = $v_etat;
-        $replace['#cmd_etat_name#'] = $v_etat_name;     
       }
+      $replace['#cmd_etat_value#'] = $v_etat;
+      $replace['#cmd_etat_name#'] = $v_etat_name;     
       
       $v_pilotage_current = $this->cpCmdGetValue('pilotage');
       if ($v_pilotage_current == 'auto') {
@@ -1951,7 +1953,12 @@ class centralepilote extends eqLogic {
       $replace['#title_programme#'] = __("Auto", __FILE__);
       $replace['#title_select_programmation#'] = __("Choisir la programmation", __FILE__);
       $replace['#title_pilotage_zone#'] = __("Pilotage par Zone", __FILE__);
-      $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      if (($this->cpGetConf('bypass_type') == 'delestage') && ($v_etat == 'off')) {
+        $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      }
+      else {
+        $replace['#title_delestage_centralise#'] = __("Pilotage Centralisé", __FILE__);
+      }
       $replace['#title_Retour#'] = __("Retour", __FILE__);
       $replace['#title_Annuler#'] = __("Annuler", __FILE__);
       $replace['#title_Valider#'] = __("Valider", __FILE__);
@@ -2006,14 +2013,16 @@ class centralepilote extends eqLogic {
         $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
       }
       
+      $v_etat = 'eco';
+      $v_etat_name = centralepilote::cpModeGetName($v_etat);
       $v_cmd = $this->getCmd(null, 'etat');
       if (is_object($v_cmd)) {         
         $v_etat_name = $v_cmd->execCmd();
         $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
         $replace['#cmd_etat_id#'] = $v_cmd->getId();
-        $replace['#cmd_etat_value#'] = $v_etat;
-        $replace['#cmd_etat_name#'] = $v_etat_name;     
       }
+      $replace['#cmd_etat_value#'] = $v_etat;
+      $replace['#cmd_etat_name#'] = $v_etat_name;     
       
       $v_pilotage_current = $this->cpCmdGetValue('pilotage');
       if ($v_pilotage_current == 'auto') {
@@ -2105,7 +2114,12 @@ class centralepilote extends eqLogic {
       $replace['#title_programme#'] = __("Auto", __FILE__);
       $replace['#title_select_programmation#'] = __("Choisir la programmation", __FILE__);
       $replace['#title_pilotage_zone#'] = __("Pilotage par Zone", __FILE__);
-      $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      if (($this->cpGetConf('bypass_type') == 'delestage') && ($v_etat == 'off')) {
+        $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      }
+      else {
+        $replace['#title_delestage_centralise#'] = __("Pilotage Centralisé", __FILE__);
+      }
       $replace['#title_Retour#'] = __("Retour", __FILE__);
       $replace['#title_Annuler#'] = __("Annuler", __FILE__);
       $replace['#title_Valider#'] = __("Valider", __FILE__);
