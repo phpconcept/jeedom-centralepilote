@@ -68,6 +68,17 @@ function centralepilote_update() {
   else if (CP_VERSION == '1.0') {
     if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
   }
+  else if (CP_VERSION == '1.1') {
+    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
+    if ($v_version != '1.1') centralepilote_update_v_1_1($v_version);
+  }
+/*
+  if ($v_version < '0.2') centralepilote_update_v_0_2($v_version);
+  if ($v_version < '0.3') centralepilote_update_v_0_3($v_version);
+  if ($v_version < '0.4') centralepilote_update_v_0_4($v_version);
+  if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
+  if ($v_version < '1.1') centralepilote_update_v_1.1($v_version);
+  */
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
@@ -75,6 +86,54 @@ function centralepilote_update() {
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
 }
 
+
+function centralepilote_update_v_1_1($v_from_version='') {
+    
+  // ----- Look for each equip
+  $eqLogics = eqLogic::byType('centralepilote');
+  foreach ($eqLogics as $v_eq) {
+    $v_flag_save = false;
+    
+    if (!$v_eq->cpIsType(array('radiateur','zone'))) {
+      continue;
+    }
+    
+    // ----- Ajout de la configuration de sortie progressive du delestage
+    if ($v_eq->getConfiguration('delestage_sortie_delai', '') == '') {
+      $v_eq->setConfiguration('delestage_sortie_delai', 0);
+      $v_flag_save = true;
+    }
+    
+    // ----- Look to add cmd
+    $v_cmd = $v_eq->getCmd(null, 'window_open');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'window_open'");
+      $v_eq->cpCmdCreate('window_open', ['name'=>'Window Open', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'icon'=>'icon jeedom-fenetre-ouverte']);
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'window_close');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'window_close'");
+      $v_eq->cpCmdCreate('window_close', ['name'=>'Window Close', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ferme']);
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'window_swap');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'window_swap'");
+      $v_eq->cpCmdCreate('window_swap', ['name'=>'Window Swap', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ouverte']);
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'window_status');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Device '".$v_eq->getName()."' : Add missing cmd 'window_status'");
+      $v_eq->cpCmdCreate('window_status', ['name'=>'Window Status', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+    }
+
+    
+  }
+  
+    
+}
 
 function centralepilote_update_v_0_8($v_from_version='') {
   if ($v_from_version == '0.3') {
