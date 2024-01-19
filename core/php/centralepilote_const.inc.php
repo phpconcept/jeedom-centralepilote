@@ -16,19 +16,8 @@
 * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once __DIR__  . '/../../../../core/php/core.inc.php';
+  // ----- Current version
+  define('CP_VERSION', '1.3');
 
-require_once __DIR__  . '/../../../../plugins/centralepilote/core/php/centralepilote_const.inc.php';
-
-require_once __DIR__  . '/../../../../plugins/centralepilote/core/class/centralepilotelog.class.php';
-require_once __DIR__  . '/../../../../plugins/centralepilote/core/class/centralepilote.class.php';
-
-
-/*
- * Non obligatoire mais peut être utilisé si vous voulez charger en même temps que votre
- * plugin des librairies externes (ne pas oublier d'adapter plugin_info/info.xml).
- * 
- * 
- */
 
 ?>
