@@ -20,9 +20,6 @@
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) . '/../../../../plugins/centralepilote/core/php/centralepilote.inc.php';
 
-  // ----- Current version
-  define('CP_VERSION', '1.3');
-  
 
 class centralepilote extends eqLogic {
 

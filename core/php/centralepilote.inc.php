@@ -21,6 +21,9 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
 require_once __DIR__  . '/../../../../plugins/centralepilote/core/class/centralepilotelog.class.php';
 require_once __DIR__  . '/../../../../plugins/centralepilote/core/class/centralepilote.class.php';
 
+  // ----- Current version
+  define('CP_VERSION', '1.3');
+
 /*
  * Non obligatoire mais peut être utilisé si vous voulez charger en même temps que votre
  * plugin des librairies externes (ne pas oublier d'adapter plugin_info/info.xml).

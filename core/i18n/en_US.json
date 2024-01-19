@@ -190,7 +190,8 @@
         "Couleurs" : "Colors",
         "Icones" : "Icons",
         "Icones et Couleurs" : "Icons and Colors",
-        "Widgets par d&eacute;faut : " : "USe default widgets : ",
+        "Widgets par d&eacute;faut : " : "Use default widgets : ",
+        "Github Version" : "Github Version",
 
         "#": "#"
     },

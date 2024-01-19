@@ -16,6 +16,7 @@
  */
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
+require_once dirname(__FILE__) . '/../../../plugins/centralepilote/core/php/centralepilote.inc.php';
 include_file('core', 'authentification', 'php');
 if (!isConnect()) {
     include_file('desktop', '404', 'php');
@@ -33,6 +34,9 @@ if (!isConnect()) {
             <div class="col-lg-5">
                 <input type="checkbox" class="configKey form-control" data-l1key="standard_widget">
             </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-4 control-label">{{Github Version}} : <?php echo CP_VERSION;?></label>
         </div>
 
 
