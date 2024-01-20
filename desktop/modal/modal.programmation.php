@@ -91,12 +91,15 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     <div class="form-group">
         <label class="col-sm-3 control-label" style="margin-left: 10px;">{{Précision}}</label>
         <div class="col-sm-3">
-          <select id="cp_prog_mode_horaire" class=" form-control" >
+          <select id="cp_prog_mode_horaire_select" class=" form-control" >
               <option value="horaire">{{Horaire}}</option>
+              <option value="demiheure">{{Demi-Heure}}</option>
          </select>
         </div>
     </div>
   </div>
+
+  <div id="cp_prog_table_horaire">
 
   <div class="row">
     <div class="col-sm-1">
@@ -106,7 +109,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     </div>
   </div>
 
-  <div class="row">
+  <div class="row" >
     <div class="col-sm-1">
     </div>
     <div class="col-sm-10">
@@ -206,7 +209,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
       }
       */
 
-      echo '<td style="'.$v_color.'"><i id="cp_'.$v_day.'_'.$i.'" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-jour="'.$v_day.'" data-heure="'.$i.'" data-mode="'.$v_mode.'"></i></td>';
+      echo '<td style="'.$v_color.'"><i id="cp_'.$v_day.'_'.$i.'" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-jour="'.$v_day.'" data-heure="'.$i.'" data-minute="00" data-mode="'.$v_mode.'"></i></td>';
     }
     echo '</tr>';
   }
@@ -217,8 +220,132 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
             
     </div>
   </div>
+  </div>
+
+
+  <div id="cp_prog_table_demiheure">
+  <div class="row">
+    <div class="col-sm-12">
+      <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}</div>
+    </div>
+  </div>
 
             
+  <div class="row">
+    <div class="col-sm-12">
+    
+    <table class="table table-bordered">
+    <tbody>
+     <tr>
+     <td></td>
+
+     <td>     
+       <div class="dropdown">
+       <i class="fa fa-ellipsis-v dropdown-toggle" data-toggle="dropdown"></i>      
+       <ul class="dropdown-menu">
+         <li><label style="padding: 0px 5px;"><a class="cp_mode_duplicate" href="#">{{Dupliquer}}</a></label></li>
+         <li><label style="padding: 0px 5px;"><a class="cp_mode_load" href="#">{{Annuler}}</a></label></li>
+         <li><label style="padding: 0px 5px;"><a class="cp_mode_save" href="#">{{Sauvegarder}}</a></label></li>
+       </ul>
+       </div>
+     </td>
+
+     <td>0h<br>00/30</td>
+     <td>1h<br>00/30</td>
+     <td>2h<br>00/30</td>
+     <td>3h<br>00/30</td>
+
+     <td>4h<br>00/30</td>
+     <td>5h<br>00/30</td>
+     <td>6h<br>00/30</td>
+     <td>7h<br>00/30</td>
+
+     <td>8h<br>00/30</td>
+     <td>9h<br>00/30</td>
+     <td>10h<br>00/30</td>
+     <td>11h<br>00/30</td>
+
+     <td>12h<br>00/30</td>
+     <td>13h<br>00/30</td>
+     <td>14h<br>00/30</td>
+     <td>15h<br>00/30</td>
+
+     <td>16h<br>00/30</td>
+     <td>17h<br>00/30</td>
+     <td>18h<br>00/30</td>
+     <td>19h<br>00/30</td>
+
+     <td>20h<br>00/30</td>
+     <td>21h<br>00/30</td>
+     <td>22h<br>00/30</td>
+     <td>23h<br>00/30</td>
+
+     </tr>
+     
+<?php 
+  $v_days = array('lundi' => __('Lundi', __FILE__), 
+                  'mardi' => __('Mardi', __FILE__),
+                  'mercredi' => __('Mercredi', __FILE__),
+                  'jeudi' => __('Jeudi', __FILE__),
+                  'vendredi' => __('Vendredi', __FILE__),
+                  'samedi' => __('Samedi', __FILE__),
+                  'dimanche' => __('Dimanche', __FILE__));
+
+  // ----- Get display mode
+  //$v_display_mode = centralepilote::cpGetProgDisplayMode();
+  
+  // Display each day, each hour 
+  foreach ($v_days as $v_day => $v_day_name) {
+    echo '<tr><td>'.$v_day_name.'</td>';
+    //echo '<td><i class="fa fa-ellipsis-v" aria-hidden="true"></i></td>';
+    echo '<td><div class="dropdown"><i class="fa fa-ellipsis-v dropdown-toggle" data-toggle="dropdown"></i><ul class="dropdown-menu">';
+    echo '<li><label style="padding: 0px 5px;"><a href="#">{{Réinitialiser}}</a></label></li>';
+    /* TBC
+    echo '<li><label style="padding: 0px 5px;"><a href="#">Copier Lundi</a></label></li>
+       <li><label style="padding: 0px 5px;"><a href="#">Copier Mardi</a></label></li>
+       <li><label style="padding: 0px 5px;"><a href="#">Copier Mercredi</a></label></li>
+       <li><label style="padding: 0px 5px;"><a href="#">Copier Jeudi</a></label></li>
+       <li><label style="padding: 0px 5px;"><a href="#">Copier Vendredi</a></label></li>
+       <li><label style="padding: 0px 5px;"><a href="#">Copier Samedi</a></label></li>
+       <li><label style="padding: 0px 5px;"><a href="#">Copier Dimanche</a></label></li>';
+       */
+    echo '</ul></div></td>';
+    
+    for ($i=0; $i<24; $i++) {
+      // TBC
+      $v_mode = 'eco';
+      
+/*      if ($v_display_mode == 'color') {
+        $v_icon = '';
+        $v_color = "background-color: ".centralepilote::cpModeGetColor($v_mode).";";
+        $v_color_icon = "";
+      }
+      else {
+      */
+        $v_icon = centralepilote::cpModeGetIconClass($v_mode);
+        $v_color = '';
+        $v_color_icon = "color: ".centralepilote::cpModeGetColor($v_mode).";";
+/*
+      }
+      */
+
+//      echo '<td style="'.$v_color.'"><i id="cp_'.$v_day.'_'.$i.'" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-jour="'.$v_day.'" data-heure="'.$i.'" data-minute="00" data-mode="'.$v_mode.'"></i></td>';
+
+      echo '<td style="'.$v_color.'"><i id="cp_'.$v_day.'_'.$i.'" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-jour="'.$v_day.'" data-heure="'.$i.'" data-minute="00" data-mode="'.$v_mode.'"></i>';
+      echo '/<i id="cp_'.$v_day.'_'.$i.'_30" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-jour="'.$v_day.'" data-heure="'.$i.'" data-minute="30" data-mode="'.$v_mode.'"></i></td>';
+    }
+    echo '</tr>';
+  }
+?>
+
+        </tbody>    
+  </table>
+            
+    </div>
+  </div>
+  </div>
+  
+                        
   <div class="row">
     <div class="col-sm-4" ></div>
     <div class="col-sm-4">

@@ -439,3 +439,27 @@ function cp_prog_update_agenda() {
 $('#cp_prog_select').on('change', function (e) {
   cp_prog_load($('#cp_prog_select').val());
 });
+
+
+/*
+* Fonction appelée lors de la selection dans la liste des modes horaires
+*/
+$('#cp_prog_mode_horaire_select').on('change', function (e) {
+  cp_prog_mode_horaire($('#cp_prog_mode_horaire_select').val());
+});
+
+/*
+* Modification du mode horaire
+*/
+function cp_prog_mode_horaire(p_mode_horaire) {
+  if (p_mode_horaire == 'horaire') {
+    $('#cp_prog_table_horaire').show();
+    $('#cp_prog_table_demiheure').hide();
+  }
+  else {
+    $('#cp_prog_table_horaire').hide();
+    $('#cp_prog_table_demiheure').show();
+  }
+}
+
+
