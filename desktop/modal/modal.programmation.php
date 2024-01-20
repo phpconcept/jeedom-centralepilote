@@ -91,6 +91,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     <div class="form-group">
         <label class="col-sm-3 control-label" style="margin-left: 10px;">{{Précision}}</label>
         <div class="col-sm-3">
+          <input type="hidden" class="form-control " id="cp_prog_mode_horaire">
           <select id="cp_prog_mode_horaire_select" class=" form-control" >
               <option value="horaire">{{Horaire}}</option>
               <option value="demiheure">{{Demi-Heure}}</option>
@@ -332,9 +333,9 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
 //      echo '<td style="'.$v_color.'"><i id="cp_'.$v_day.'_'.$i.'" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-jour="'.$v_day.'" data-heure="'.$i.'" data-minute="00" data-mode="'.$v_mode.'"></i></td>';
 
       echo '<td style="'.$v_color.'">';
-      echo '<i id="cp_'.$v_day.'_'.$i.'_00" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-mode_horaire="demiheure" data-jour="'.$v_day.'" data-heure="'.$i.'" data-minute="00" data-mode="'.$v_mode.'"></i>';
+      echo '<i id="cp_'.$v_day.'_'.$i.'_00" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-mode_horaire="demiheure" data-jour="'.$v_day.'" data-heure="'.$i.'_00" data-minute="00" data-mode="'.$v_mode.'"></i>';
       echo '/';
-      echo '<i id="cp_'.$v_day.'_'.$i.'_30" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-mode_horaire="demiheure" data-jour="'.$v_day.'" data-heure="'.$i.'" data-minute="30" data-mode="'.$v_mode.'"></i>';
+      echo '<i id="cp_'.$v_day.'_'.$i.'_30" style="'.$v_color_icon.'" class="'.$v_icon.' cp_mode_select cp_mode_'.$v_mode.'" data-mode_horaire="demiheure" data-jour="'.$v_day.'" data-heure="'.$i.'_30" data-minute="30" data-mode="'.$v_mode.'"></i>';
       echo '</td>';
     }
     echo '</tr>';

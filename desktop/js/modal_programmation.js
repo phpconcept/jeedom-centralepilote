@@ -348,9 +348,12 @@ function cp_prog_display(p_prog) {
   else {
     v_val = 'horaire';
   }
+
   $('#cp_prog_mode_horaire_select option[value="'+v_val+'"]').prop('selected', true);
+  $('#cp_prog_mode_horaire').val(v_val);
+  
   // ----- Change le display des tableaux
-  cp_prog_mode_horaire(v_val);
+  cp_prog_mode_horaire_hide(v_val);
 
   // ----- Afficher l'agenda des plages horaires
   v_agenda = v_obj.agenda;
@@ -414,7 +417,8 @@ function cp_prog_update_agenda() {
   v_id = $("#cp_prog_id").val();
   v_name = $("#cp_prog_name").val();
   v_short_name = $("#cp_prog_short_name").val();
-  v_mode_horaire = $('#cp_prog_mode_horaire_select').val();
+  //v_mode_horaire = $('#cp_prog_mode_horaire_select').val();
+  v_mode_horaire = $('#cp_prog_mode_horaire').val();
   
   
   $('.cp_mode_select[data-mode_horaire='+v_mode_horaire+']').each(function (p_value) {
@@ -459,13 +463,47 @@ $('#cp_prog_select').on('change', function (e) {
 * Fonction appelée lors de la selection dans la liste des modes horaires
 */
 $('#cp_prog_mode_horaire_select').on('change', function (e) {
-  cp_prog_mode_horaire($('#cp_prog_mode_horaire_select').val());
+  cp_prog_mode_swap_horaire($('#cp_prog_mode_horaire_select').val());
 });
 
 /*
 * Modification du mode horaire
 */
-function cp_prog_mode_horaire(p_mode_horaire) {
+function cp_prog_mode_swap_horaire(p_mode_horaire) {
+
+  v_current_mode_horaire = $('#cp_prog_mode_horaire').val();
+  
+  // Look for no swap to do
+  if (v_current_mode_horaire == p_mode_horaire) {
+    return;
+  }
+  
+  // ----- Je parse toutes les valeurs et je les passe dans l'autre tableau
+  // en adaptant les demi-heures
+  $('.cp_mode_select[data-mode_horaire='+v_current_mode_horaire+']').each(function (p_value) {
+    var v_elt = $(this);
+    var v_jour = v_elt.data('jour');
+    var v_heure = v_elt.data('heure');
+    var v_mode = v_elt.data('mode');        
+    
+    if (v_current_mode_horaire == 'horaire') {
+      cp_mode_set_slot(v_jour, v_heure+'_00', v_mode);
+      cp_mode_set_slot(v_jour, v_heure+'_30', v_mode);
+    }
+    else {
+      // extraire substring _00 et ne fixe que l'heure sans le 00
+    }
+        
+  });  
+  
+  // ----- Update hidden value
+  $('#cp_prog_mode_horaire').val(p_mode_horaire);
+  
+  cp_prog_mode_horaire_hide(p_mode_horaire)
+}
+
+function cp_prog_mode_horaire_hide(p_mode_horaire) {
+
   if (p_mode_horaire == 'horaire') {
     $('#cp_prog_table_horaire').show();
     $('#cp_prog_table_demiheure').hide();
@@ -474,6 +512,7 @@ function cp_prog_mode_horaire(p_mode_horaire) {
     $('#cp_prog_table_horaire').hide();
     $('#cp_prog_table_demiheure').show();
   }
+  
 }
 
 
