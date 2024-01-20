@@ -542,6 +542,7 @@ class centralepilote extends eqLogic {
       // ----- Static default program
       $v_prog0  = '{"id":"0","name":"'.__("Programmation par défaut",__FILE__).'",';
       $v_prog0 .= '"short_name":"'.__("Défaut",__FILE__).'",';
+      $v_prog0 .= '"mode_horaire":"horaire",'; // ou 'demiheure'
       $v_prog0 .= '"agenda":{';
       $v_prog0 .= ' "lundi":{"0":"eco","1":"eco","2":"eco","3":"eco","4":"eco","5":"eco","6":"eco","7":"eco","8":"eco","9":"eco","10":"eco","11":"eco","12":"eco","13":"eco","14":"eco","15":"eco","16":"eco","17":"eco","18":"eco","19":"eco","20":"eco","21":"eco","22":"eco","23":"eco"},';
       $v_prog0 .= ' "mardi":{"0":"eco","1":"eco","2":"eco","3":"eco","4":"eco","5":"eco","6":"eco","7":"eco","8":"eco","9":"eco","10":"eco","11":"eco","12":"eco","13":"eco","14":"eco","15":"eco","16":"eco","17":"eco","18":"eco","19":"eco","20":"eco","21":"eco","22":"eco","23":"eco"},';
@@ -716,7 +717,7 @@ class centralepilote extends eqLogic {
         return('');
       }
       
-      if (isset($v_prog['short_name'])) {
+      if ((isset($v_prog['short_name'])) && ($v_prog['short_name']!='')) {
         return($v_prog['short_name']);
       }
       
@@ -868,7 +869,7 @@ class centralepilote extends eqLogic {
       // ----- Generate the list
       $v_str_list = array();
       foreach ($v_prog_list as $v_key => $v_prog) {
-        if (isset($v_prog['short_name'])) {
+        if (isset($v_prog['short_name']) && ($v_prog['short_name']!='')) {
           $v_name = $v_prog['short_name'];
         }
         else {
