@@ -341,6 +341,18 @@ function cp_prog_display(p_prog) {
     $('#cp_prog_short_name').val('');
   }
   
+  // ----- Choisir le bon mode horaire dans la liste deroulante
+  if ((v_obj.mode_horaire) && (v_obj.mode_horaire != '')) {
+    v_val = v_obj.mode_horaire;
+  }
+  else {
+    v_val = 'horaire';
+  }
+  $('#cp_prog_mode_horaire_select option[value="'+v_val+'"]').prop('selected', true);
+  // ----- Change le display des tableaux
+  cp_prog_mode_horaire(v_val);
+
+  // ----- Afficher l'agenda des plages horaires
   v_agenda = v_obj.agenda;
   
   //v_val = '';
@@ -398,8 +410,14 @@ function cp_prog_update_agenda() {
   var v_val = {};
   var v_current_day = '';
   var v_result = '';
+
+  v_id = $("#cp_prog_id").val();
+  v_name = $("#cp_prog_name").val();
+  v_short_name = $("#cp_prog_short_name").val();
+  v_mode_horaire = $('#cp_prog_mode_horaire_select').val();
   
-  $('.cp_mode_select').each(function (p_value) {
+  
+  $('.cp_mode_select[data-mode_horaire='+v_mode_horaire+']').each(function (p_value) {
     var v_elt = $(this);
     var v_jour = v_elt.data('jour');
     var v_heure = v_elt.data('heure');
@@ -419,11 +437,7 @@ function cp_prog_update_agenda() {
   // ----- Store last day
   v_agenda[v_current_day] = v_obj;
   
-  v_id = $("#cp_prog_id").val();
-  v_name = $("#cp_prog_name").val();
-  v_short_name = $("#cp_prog_short_name").val();
-  
-  v_prog = {'id':v_id, 'name':v_name, 'short_name':v_short_name, 'agenda':v_agenda};
+  v_prog = {'id':v_id, 'name':v_name, 'short_name':v_short_name, 'mode_horaire': v_mode_horaire, 'agenda':v_agenda};
   v_result = JSON.stringify(v_prog);
   
   //v_result = JSON.stringify(v_agenda);
