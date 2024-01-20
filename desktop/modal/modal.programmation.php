@@ -63,6 +63,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
             <h3 class="panel-title">{{Programmation}}
             <a class="cp_mode_save btn btn-success btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="far fa-check-circle icon-white"></i>&nbsp;&nbsp;{{Sauvegarder}}</a>
             <a class="cp_prog_delete btn btn-danger btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="fa fa-trash icon-white"></i>&nbsp;&nbsp;{{Supprimer}}</a>
+            <a class="cp_mode_duplicate btn btn-success btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="fa fa-clone icon-white"></i>&nbsp;&nbsp;{{Dupliquer}}</a>
             </h3>
         </div>
         <div class="panel-body">
@@ -73,6 +74,15 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
         <div class="col-sm-3">
             <input type="hidden" class="form-control " id="cp_prog_id">
             <input type="text" class="form-control" id="cp_prog_name">
+        </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+        <label class="col-sm-3 control-label" style="margin-left: 10px;">{{Nom court (optionel)}}</label>
+        <div class="col-sm-3">
+            <input type="text" class="form-control" id="cp_prog_short_name">
         </div>
     </div>
   </div>
@@ -110,6 +120,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
        <div class="dropdown">
        <i class="fa fa-ellipsis-v dropdown-toggle" data-toggle="dropdown"></i>      
        <ul class="dropdown-menu">
+         <li><label style="padding: 0px 5px;"><a class="cp_mode_duplicate" href="#">{{Dupliquer}}</a></label></li>
          <li><label style="padding: 0px 5px;"><a class="cp_mode_load" href="#">{{Annuler}}</a></label></li>
          <li><label style="padding: 0px 5px;"><a class="cp_mode_save" href="#">{{Sauvegarder}}</a></label></li>
        </ul>

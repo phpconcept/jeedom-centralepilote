@@ -112,6 +112,24 @@ $(".cp_mode_clean").off('click').on('click', function () {
 
 });
 
+$(".cp_mode_duplicate").off('click').on('click', function () {
+
+  $('#cp_prog_id').val('');
+
+  v_name = $("#cp_prog_name").val();
+  $('#cp_prog_name').val(v_name+'-copy');
+  
+  v_result = cp_prog_update_agenda();
+  
+  //alert('Save');
+  $('#cp_debug_value').html('Value : '+v_result);
+  
+  v_id = $("#cp_prog_id").val();
+  
+  cp_prog_save(v_id, v_result);
+  
+});
+
 function cp_prog_clean() {
 
   $.ajax({
@@ -172,6 +190,7 @@ function cp_prog_save(p_id, p_prog_json) {
   });
 
 }
+
 
 $(".cp_prog_delete").off('click').on('click', function () {
   v_id = $("#cp_prog_id").val();
@@ -315,6 +334,12 @@ function cp_prog_display(p_prog) {
     
   $('#cp_prog_id').val(v_obj.id);
   $('#cp_prog_name').val(v_obj.name);
+  if (v_obj.short_name) {
+    $('#cp_prog_short_name').val(v_obj.short_name);
+  }
+  else {
+    $('#cp_prog_short_name').val('');
+  }
   
   v_agenda = v_obj.agenda;
   
@@ -340,6 +365,7 @@ function cp_prog_reset() {
     
   $('#cp_prog_id').val('');
   $('#cp_prog_name').val('Nouvelle Programmation');
+  $('#cp_prog_short_name').val('');
     
   v_mode = 'eco';
   
@@ -395,8 +421,9 @@ function cp_prog_update_agenda() {
   
   v_id = $("#cp_prog_id").val();
   v_name = $("#cp_prog_name").val();
+  v_short_name = $("#cp_prog_short_name").val();
   
-  v_prog = {'id':v_id, 'name':v_name, 'agenda':v_agenda};
+  v_prog = {'id':v_id, 'name':v_name, 'short_name':v_short_name, 'agenda':v_agenda};
   v_result = JSON.stringify(v_prog);
   
   //v_result = JSON.stringify(v_agenda);

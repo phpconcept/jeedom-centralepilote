@@ -153,11 +153,13 @@
         "Horaire" : "Hour schedule",
         "Liste des Programmations" : "Programs list",
         "Nom de la programmation" : "Program name",
+        "Nom court (optionel)" : "Short Name (optional)",
         "Programmation" : "Program",
         "Précision" : "Accuracy",
         "Réinitialiser" : "Reinit",
         "Sauvegarder" : "Save",
         "Supprimer" : "Delete",
+        "Dupliquer" : "Duplicate",
         "Sélectionner une programmation : " : "Select a program : ",
 
         "#": "#"
@@ -242,6 +244,7 @@
         "Normal" : "Normal",
         "Pilotage par Zone" : "Control by zone",
         "Programmation par défaut" : "Default program",
+        "Défaut" : "Default",
         "Programme" : "Program",
         "Retour" : "Return",
         "Valider" : "Confirm",
