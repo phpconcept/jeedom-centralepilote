@@ -201,7 +201,8 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 ### Change Logs
 
 Release v1.3-beta :
-
+- Bug corrections :
+  - Réalignement de l'icône "Central Fil-Pilote" dans le menu de gestion du plugin.
 
 Release v1.2 (beta) :
 - Bug corrections :
