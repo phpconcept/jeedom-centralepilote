@@ -1010,7 +1010,17 @@ class centralepilote extends eqLogic {
         if ($v_item_mode != $v_current_mode) {
           $p_next_mode = $v_item_mode;
           if ($i_nom_jour != $p_jour) $p_next_jour = $i_nom_jour;
-          $p_next_time = $i_heure.'h';
+          if ($v_mode_demiheure) {
+            if ($i_minute < 30) {
+              $p_next_time = $i_heure.'h';
+            }
+            else {
+              $p_next_time = $i_heure.'h30';
+            }
+          }
+          else {
+            $p_next_time = $i_heure.'h';
+          }
           centralepilote::log('debug', "cpProgNextModeFromClockTick() : Next mode :'".$p_next_mode."', time :'".$p_next_time."'.");
           return(true);
         }
