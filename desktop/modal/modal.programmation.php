@@ -69,6 +69,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
         </div>
         <div class="panel-body">
 
+
   <div class="row">
     <div class="form-group">
         <label class="col-sm-3 control-label" style="margin-left: 10px;">{{Nom de la programmation}}</label>
@@ -97,17 +98,26 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
               <option value="horaire">{{Horaire}}</option>
               <option value="demiheure">{{Demi-Heure}}</option>
          </select>
-        </div>
+        </div>        
+        
     </div>
   </div>
 
-  <div id="cp_prog_table_horaire" style="overflow-x:scroll;">
+
+  <div class="col-sm-12" id="cp_prog_table_horaire" style="overflow-x:scroll;">
 
   <div class="row">
     <div class="col-sm-1">
     </div>
     <div class="col-sm-10">
-      <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}</div>
+      <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}
+      <div class="btn-group pull-right">
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="confort"><i class="fab fa-hotjar "></i> Confort</button>
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="eco"><i class="fas fa-leaf "></i> Eco</button>
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="horsgel"><i class="far fa-snowflake "></i> Hors Gel</button>
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="off"><i class="fas fa-power-off "></i> Off</button>
+      </div>
+      </div>
     </div>
   </div>
 
@@ -225,10 +235,17 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
   </div>
 
 
-  <div id="cp_prog_table_demiheure" style="overflow-x:scroll;">
+  <div class="col-sm-12" id="cp_prog_table_demiheure" style="overflow-x:scroll;">
   <div class="row">
     <div class="col-sm-12">
-      <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}</div>
+      <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}
+      <div class="btn-group pull-right">
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="confort"><i class="fab fa-hotjar "></i> Confort</button>
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="eco"><i class="fas fa-leaf "></i> Eco</button>
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="horsgel"><i class="far fa-snowflake "></i> Hors Gel</button>
+      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="off"><i class="fas fa-power-off "></i> Off</button>
+      </div>
+      </div>
     </div>
   </div>
 
@@ -350,7 +367,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
   </div>
   </div>
   
-                        
+<div class="col-sm-12"  style="display:none;">                        
   <div class="row">
     <div class="col-sm-4" ></div>
     <div class="col-sm-4">
@@ -366,6 +383,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     </div>
     <div class="col-sm-4" ></div>
   </div>
+</div>
 
     </div>
   </div>
