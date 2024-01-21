@@ -204,6 +204,8 @@ Release v1.3-beta :
 - Nouveautés :
   - Programmation : possibilité de dupliquer une programmation existante.
   - Programmation : ajout d'un nom court optionnel.
+  - Programmation : ajout d'un bouton annuler, permettant de revenir à la dernière sauvegarde faite.
+  - Programmation : possibilité de définir la précision des plages horaires à l'heure ou à la demi-heure.
   
 - Bug corrections :
   - Réalignement de l'icône "Central Fil-Pilote" dans le menu de gestion du plugin.

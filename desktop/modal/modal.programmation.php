@@ -62,6 +62,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
         <div class="panel-heading" style="background-color: #039be5;">
             <h3 class="panel-title">{{Programmation}}
             <a class="cp_mode_save btn btn-success btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="far fa-check-circle icon-white"></i>&nbsp;&nbsp;{{Sauvegarder}}</a>
+            <a class="cp_mode_load btn  btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="fa fa-ban icon-white"></i>&nbsp;&nbsp;{{Annuler}}</a>
             <a class="cp_prog_delete btn btn-danger btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="fa fa-trash icon-white"></i>&nbsp;&nbsp;{{Supprimer}}</a>
             <a class="cp_mode_duplicate btn btn-success btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="fa fa-clone icon-white"></i>&nbsp;&nbsp;{{Dupliquer}}</a>
             </h3>
@@ -100,7 +101,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     </div>
   </div>
 
-  <div id="cp_prog_table_horaire">
+  <div id="cp_prog_table_horaire" style="overflow-x:scroll;">
 
   <div class="row">
     <div class="col-sm-1">
@@ -224,7 +225,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
   </div>
 
 
-  <div id="cp_prog_table_demiheure">
+  <div id="cp_prog_table_demiheure" style="overflow-x:scroll;">
   <div class="row">
     <div class="col-sm-12">
       <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}</div>
@@ -233,7 +234,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
 
             
   <div class="row">
-    <div class="col-sm-12">
+    <div class="col-sm-12" >
     
     <table class="table table-bordered">
     <tbody>

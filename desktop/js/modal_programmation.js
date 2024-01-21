@@ -491,7 +491,10 @@ function cp_prog_mode_swap_horaire(p_mode_horaire) {
       cp_mode_set_slot(v_jour, v_heure+'_30', v_mode);
     }
     else {
-      // extraire substring _00 et ne fixe que l'heure sans le 00
+      if (v_position = v_heure.search("_00") != -1) {
+        v_new_heure = v_heure.replace("_00", ""); 
+        cp_mode_set_slot(v_jour, v_new_heure, v_mode);
+      }
     }
         
   });  
