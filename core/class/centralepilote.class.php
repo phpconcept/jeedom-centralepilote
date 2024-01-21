@@ -902,6 +902,17 @@ class centralepilote extends eqLogic {
         return($v_result);
       }
       
+      // ----- Regarde si précision à la demiheure
+      if (isset($v_prog['mode_horaire']) && ($v_prog['mode_horaire'] == 'demiheure')) {
+        if ($p_minute < 30) {
+          $p_heure = $p_heure.'_00';
+        }
+        else {
+          $p_heure = $p_heure.'_30';
+        }
+        centralepilote::log('debug', "cpProgModeFromClockTick() : Mode horaire demi heure value : ".$p_heure);
+      }
+      
       // ----- Get mode from jour/heure/minute
       if (!isset($v_prog['agenda'][$p_jour][$p_heure])) {
         centralepilote::log('debug', "cpProgModeFromClockTick() : Missing value for '".$p_jour."' '".$p_heure."h' for programme '".$p_id."'.");
@@ -922,6 +933,110 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public static function cpProgNextModeFromClockTick($p_id, &$p_next_mode, &$p_next_jour, &$p_next_time, $p_jour='', $p_heure='', $p_minute='') {
+      // TBC : conifgurable defautl value ?
+      $p_next_mode = '';
+      $p_next_jour = '';
+      $p_next_time = '';
+      $v_jour_nom = [1=>'lundi',2=>'mardi',3=>'mercredi',4=>'jeudi',5=>'vendredi',6=>'samedi',7=>'dimanche'];
+      $v_jour_index = ['lundi'=>1,'mardi'=>2,'mercredi'=>3,'jeudi'=>4,'vendredi'=>5,'samedi'=>6,'dimanche'=>7];
+
+      // ----- Look for empty info
+      if ($p_jour == '') {
+        $v_jour = date("N");  // lundi:1 ... dimanche:7        
+        $p_jour = $v_jour_nom[$v_jour];
+      }
+      if ($p_heure == '') {
+        $p_heure = date("G");  // de 0 à 23
+      }
+      if ($p_minute == '') {
+        $p_minute = date("i");  // de 00 à 59
+      }
+      
+      $v_prog = centralepilote::cpProgLoad($p_id);
+      if (!is_array($v_prog)) {
+        centralepilote::log('debug', "cpProgNextModeFromClockTick() : Unknown programme id '".$p_id."'.");
+        return(false);
+      }
+      
+      // ----- Memorise l'heure, sans les demiheures
+      $v_heure_ref = $p_heure;
+      
+      // ----- Regarde si précision à la demiheure
+      $v_mode_demiheure = false;
+      if (isset($v_prog['mode_horaire']) && ($v_prog['mode_horaire'] == 'demiheure')) {
+        $v_mode_demiheure = true;
+        if ($p_minute < 30) {
+          $p_heure = $p_heure.'_00';
+          $p_minute = 0;
+        }
+        else {
+          $p_heure = $p_heure.'_30';
+          $p_minute = 30;
+        }
+        centralepilote::log('debug', "cpProgNextModeFromClockTick() : Mode horaire demi heure value : ".$p_heure);
+      }
+
+      // ----- Get mode from jour/heure/minute
+      if (!isset($v_prog['agenda'][$p_jour][$p_heure])) {
+        centralepilote::log('debug', "cpProgNextModeFromClockTick() : Missing value for '".$p_jour."' '".$p_heure."h' for programme '".$p_id."'.");
+        return(false);
+      }
+      $v_current_mode = $v_prog['agenda'][$p_jour][$p_heure];
+      
+      $i_jour = $v_jour_index[$p_jour];
+      $i_heure = $v_heure_ref;
+      $i_minute = $p_minute;
+      $v_loop_detected = false;
+      $v_loop_count = 0; // for sanity check ...
+      while (!$v_loop_detected) {
+        $v_loop_count++;
+        if ($v_mode_demiheure) $i_minute += 30; else $i_minute += 60;
+        if ($i_minute >= 60) { $i_minute = 0; $i_heure++; }
+        //$i_heure++;
+        if ($i_heure > 23) { $i_heure = 0; $i_jour++; }
+        if ($i_jour > 7) { $i_jour = 1; }
+        $i_nom_jour = $v_jour_nom[$i_jour];
+        if ($v_mode_demiheure) {
+          if ($i_minute < 30) {
+            $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure.'_00'];
+          }
+          else {
+            $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure.'_30'];
+          }
+        }
+        else {
+          $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure];
+        }
+        if ($v_item_mode != $v_current_mode) {
+          $p_next_mode = $v_item_mode;
+          if ($i_nom_jour != $p_jour) $p_next_jour = $i_nom_jour;
+          $p_next_time = $i_heure.'h';
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Next mode :'".$p_next_mode."', time :'".$p_next_time."'.");
+          return(true);
+        }
+        if (($i_minute == $p_minute) && ($i_heure == $v_heure_ref) && ($i_jour == $v_jour_index[$p_jour])) {
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Full week with same mode.");
+          $v_loop_detected = true;
+        }
+        if ($v_loop_count > 250) {
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Error : Loop detected.");
+          return(false);
+        }
+      }      
+      
+      return(false);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpProgNextModeFromClockTick()
+     * Description :
+     *   
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpProgNextModeFromClockTick_BACKUP($p_id, &$p_next_mode, &$p_next_jour, &$p_next_time, $p_jour='', $p_heure='', $p_minute='') {
       // TBC : conifgurable defautl value ?
       $p_next_mode = '';
       $p_next_jour = '';
