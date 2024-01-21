@@ -2033,7 +2033,7 @@ class centralepilote extends eqLogic {
       $replace['#title_a_min#'] = __("à", __FILE__);
       $replace['#title_missing_mode#'] = __("Faire un choix", __FILE__);
       $replace['#title_Choisir#'] = __("Choisir ...", __FILE__);
-      $replace['#title_next_mode#'] = __("Next", __FILE__);      
+      $replace['#title_next_mode#'] = __("Ensuite", __FILE__);      
       
       $replace['#width#'] = '320px';
       $replace['#height#'] = '160px';       
