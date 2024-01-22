@@ -258,6 +258,8 @@ function cp_centrale_display_init() {
     }
   });
   */
+  
+
 }
 
 /*
@@ -291,6 +293,7 @@ function cp_radiateur_display_init() {
   ($('.eqLogicAttr[data-l1key=configuration][data-l2key='+v_mode+']').value()==1 ? $('#cp_disp_'+v_mode+'').show() : $('#cp_disp_'+v_mode+'').hide()); 
   ($('.eqLogicAttr[data-l1key=configuration][data-l2key='+v_mode+']').value()==1 ? $('#cp_disp_no'+v_mode+'').hide() : $('#cp_disp_no'+v_mode+'').show()); 
   
+    
 }
 
 /*
@@ -303,6 +306,19 @@ function cp_zone_display_init() {
   $('.cp_panel_zone').show();
   $('.cp_panel_radiateur_zone').show();
   $('.cp_panel_centrale').hide();
+  
+  /*
+  $('.cp_attr_radiateur[data-l1key=configuration]').each(function () {
+    var v_elt = $(this);
+    v_elt.data('data-l2key', '');
+  });
+  
+  $('.cp_attr_centrale[data-l1key=configuration]').each(function () {
+    var v_elt = $(this);
+    v_elt.data('data-l2key', '');
+  });
+  */
+  
   
 }
 
@@ -496,11 +512,20 @@ function cp_nature_change(event) {
 
 /*
  * saveEqLogic callback called by plugin.template before saving an eqLogic
+ * 
+ * Le principe est le suivant :
+ * Si un attribut genre data-l2key="temperature" n'est présent que une seule fois dans les tags HTML
+ * On choisit dans le tableau v_att_to_save pour quel type on le sauve
+ * Si un attribut genre data-l2key="temperature_confort" se trouve a plusieurs endroit en fonction du type, alors on le 
+ * décalre  data-l2key="radiateur_temperature_confort" et data-l2key="zone_temperature_confort", il sera alors filtré dans le tableau
+ * mais on va reitrer le prefix xxxx_
+ * Ben non on peut pas retirer le prefix car alors pb pour la mise à jour à l'ouverture
  */
 function saveEqLogic(_eqLogic) {
   // ----- Temporary table to store the new list of configuration attributes/values
   var v_new_conf = {};
   
+  /*
   // ----- 
   var v_att_to_ignore = { "radiateur" : 
                           {"temperature_externe":1,
@@ -569,17 +594,120 @@ function saveEqLogic(_eqLogic) {
                            "puissance":1,
                            "delestage_sortie_delai":1}
                         };
+*/
+
+  var v_att_to_save = { "radiateur" : 
+                          {"support_confort":1,
+                           "support_confort_1":1,
+                           "support_confort_2":1,
+                           "support_eco":1,
+                           "support_horsgel":1,
+                           "support_off":1,
+                           "temperature":1,
+                           "puissance":1,
+                           "zone":1,
+                           "delestage_sortie_delai":1,
+                           "notes":1,
+                           "nature_fil_pilote":1,
+                           "lien_commutateur":1,
+                           "lien_commutateur_a":1,
+                           "lien_commutateur_b":1,
+                           "command_confort":1,
+                           "statut_confort":1,
+                           "fallback_confort":1,
+                           "command_eco":1,
+                           "statut_eco":1,
+                           "fallback_eco":1,
+                           "command_horsgel":1,
+                           "statut_horsgel":1,
+                           "fallback_horsgel":1,
+                           "command_off":1,
+                           "statut_off":1,
+                           "fallback_off":1,
+                           "command_confort_1":1,
+                           "statut_confort_1":1,
+                           "fallback_confort_1":1,
+                           "command_confort_2":1,
+                           "statut_confort_2":1,
+                           "fallback_confort_2":1,
+                           "radiateur_temperature_confort":1,
+                           "radiateur_temperature_confort_1":1,
+                           "radiateur_temperature_confort_2":1,
+                           "radiateur_temperature_eco":1,
+                           "radiateur_temperature_horsgel":1
+                           }
+                        ,"zone" : 
+                          {"support_confort":1,
+                           "support_confort_1":1,
+                           "support_confort_2":1,
+                           "support_eco":1,
+                           "support_horsgel":1,
+                           "support_off":1,
+                           "temperature":1,
+                           "delestage_sortie_delai":1,
+                           "notes":1,
+                           "zone_temperature_confort":1,
+                           "zone_temperature_confort_1":1,
+                           "zone_temperature_confort_2":1,
+                           "zone_temperature_eco":1,
+                           "zone_temperature_horsgel":1}
+                        ,"centrale" : 
+                          {"temperature_externe":1,
+                           "temperature_confort":1,
+                           "temperature_confort_1":1,
+                           "temperature_confort_2":1,
+                           "temperature_eco":1,
+                           "temperature_horsgel":1}
+                        };
 
 
+/*
   for (v_item in _eqLogic.configuration ) {
+  
   
     // ----- Look if this is an attribute to ignore
     // if missing from the list, will be accepted
     if ((v_att_to_ignore[_eqLogic.configuration.type]) && (v_att_to_ignore[_eqLogic.configuration.type][v_item])) {
       //console.log('Value of '+v_item+' is '+v_att_to_ignore[_eqLogic.configuration.type][v_item]);
+    console.log('ignore item : '+v_item);
     }
     else {
+    console.log('save item : '+v_item);
       v_new_conf[v_item] = _eqLogic.configuration[v_item];
+    }
+
+  }
+  */
+
+  for (v_item in _eqLogic.configuration ) {
+    
+    // ----- eqLogic type, should be 'radiateur', 'zone' or 'centrale'
+    var v_type = _eqLogic.configuration.type;
+    if ((v_type != 'radiateur') && (v_type != 'zone') && (v_type != 'centrale')) {
+      // TBC : error !
+    }
+    
+    // ----- Look if this is an attribute to save for this object type
+    if ((v_att_to_save[v_type][v_item]) || (v_item == 'type')) {
+      //console.log('item to save : '+v_item);
+      v_new_conf[v_item] = _eqLogic.configuration[v_item];
+      /*
+      // ----- On regarde si attribut prefixé, donc uniquement pour un type, on retire le prefixe
+      var v_position = v_item.search(v_type+'_');
+      if (v_position != -1) {
+        v_new_item = v_item.replace(v_type+'_', '');
+        //console.log('new item : '+v_new_item);
+        v_new_conf[v_new_item] = _eqLogic.configuration[v_item];
+      }
+      else {
+        v_new_conf[v_item] = _eqLogic.configuration[v_item];
+      }
+      */
+
+    }
+    
+    else {
+      console.log('item not to save : '+v_item);
     }
 
   }

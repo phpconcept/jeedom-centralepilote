@@ -110,25 +110,27 @@ function centralepilote_update_v_1_3($v_from_version='') {
       continue;
     }
     
+    $v_type = $v_eq->cpGetType();
+    
     // ----- Ajout des configurations de temperature cible par radiateur
-    if ($v_eq->getConfiguration('temperature_confort', '') == '') {
-      $v_eq->setConfiguration('temperature_confort', '');
+    if ($v_eq->getConfiguration($v_type.'_temperature_confort', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_confort', '');
       $v_flag_save = true;
     }
-    if ($v_eq->getConfiguration('temperature_confort_1', '') == '') {
-      $v_eq->setConfiguration('temperature_confort_1', '');
+    if ($v_eq->getConfiguration($v_type.'_temperature_confort_1', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_confort_1', '');
       $v_flag_save = true;
     }
-    if ($v_eq->getConfiguration('temperature_confort_2', '') == '') {
-      $v_eq->setConfiguration('temperature_confort_2', '');
+    if ($v_eq->getConfiguration($v_type.'_temperature_confort_2', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_confort_2', '');
       $v_flag_save = true;
     }
-    if ($v_eq->getConfiguration('temperature_eco', '') == '') {
-      $v_eq->setConfiguration('temperature_eco', '');
+    if ($v_eq->getConfiguration($v_type.'_temperature_eco', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_eco', '');
       $v_flag_save = true;
     }
-    if ($v_eq->getConfiguration('temperature_horsgel', '') == '') {
-      $v_eq->setConfiguration('temperature_horsgel', '');
+    if ($v_eq->getConfiguration($v_type.'_temperature_horsgel', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_horsgel', '');
       $v_flag_save = true;
     }
 

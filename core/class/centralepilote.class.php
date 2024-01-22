@@ -1309,11 +1309,11 @@ class centralepilote extends eqLogic {
 
         // ----- Temperatures de référence par radiateur
         // si vide, alors va utiliser la valeur au niveau de la centrale        
-        $this->setConfiguration('temperature_confort', '');
-        $this->setConfiguration('temperature_confort_1', '');
-        $this->setConfiguration('temperature_confort_2', '');
-        $this->setConfiguration('temperature_eco', '');
-        $this->setConfiguration('temperature_horsgel', '');
+        $this->setConfiguration('radiateur_temperature_confort', '');
+        $this->setConfiguration('radiateur_temperature_confort_1', '');
+        $this->setConfiguration('radiateur_temperature_confort_2', '');
+        $this->setConfiguration('radiateur_temperature_eco', '');
+        $this->setConfiguration('radiateur_temperature_horsgel', '');
               
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
@@ -1387,13 +1387,13 @@ class centralepilote extends eqLogic {
         // ----- Information concernant les declencheurs        
         $this->setConfiguration('trigger_list', array());
         
-        // ----- Temperatures de référence par radiateur
+        // ----- Temperatures de référence par zone
         // si vide, alors va utiliser la valeur au niveau de la centrale        
-        $this->setConfiguration('temperature_confort', '');
-        $this->setConfiguration('temperature_confort_1', '');
-        $this->setConfiguration('temperature_confort_2', '');
-        $this->setConfiguration('temperature_eco', '');
-        $this->setConfiguration('temperature_horsgel', '');
+        $this->setConfiguration('zone_temperature_confort', '');
+        $this->setConfiguration('zone_temperature_confort_1', '');
+        $this->setConfiguration('zone_temperature_confort_2', '');
+        $this->setConfiguration('zone_temperature_eco', '');
+        $this->setConfiguration('zone_temperature_horsgel', '');
               
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
@@ -2282,7 +2282,7 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpGetConf()
+     * Method : cpGetType()
      * Description :
      *   Retourne l'un des 3 types majeurs d'équipement : 'centrale', 'radiateur' ou 'zone'.
      * Parameters :
@@ -3818,9 +3818,11 @@ class centralepilote extends eqLogic {
         $v_mode = $p_mode;
       }
       
-      // ----- Get target temperature for the mode for this radiateur (future)
+      $v_type = $this->cpGetType();
+      
+      // ----- Get target temperature for the mode for this radiateur / zone
       $v_value = '';      
-      if (($v_virtual_cmd = $this->cpGetConf('temperature_'.$v_mode)) != '') {
+      if (($v_virtual_cmd = $this->cpGetConf($v_type.'_temperature_'.$v_mode)) != '') {
       
         $cmd = cmd::byId(str_replace('#', '', $v_virtual_cmd));
         if (is_object($cmd)) {
