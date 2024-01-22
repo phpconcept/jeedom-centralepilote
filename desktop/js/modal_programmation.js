@@ -112,6 +112,12 @@ $(".cp_mode_clean").off('click').on('click', function () {
 
 });
 
+$(".cp_mode_reset").off('click').on('click', function () {
+
+  cp_mode_reset();
+
+});
+
 $(".cp_mode_duplicate").off('click').on('click', function () {
 
   $('#cp_prog_id').val('');
@@ -382,6 +388,8 @@ function cp_prog_reset() {
   $('#cp_prog_name').val('Nouvelle Programmation');
   $('#cp_prog_short_name').val('');
     
+  cp_mode_reset();
+  /*
   v_mode = 'eco';
   
   for (i=0; i<24; i++) {
@@ -394,9 +402,11 @@ function cp_prog_reset() {
     cp_mode_set_slot('samedi', v_heure, v_mode);
     cp_mode_set_slot('dimanche', v_heure, v_mode);
   }
+  */
   
 
 }
+
 
 $("#cp_prog_add").off('click').on('click', function () {
 
@@ -516,6 +526,75 @@ function cp_prog_mode_horaire_hide(p_mode_horaire) {
     $('#cp_prog_table_demiheure').show();
   }
   
+}
+
+/*
+* 
+*/
+$(".cp_prog_copy_line").off('click').on('click', function () {
+  var v_elt = $(this);
+  var v_jour = v_elt.data('jour');
+  var v_jour_cible = v_elt.data('jour_cible');
+
+  //alert('copy jour : '+v_jour_cible+' dans jour '+v_jour);
+  
+  for (i=0; i<24; i++) {
+    // ----- Modification des créneaux en mode horaire
+    v_heure = i;
+    var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
+    cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
+    
+    // ----- Modification des créneaux en mode demiheure
+    v_heure = i+'_00';
+    var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
+    cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
+    v_heure = i+'_30';
+    var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
+    cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
+  }
+});
+
+
+/*
+* 
+*/
+$(".cp_prog_reset_line").off('click').on('click', function () {
+  var v_elt = $(this);
+  var v_jour = v_elt.data('jour');
+
+  //alert('reset jour : '+v_jour);
+  
+  for (i=0; i<24; i++) {
+    // ----- Modification des créneaux en mode horaire
+    v_heure = i;
+    cp_mode_set_slot(v_jour, v_heure, 'eco');
+    
+    // ----- Modification des créneaux en mode demiheure
+    v_heure = i+'_00';
+    cp_mode_set_slot(v_jour, v_heure, 'eco');
+    v_heure = i+'_30';
+    cp_mode_set_slot(v_jour, v_heure, 'eco');
+  }
+  
+});
+
+function cp_mode_reset() {
+    
+  const v_jour_list = ["lundi","mardi","mercredi", "jeudi","vendredi","samedi","dimanche"];
+  var v_mode = 'eco';
+  
+  for (i=0; i<24; i++) {
+    for (j=0; j<7; j++) {
+      v_heure = i;
+      cp_mode_set_slot(v_jour_list[j], v_heure, v_mode);
+      v_heure = i+'_00';
+      cp_mode_set_slot(v_jour_list[j], v_heure, v_mode);
+      v_heure = i+'_30';
+      cp_mode_set_slot(v_jour_list[j], v_heure, v_mode);
+    }
+  }
+  
+
 }
 
 

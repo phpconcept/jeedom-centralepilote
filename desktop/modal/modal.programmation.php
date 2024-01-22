@@ -135,9 +135,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
        <div class="dropdown">
        <i class="fa fa-ellipsis-v dropdown-toggle" data-toggle="dropdown"></i>      
        <ul class="dropdown-menu">
-         <li><label style="padding: 0px 5px;"><a class="cp_mode_duplicate" href="#">{{Dupliquer}}</a></label></li>
-         <li><label style="padding: 0px 5px;"><a class="cp_mode_load" href="#">{{Annuler}}</a></label></li>
-         <li><label style="padding: 0px 5px;"><a class="cp_mode_save" href="#">{{Sauvegarder}}</a></label></li>
+         <li><label style="padding: 0px 5px;"><a class="cp_mode_reset" href="#">{{Réinitialiser}}</a></label></li>
        </ul>
        </div>
      </td>
@@ -190,18 +188,28 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
   foreach ($v_days as $v_day => $v_day_name) {
     echo '<tr><td>'.$v_day_name.'</td>';
     //echo '<td><i class="fa fa-ellipsis-v" aria-hidden="true"></i></td>';
-    echo '<td><div class="dropdown"><i class="fa fa-ellipsis-v dropdown-toggle" data-toggle="dropdown"></i><ul class="dropdown-menu">';
-    echo '<li><label style="padding: 0px 5px;"><a href="#">{{Réinitialiser}}</a></label></li>';
-    /* TBC
-    echo '<li><label style="padding: 0px 5px;"><a href="#">Copier Lundi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Mardi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Mercredi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Jeudi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Vendredi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Samedi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Dimanche</a></label></li>';
-       */
+    
+    echo '<td><div class="dropdown"><i class="fa fa-clone dropdown-toggle" data-toggle="dropdown"></i><ul class="dropdown-menu">';
+    echo '<li><label class="cursor cp_prog_reset_line" style="padding: 0px 5px;" data-jour="'.$v_day.'">{{Réinitialiser}}</label></li>';
+       
+    foreach ($v_days as $v_day_copy => $v_day_name_copy) {
+      if ($v_day_copy == $v_day) continue;
+      echo '<li><label class="cursor cp_prog_copy_line" style="padding: 0px 5px;" data-jour="'.$v_day.'" data-jour_cible="'.$v_day_copy.'">{{Copier}} '.$v_day_name_copy.'</label></li>';
+    }
+       
     echo '</ul></div></td>';
+
+/*    
+    echo '<td><div class="dropdown"><i class="fa fa-clone dropdown-toggle" data-toggle="dropdown"></i>';
+    echo '<div class="dropdown-menu" style="width:400px;">';
+    echo '<div class="btn-group" >';
+    foreach ($v_days as $v_day_copy => $v_day_name_copy) {
+      if ($v_day_copy == $v_day) continue;
+      //echo '<label class="cursor cp_prog_copy_line" style="padding: 0px 5px;" data-jour="'.$v_day.'" data-jour_cible="'.$v_day_copy.'">{{Copier}} '.$v_day_name_copy.'</label>-&nbsp;';
+      echo '<button type="button" class="btn btn-xs cp_prog_copy_line" style="top: -1px !important; right: -6px !important;" data-jour="'.$v_day.'" data-jour_cible="'.$v_day_copy.'">'.$v_day_name_copy.'</button>';
+    }
+    echo '</div></div></div></td>';
+*/    
     
     for ($i=0; $i<24; $i++) {
       // TBC
@@ -262,9 +270,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
        <div class="dropdown">
        <i class="fa fa-ellipsis-v dropdown-toggle" data-toggle="dropdown"></i>      
        <ul class="dropdown-menu">
-         <li><label style="padding: 0px 5px;"><a class="cp_mode_duplicate" href="#">{{Dupliquer}}</a></label></li>
-         <li><label style="padding: 0px 5px;"><a class="cp_mode_load" href="#">{{Annuler}}</a></label></li>
-         <li><label style="padding: 0px 5px;"><a class="cp_mode_save" href="#">{{Sauvegarder}}</a></label></li>
+         <li><label style="padding: 0px 5px;"><a class="cp_mode_reset" href="#">{{Réinitialiser}}</a></label></li>
        </ul>
        </div>
      </td>
@@ -317,17 +323,14 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
   foreach ($v_days as $v_day => $v_day_name) {
     echo '<tr><td>'.$v_day_name.'</td>';
     //echo '<td><i class="fa fa-ellipsis-v" aria-hidden="true"></i></td>';
-    echo '<td><div class="dropdown"><i class="fa fa-ellipsis-v dropdown-toggle" data-toggle="dropdown"></i><ul class="dropdown-menu">';
-    echo '<li><label style="padding: 0px 5px;"><a href="#">{{Réinitialiser}}</a></label></li>';
-    /* TBC
-    echo '<li><label style="padding: 0px 5px;"><a href="#">Copier Lundi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Mardi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Mercredi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Jeudi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Vendredi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Samedi</a></label></li>
-       <li><label style="padding: 0px 5px;"><a href="#">Copier Dimanche</a></label></li>';
-       */
+    echo '<td><div class="dropdown"><i class="fa fa-clone dropdown-toggle" data-toggle="dropdown"></i><ul class="dropdown-menu">';
+    echo '<li><label class="cursor cp_prog_reset_line" style="padding: 0px 5px;" data-jour="'.$v_day.'">{{Réinitialiser}}</label></li>';
+       
+    foreach ($v_days as $v_day_copy => $v_day_name_copy) {
+      if ($v_day_copy == $v_day) continue;
+      echo '<li><label class="cursor cp_prog_copy_line" style="padding: 0px 5px;" data-jour="'.$v_day.'" data-jour_cible="'.$v_day_copy.'">{{Copier}} '.$v_day_name_copy.'</label></li>';
+    }
+       
     echo '</ul></div></td>';
     
     for ($i=0; $i<24; $i++) {
@@ -367,6 +370,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
   </div>
   </div>
   
+<!-- A retirer à terme -->
 <div class="col-sm-12"  style="display:none;">                        
   <div class="row">
     <div class="col-sm-4" ></div>
