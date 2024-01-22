@@ -1306,7 +1306,15 @@ class centralepilote extends eqLogic {
         
         // ----- Permet de décaler la sortie du délestage de x minutes x ne pouvant être que 0, 5, 30,60,90,120,150,180 (tranches de 30 minutes)
         $this->setConfiguration('delestage_sortie_delai', 0);
-        
+
+        // ----- Temperatures de référence par radiateur
+        // si vide, alors va utiliser la valeur au niveau de la centrale        
+        $this->setConfiguration('temperature_confort', '');
+        $this->setConfiguration('temperature_confort_1', '');
+        $this->setConfiguration('temperature_confort_2', '');
+        $this->setConfiguration('temperature_eco', '');
+        $this->setConfiguration('temperature_horsgel', '');
+              
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }
@@ -1379,6 +1387,14 @@ class centralepilote extends eqLogic {
         // ----- Information concernant les declencheurs        
         $this->setConfiguration('trigger_list', array());
         
+        // ----- Temperatures de référence par radiateur
+        // si vide, alors va utiliser la valeur au niveau de la centrale        
+        $this->setConfiguration('temperature_confort', '');
+        $this->setConfiguration('temperature_confort_1', '');
+        $this->setConfiguration('temperature_confort_2', '');
+        $this->setConfiguration('temperature_eco', '');
+        $this->setConfiguration('temperature_horsgel', '');
+              
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }
@@ -3803,11 +3819,28 @@ class centralepilote extends eqLogic {
       }
       
       // ----- Get target temperature for the mode for this radiateur (future)
-      // TBC
+      $v_value = '';      
+      if (($v_virtual_cmd = $this->cpGetConf('temperature_'.$v_mode)) != '') {
+      
+        $cmd = cmd::byId(str_replace('#', '', $v_virtual_cmd));
+        if (is_object($cmd)) {
+          $v_value = $cmd->execCmd();
+        }
+        else {
+          $v_value = $v_virtual_cmd;
+        }
+      }
       
       // ----- Get target temperature for the mode globally at the centrale level
-      $v_value = centralepilote::cpCentraleGetConfig('temperature_'.$v_mode);
-      //centralepilote::log('debug',  "Temp ".'temperature_'.$v_mode." '".$v_value."'.");
+      if ($v_value == '') {
+        $v_value = centralepilote::cpCentraleGetConfig('temperature_'.$v_mode);
+      }
+
+      if (is_numeric($v_value)) {
+        $v_value = round($v_value,1);
+      }
+
+      //centralepilote::log('debug',  "cpEqGetTemperatureCible() ".'temperature_'.$v_mode." '".$v_value."'.");
       
       return($v_value);
     }
@@ -3833,7 +3866,7 @@ class centralepilote extends eqLogic {
       if (!is_object($cmd)) {        
         return('');
       }
-      $v_value = $cmd->execCmd($p_options);
+      $v_value = $cmd->execCmd();
       $v_value_round = round($v_value,1);
       //centralepilote::log('debug',  "Value '".$v_value."', rounded : '".$v_value_round."'");
       
