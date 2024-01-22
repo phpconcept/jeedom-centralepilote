@@ -2809,7 +2809,7 @@ class centralepilote extends eqLogic {
       
       // TBC : Look and improve ?
       if ($this->cpGetConf('support_'.$p_mode) == 0) {
-        centralepilote::log('debug',  "mode '".$p_mode."' not supported");
+        centralepilote::log('debug',  "mode '".$p_mode."' not supported on this device.");
         if (($v_fallback = $this->cpGetConf('fallback_'.$p_mode)) != '') {
           $p_mode = $v_fallback;
           centralepilote::log('debug',  "fallback to '".$p_mode."'");
@@ -2844,15 +2844,15 @@ class centralepilote extends eqLogic {
       
       if ($this->cpGetType() == 'radiateur') {
 
+        // ----- Look for alternative mode
+        $p_mode = $this->cpModeAlternative($p_mode);
+        
         // ----- Look if already the same mode        
         if (($this->cpModeGetFromCmd() == $p_mode) && (!$p_force)) {
           centralepilote::log('debug',  "Equipement '".$this->getName()."' is already in mode '".$p_mode."'. skip.");
           return;
         }
 
-        // ----- Look for alternative mode
-        $p_mode = $this->cpModeAlternative($p_mode);
-        
         $v_command = '';
         switch ($p_mode) {
           case 'confort':
