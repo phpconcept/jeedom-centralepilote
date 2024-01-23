@@ -3841,6 +3841,10 @@ class centralepilote extends eqLogic {
       if (is_numeric($v_value)) {
         $v_value = round($v_value,1);
       }
+      else {
+        // si c'est un objet ou un array, il vaut mieux renvoyer vide
+        $v_value = '';
+      }
 
       //centralepilote::log('debug',  "cpEqGetTemperatureCible() ".'temperature_'.$v_mode." '".$v_value."'.");
       
