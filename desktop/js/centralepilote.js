@@ -588,7 +588,8 @@ function saveEqLogic(_eqLogic) {
     // ----- eqLogic type, should be 'radiateur', 'zone' or 'centrale'
     var v_type = _eqLogic.configuration.type;
     if ((v_type != 'radiateur') && (v_type != 'zone') && (v_type != 'centrale')) {
-      // TBC : error !
+      $('#div_alert').showAlert({message: 'saveEqLogic() : Type inconnu : '+v_type, level: 'warning'});
+      return _eqLogic;
     }
     
     // ----- Look if this is an attribute to save for this object type
