@@ -200,12 +200,13 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
-Release v1.3-beta :
+Release v1.3 (beta) :
 - Nouveautés :
   - Programmation : possibilité de dupliquer une programmation existante.
   - Programmation : ajout d'un nom court optionnel.
   - Programmation : ajout d'un bouton annuler, permettant de revenir à la dernière sauvegarde faite.
   - Programmation : possibilité de définir la précision des plages horaires à l'heure ou à la demi-heure.
+  - Température de référence : possibilité d'indiquer une température de référence, ou un lien vers une commande info avec cette température, par radiateur ou par zone.
   
 - Bug corrections :
   - Réalignement de l'icône "Central Fil-Pilote" dans le menu de gestion du plugin.
