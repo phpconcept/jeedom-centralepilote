@@ -1248,7 +1248,7 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
         
         // ----- Here I can change the value because the centrale eq is created in "enable" status.
-        $this->checkAndUpdateCmd('etat', 'Normal');
+        $this->checkAndUpdateCmd('etat', 'normal');
       }
 
       else {
@@ -1663,7 +1663,7 @@ class centralepilote extends eqLogic {
             // TBC : normalement l'eq centrale est créé en mode 'enable' et n'est jamais desctivé, donc ne vient jamais là ... sauf peut être lors de l'activation/desactivation du plugin lui-même
             $v_value = $this->cpCmdGetValue('etat');
             if ($v_value == '') {
-              $this->checkAndUpdateCmd('etat', 'Normal');
+              $this->checkAndUpdateCmd('etat', 'normal');
             }
           }
           
@@ -3266,6 +3266,14 @@ class centralepilote extends eqLogic {
         else if ($p_bypass_mode == 'horsgel') {
           $v_mode = 'horsgel';
         }
+        else if ($p_bypass_mode == 'normal') {
+          $this->cpPilotageExitFromBypass();
+          return;
+        }
+        else {
+          centralepilote::log('debug',  "Error : unexpected bypass mode '".$p_bypass_mode."' here (".__FILE__.",".__LINE__.")");
+          return;
+        }
         
         // ----- When in delestage mode reset open_window status to close
         $this->checkAndUpdateCmd('window_status', 'close');
@@ -3273,7 +3281,7 @@ class centralepilote extends eqLogic {
       
       // ----- Unexpected values
       else {
-        centralepilote::log('debug',  "Error : unexpected bypass mode '".$p_bypass_mode."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug',  "Error : unexpected bypass type '".$p_bypass_type."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
