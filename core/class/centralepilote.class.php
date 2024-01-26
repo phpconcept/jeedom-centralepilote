@@ -3340,7 +3340,7 @@ class centralepilote extends eqLogic {
         
         // ----- Pas de delai donc on passe au pilotage d'avant
         else {
-          // rien à faire
+          // rien à faire on a déjà la valeur dans $v_pilotage
         }
         
         
@@ -3348,6 +3348,11 @@ class centralepilote extends eqLogic {
       
       else if ($v_current_bypass_type == 'open_window') {
         $this->checkAndUpdateCmd('window_status', 'close');
+      }
+      
+      else if ($v_current_bypass_type == 'no') {
+        // TBC : on est déjà hors bypass, donc normalement rien à faire, on sort ...
+        return;
       }
       
       else {
@@ -3657,10 +3662,13 @@ class centralepilote extends eqLogic {
       
       // ----- Check delestage ...
       $v_bypass = centralepilote::cpCentraleGet()->cpCmdGetValue('etat');
+      centralepilote::log('debug', "cpRadChangeToEnable() : Central bypass mode is set to '".$v_bypass."'");
       if (($v_bypass != '') && ($v_bypass != 'normal')) {
+        centralepilote::log('debug', "cpRadChangeToEnable() : device '".$this->getName()."' is set to bypass '".$v_bypass."'");
         $this->cpPilotageChangeToBypass('delestage', $v_bypass);
       }
       else {
+        centralepilote::log('debug', "cpRadChangeToEnable() : device '".$this->getName()."' is set to no bypass");
         // ----- Reset window_open to close
         $this->cpPilotageChangeToBypass('no');
       

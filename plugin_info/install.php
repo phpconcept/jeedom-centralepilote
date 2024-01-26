@@ -18,6 +18,7 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
+
 // Fonction exécutée automatiquement après l'installation ou activation du plugin 
 function centralepilote_install() {
 
@@ -86,16 +87,15 @@ function centralepilote_update() {
   if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
   if ($v_version < '1.1') centralepilote_update_v_1.1($v_version);
   */
-  
-  if ($v_version < '1.2') centralepilote_update_v_1.2($v_version);
-  if ($v_version < '1.3') centralepilote_update_v_1.3($v_version);
+
+  if ($v_version < '1.2') centralepilote_update_v_1_2($v_version);
+  if ($v_version < '1.3') centralepilote_update_v_1_3($v_version);
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
 }
-
 
 function centralepilote_update_v_1_3($v_from_version='') {
 
