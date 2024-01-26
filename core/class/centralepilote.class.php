@@ -4425,7 +4425,9 @@ class centralepiloteCmd extends cmd {
       // ----- Update all equip
       $eqLogics = eqLogic::byType('centralepilote');
       foreach ($eqLogics as $v_eq) {
-        $v_eq->cpPilotageChangeToBypass($v_bypass_type, $v_bypass_mode);
+        if ($v_eq->cpIsType(array('radiateur','zone'))) {
+          $v_eq->cpPilotageChangeToBypass($v_bypass_type, $v_bypass_mode);
+        }
       }      
       
       $p_centrale->refreshWidget();
