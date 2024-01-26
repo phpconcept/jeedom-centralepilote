@@ -200,7 +200,19 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
-Release v1.2-beta :
+Release v1.3 (beta) :
+- Nouveautés :
+  - Programmation : possibilité de dupliquer une programmation existante.
+  - Programmation : ajout d'un nom court optionnel.
+  - Programmation : ajout d'un bouton annuler, permettant de revenir à la dernière sauvegarde faite.
+  - Programmation : possibilité de définir la précision des plages horaires à l'heure ou à la demi-heure.
+  - Température de référence : possibilité d'indiquer une température de référence, ou un lien vers une commande info avec cette température, par radiateur ou par zone.
+  
+- Bug corrections :
+  - Réalignement de l'icône "Central Fil-Pilote" dans le menu de gestion du plugin.
+  - A l'installation du plugin la centrale prend bien la valeur par defaut 'normal' de sa commande d'état.
+
+Release v1.2 (beta) :
 - Bug corrections :
   - La liste des programmations s'affiche correctement dans les scenarii. A noter cependant que la valeur "Aucun" est affichée par défaut, si elle est selectionnée alors c'est le programme par defaut qui est selectionné.
   - Amélioration de l'affichage du pilotage centralisé de tous les radiateurs. Lorsqu'il s'agit d'un délestage (off), affichage du message "Délestage Centralisé", sinon affichage du message "Pilotage Centralisé".
