@@ -210,6 +210,7 @@ Release v1.3 (beta) :
   
 - Bug corrections :
   - Réalignement de l'icône "Central Fil-Pilote" dans le menu de gestion du plugin.
+  - A l'installation du plugin la centrale prend bien la valeur par defaut 'normal' de sa commande d'état.
 
 Release v1.2 (beta) :
 - Bug corrections :
