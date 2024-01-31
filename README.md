@@ -200,9 +200,11 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
-Release v1.3 (beta) :
+Release v1.3 :
 - Nouveautés :
   - Programmation : possibilité de dupliquer une programmation existante.
+  - Programmation : possibilité de dupliquer une ligne de programmation d'un jour sur l'autre.
+  - Programmation : possibilité de remettre à zéro une ligne de programmation.
   - Programmation : ajout d'un nom court optionnel.
   - Programmation : ajout d'un bouton annuler, permettant de revenir à la dernière sauvegarde faite.
   - Programmation : possibilité de définir la précision des plages horaires à l'heure ou à la demi-heure.
