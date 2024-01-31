@@ -112,6 +112,30 @@ $(".cp_mode_clean").off('click').on('click', function () {
 
 });
 
+$(".cp_mode_reset").off('click').on('click', function () {
+
+  cp_mode_reset();
+
+});
+
+$(".cp_mode_duplicate").off('click').on('click', function () {
+
+  $('#cp_prog_id').val('');
+
+  v_name = $("#cp_prog_name").val();
+  $('#cp_prog_name').val(v_name+'-copy');
+  
+  v_result = cp_prog_update_agenda();
+  
+  //alert('Save');
+  $('#cp_debug_value').html('Value : '+v_result);
+  
+  v_id = $("#cp_prog_id").val();
+  
+  cp_prog_save(v_id, v_result);
+  
+});
+
 function cp_prog_clean() {
 
   $.ajax({
@@ -172,6 +196,7 @@ function cp_prog_save(p_id, p_prog_json) {
   });
 
 }
+
 
 $(".cp_prog_delete").off('click').on('click', function () {
   v_id = $("#cp_prog_id").val();
@@ -315,7 +340,28 @@ function cp_prog_display(p_prog) {
     
   $('#cp_prog_id').val(v_obj.id);
   $('#cp_prog_name').val(v_obj.name);
+  if (v_obj.short_name) {
+    $('#cp_prog_short_name').val(v_obj.short_name);
+  }
+  else {
+    $('#cp_prog_short_name').val('');
+  }
   
+  // ----- Choisir le bon mode horaire dans la liste deroulante
+  if ((v_obj.mode_horaire) && (v_obj.mode_horaire != '')) {
+    v_val = v_obj.mode_horaire;
+  }
+  else {
+    v_val = 'horaire';
+  }
+
+  $('#cp_prog_mode_horaire_select option[value="'+v_val+'"]').prop('selected', true);
+  $('#cp_prog_mode_horaire').val(v_val);
+  
+  // ----- Change le display des tableaux
+  cp_prog_mode_horaire_hide(v_val);
+
+  // ----- Afficher l'agenda des plages horaires
   v_agenda = v_obj.agenda;
   
   //v_val = '';
@@ -340,7 +386,10 @@ function cp_prog_reset() {
     
   $('#cp_prog_id').val('');
   $('#cp_prog_name').val('Nouvelle Programmation');
+  $('#cp_prog_short_name').val('');
     
+  cp_mode_reset();
+  /*
   v_mode = 'eco';
   
   for (i=0; i<24; i++) {
@@ -353,9 +402,11 @@ function cp_prog_reset() {
     cp_mode_set_slot('samedi', v_heure, v_mode);
     cp_mode_set_slot('dimanche', v_heure, v_mode);
   }
+  */
   
 
 }
+
 
 $("#cp_prog_add").off('click').on('click', function () {
 
@@ -372,8 +423,15 @@ function cp_prog_update_agenda() {
   var v_val = {};
   var v_current_day = '';
   var v_result = '';
+
+  v_id = $("#cp_prog_id").val();
+  v_name = $("#cp_prog_name").val();
+  v_short_name = $("#cp_prog_short_name").val();
+  //v_mode_horaire = $('#cp_prog_mode_horaire_select').val();
+  v_mode_horaire = $('#cp_prog_mode_horaire').val();
   
-  $('.cp_mode_select').each(function (p_value) {
+  
+  $('.cp_mode_select[data-mode_horaire='+v_mode_horaire+']').each(function (p_value) {
     var v_elt = $(this);
     var v_jour = v_elt.data('jour');
     var v_heure = v_elt.data('heure');
@@ -393,10 +451,7 @@ function cp_prog_update_agenda() {
   // ----- Store last day
   v_agenda[v_current_day] = v_obj;
   
-  v_id = $("#cp_prog_id").val();
-  v_name = $("#cp_prog_name").val();
-  
-  v_prog = {'id':v_id, 'name':v_name, 'agenda':v_agenda};
+  v_prog = {'id':v_id, 'name':v_name, 'short_name':v_short_name, 'mode_horaire': v_mode_horaire, 'agenda':v_agenda};
   v_result = JSON.stringify(v_prog);
   
   //v_result = JSON.stringify(v_agenda);
@@ -412,3 +467,134 @@ function cp_prog_update_agenda() {
 $('#cp_prog_select').on('change', function (e) {
   cp_prog_load($('#cp_prog_select').val());
 });
+
+
+/*
+* Fonction appelée lors de la selection dans la liste des modes horaires
+*/
+$('#cp_prog_mode_horaire_select').on('change', function (e) {
+  cp_prog_mode_swap_horaire($('#cp_prog_mode_horaire_select').val());
+});
+
+/*
+* Modification du mode horaire
+*/
+function cp_prog_mode_swap_horaire(p_mode_horaire) {
+
+  v_current_mode_horaire = $('#cp_prog_mode_horaire').val();
+  
+  // Look for no swap to do
+  if (v_current_mode_horaire == p_mode_horaire) {
+    return;
+  }
+  
+  // ----- Je parse toutes les valeurs et je les passe dans l'autre tableau
+  // en adaptant les demi-heures
+  $('.cp_mode_select[data-mode_horaire='+v_current_mode_horaire+']').each(function (p_value) {
+    var v_elt = $(this);
+    var v_jour = v_elt.data('jour');
+    var v_heure = v_elt.data('heure');
+    var v_mode = v_elt.data('mode');        
+    
+    if (v_current_mode_horaire == 'horaire') {
+      cp_mode_set_slot(v_jour, v_heure+'_00', v_mode);
+      cp_mode_set_slot(v_jour, v_heure+'_30', v_mode);
+    }
+    else {
+      if (v_position = v_heure.search("_00") != -1) {
+        v_new_heure = v_heure.replace("_00", ""); 
+        cp_mode_set_slot(v_jour, v_new_heure, v_mode);
+      }
+    }
+        
+  });  
+  
+  // ----- Update hidden value
+  $('#cp_prog_mode_horaire').val(p_mode_horaire);
+  
+  cp_prog_mode_horaire_hide(p_mode_horaire)
+}
+
+function cp_prog_mode_horaire_hide(p_mode_horaire) {
+
+  if (p_mode_horaire == 'horaire') {
+    $('#cp_prog_table_horaire').show();
+    $('#cp_prog_table_demiheure').hide();
+  }
+  else {
+    $('#cp_prog_table_horaire').hide();
+    $('#cp_prog_table_demiheure').show();
+  }
+  
+}
+
+/*
+* 
+*/
+$(".cp_prog_copy_line").off('click').on('click', function () {
+  var v_elt = $(this);
+  var v_jour = v_elt.data('jour');
+  var v_jour_cible = v_elt.data('jour_cible');
+
+  //alert('copy jour : '+v_jour_cible+' dans jour '+v_jour);
+  
+  for (i=0; i<24; i++) {
+    // ----- Modification des créneaux en mode horaire
+    v_heure = i;
+    var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
+    cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
+    
+    // ----- Modification des créneaux en mode demiheure
+    v_heure = i+'_00';
+    var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
+    cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
+    v_heure = i+'_30';
+    var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
+    cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
+  }
+});
+
+
+/*
+* 
+*/
+$(".cp_prog_reset_line").off('click').on('click', function () {
+  var v_elt = $(this);
+  var v_jour = v_elt.data('jour');
+
+  //alert('reset jour : '+v_jour);
+  
+  for (i=0; i<24; i++) {
+    // ----- Modification des créneaux en mode horaire
+    v_heure = i;
+    cp_mode_set_slot(v_jour, v_heure, 'eco');
+    
+    // ----- Modification des créneaux en mode demiheure
+    v_heure = i+'_00';
+    cp_mode_set_slot(v_jour, v_heure, 'eco');
+    v_heure = i+'_30';
+    cp_mode_set_slot(v_jour, v_heure, 'eco');
+  }
+  
+});
+
+function cp_mode_reset() {
+    
+  const v_jour_list = ["lundi","mardi","mercredi", "jeudi","vendredi","samedi","dimanche"];
+  var v_mode = 'eco';
+  
+  for (i=0; i<24; i++) {
+    for (j=0; j<7; j++) {
+      v_heure = i;
+      cp_mode_set_slot(v_jour_list[j], v_heure, v_mode);
+      v_heure = i+'_00';
+      cp_mode_set_slot(v_jour_list[j], v_heure, v_mode);
+      v_heure = i+'_30';
+      cp_mode_set_slot(v_jour_list[j], v_heure, v_mode);
+    }
+  }
+  
+
+}
+
+

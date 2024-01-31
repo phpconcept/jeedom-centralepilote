@@ -18,6 +18,7 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
+
 // Fonction exécutée automatiquement après l'installation ou activation du plugin 
 function centralepilote_install() {
 
@@ -72,6 +73,13 @@ function centralepilote_update() {
     if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
     if ($v_version != '1.1') centralepilote_update_v_1_1($v_version);
   }
+
+/*  else if (CP_VERSION == '1.2') {
+    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
+    if ($v_version < '1.1') centralepilote_update_v_1_1($v_version);
+    if ($v_version != '1.2') centralepilote_update_v_1_2($v_version);
+  }
+  */
 /*
   if ($v_version < '0.2') centralepilote_update_v_0_2($v_version);
   if ($v_version < '0.3') centralepilote_update_v_0_3($v_version);
@@ -79,11 +87,82 @@ function centralepilote_update() {
   if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
   if ($v_version < '1.1') centralepilote_update_v_1.1($v_version);
   */
+
+  if ($v_version < '1.2') centralepilote_update_v_1_2($v_version);
+  if ($v_version < '1.3') centralepilote_update_v_1_3($v_version);
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
+}
+
+function centralepilote_update_v_1_3($v_from_version='') {
+
+  log::add('centralepilote', 'info', "Update devices to version 1.3 of plugin 'centralepilote'");
+  
+  // ----- Look for each equip
+  $eqLogics = eqLogic::byType('centralepilote');
+  foreach ($eqLogics as $v_eq) {
+    $v_flag_save = false;
+    
+    if (!$v_eq->cpIsType(array('radiateur','zone'))) {
+      continue;
+    }
+    
+    $v_type = $v_eq->cpGetType();
+    
+    // ----- Ajout des configurations de temperature cible par radiateur
+    if ($v_eq->getConfiguration($v_type.'_temperature_confort', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_confort', '');
+      $v_flag_save = true;
+    }
+    if ($v_eq->getConfiguration($v_type.'_temperature_confort_1', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_confort_1', '');
+      $v_flag_save = true;
+    }
+    if ($v_eq->getConfiguration($v_type.'_temperature_confort_2', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_confort_2', '');
+      $v_flag_save = true;
+    }
+    if ($v_eq->getConfiguration($v_type.'_temperature_eco', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_eco', '');
+      $v_flag_save = true;
+    }
+    if ($v_eq->getConfiguration($v_type.'_temperature_horsgel', '') == '') {
+      $v_eq->setConfiguration($v_type.'_temperature_horsgel', '');
+      $v_flag_save = true;
+    }
+
+    if ($v_flag_save) {
+      $v_eq->save();
+    }
+    
+  }
+  
+}
+
+function centralepilote_update_v_1_2($v_from_version='') {
+
+  log::add('centralepilote', 'info', "Update devices to version 1.2 of plugin 'centralepilote'");
+
+  // ----- Look for each equip
+  $eqLogics = eqLogic::byType('centralepilote');
+  foreach ($eqLogics as $v_eq) {
+    $v_flag_save = false;
+    
+    if (!$v_eq->cpIsType(array('radiateur','zone'))) {
+      continue;
+    }
+    
+    // TBC
+
+    if ($v_flag_save) {
+      $v_eq->save();
+    }
+    
+  }
+  
 }
 
 
@@ -129,6 +208,9 @@ function centralepilote_update_v_1_1($v_from_version='') {
       $v_eq->cpCmdCreate('window_status', ['name'=>'Window Status', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
     }
 
+    if ($v_flag_save) {
+      $v_eq->save();
+    }
     
   }
   

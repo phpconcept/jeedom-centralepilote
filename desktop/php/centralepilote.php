@@ -86,7 +86,16 @@ if (0) {
   }
 ?>
 
+<!-- 
+Ici une ruse avec un div caché, car je veux utiliser la classe eqLogicAction pour garder le même style d'affichage
+Mais j'ai besoin d'une classe  eqLogicDisplayCard, pour lancer l'ouverture de l'objet spécial "central".
+Bon mais c'est juste pour que ce soit joli à l'affichage ...
+-->
+<!-- 
       <div class="cursor eqLogicDisplayCard logoSecondary" data-eqLogic_id="<?php echo $v_id; ?>" >
+-->
+      <div class="eqLogicDisplayCard" data-eqLogic_id="<?php echo $v_id; ?>" ></div>
+      <div class="cursor eqLogicAction logoSecondary" onclick="$('.eqLogicDisplayCard[data-eqLogic_id=<?php echo $v_id; ?>]').click();" >
         <i class="fas fa-chalkboard-teacher"></i>
         <br>
         <span>{{Centrale Fil-Pilote}}</span>

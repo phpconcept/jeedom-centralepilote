@@ -20,9 +20,6 @@
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 require_once dirname(__FILE__) . '/../../../../plugins/centralepilote/core/php/centralepilote.inc.php';
 
-  // ----- Current version
-  define('CP_VERSION', '1.1');
-  
 
 class centralepilote extends eqLogic {
 
@@ -544,6 +541,8 @@ class centralepilote extends eqLogic {
       
       // ----- Static default program
       $v_prog0  = '{"id":"0","name":"'.__("Programmation par défaut",__FILE__).'",';
+      $v_prog0 .= '"short_name":"'.__("Défaut",__FILE__).'",';
+      $v_prog0 .= '"mode_horaire":"horaire",'; // ou 'demiheure'
       $v_prog0 .= '"agenda":{';
       $v_prog0 .= ' "lundi":{"0":"eco","1":"eco","2":"eco","3":"eco","4":"eco","5":"eco","6":"eco","7":"eco","8":"eco","9":"eco","10":"eco","11":"eco","12":"eco","13":"eco","14":"eco","15":"eco","16":"eco","17":"eco","18":"eco","19":"eco","20":"eco","21":"eco","22":"eco","23":"eco"},';
       $v_prog0 .= ' "mardi":{"0":"eco","1":"eco","2":"eco","3":"eco","4":"eco","5":"eco","6":"eco","7":"eco","8":"eco","9":"eco","10":"eco","11":"eco","12":"eco","13":"eco","14":"eco","15":"eco","16":"eco","17":"eco","18":"eco","19":"eco","20":"eco","21":"eco","22":"eco","23":"eco"},';
@@ -718,6 +717,10 @@ class centralepilote extends eqLogic {
         return('');
       }
       
+      if ((isset($v_prog['short_name'])) && ($v_prog['short_name']!='')) {
+        return($v_prog['short_name']);
+      }
+      
       return($v_prog['name']);
     }
     /* -------------------------------------------------------------------------*/
@@ -866,7 +869,13 @@ class centralepilote extends eqLogic {
       // ----- Generate the list
       $v_str_list = array();
       foreach ($v_prog_list as $v_key => $v_prog) {
-        $v_str_list[] = $v_prog['id'].'|'.$v_prog['name'];
+        if (isset($v_prog['short_name']) && ($v_prog['short_name']!='')) {
+          $v_name = $v_prog['short_name'];
+        }
+        else {
+          $v_name = $v_prog['name'];
+        }
+        $v_str_list[] = $v_prog['id'].'|'.$v_name;
       }
       
       $v_str = implode(';', $v_str_list);
@@ -891,6 +900,17 @@ class centralepilote extends eqLogic {
       if (!is_array($v_prog)) {
         centralepilote::log('debug', "cpProgModeFromClockTick() : Unknown programme id '".$p_id."'.");
         return($v_result);
+      }
+      
+      // ----- Regarde si précision à la demiheure
+      if (isset($v_prog['mode_horaire']) && ($v_prog['mode_horaire'] == 'demiheure')) {
+        if ($p_minute < 30) {
+          $p_heure = $p_heure.'_00';
+        }
+        else {
+          $p_heure = $p_heure.'_30';
+        }
+        centralepilote::log('debug', "cpProgModeFromClockTick() : Mode horaire demi heure value : ".$p_heure);
       }
       
       // ----- Get mode from jour/heure/minute
@@ -938,6 +958,24 @@ class centralepilote extends eqLogic {
         return(false);
       }
       
+      // ----- Memorise l'heure, sans les demiheures
+      $v_heure_ref = $p_heure;
+      
+      // ----- Regarde si précision à la demiheure
+      $v_mode_demiheure = false;
+      if (isset($v_prog['mode_horaire']) && ($v_prog['mode_horaire'] == 'demiheure')) {
+        $v_mode_demiheure = true;
+        if ($p_minute < 30) {
+          $p_heure = $p_heure.'_00';
+          $p_minute = 0;
+        }
+        else {
+          $p_heure = $p_heure.'_30';
+          $p_minute = 30;
+        }
+        centralepilote::log('debug', "cpProgNextModeFromClockTick() : Mode horaire demi heure value : ".$p_heure);
+      }
+
       // ----- Get mode from jour/heure/minute
       if (!isset($v_prog['agenda'][$p_jour][$p_heure])) {
         centralepilote::log('debug', "cpProgNextModeFromClockTick() : Missing value for '".$p_jour."' '".$p_heure."h' for programme '".$p_id."'.");
@@ -946,23 +984,47 @@ class centralepilote extends eqLogic {
       $v_current_mode = $v_prog['agenda'][$p_jour][$p_heure];
       
       $i_jour = $v_jour_index[$p_jour];
-      $i_heure = $p_heure;
+      $i_heure = $v_heure_ref;
+      $i_minute = $p_minute;
       $v_loop_detected = false;
       $v_loop_count = 0; // for sanity check ...
       while (!$v_loop_detected) {
         $v_loop_count++;
-        $i_heure++;
+        if ($v_mode_demiheure) $i_minute += 30; else $i_minute += 60;
+        if ($i_minute >= 60) { $i_minute = 0; $i_heure++; }
+        //$i_heure++;
         if ($i_heure > 23) { $i_heure = 0; $i_jour++; }
         if ($i_jour > 7) { $i_jour = 1; }
         $i_nom_jour = $v_jour_nom[$i_jour];
-        if ($v_prog['agenda'][$i_nom_jour][$i_heure] != $v_prog['agenda'][$p_jour][$p_heure]) {
-          $p_next_mode = $v_prog['agenda'][$i_nom_jour][$i_heure];
+        if ($v_mode_demiheure) {
+          if ($i_minute < 30) {
+            $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure.'_00'];
+          }
+          else {
+            $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure.'_30'];
+          }
+        }
+        else {
+          $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure];
+        }
+        if ($v_item_mode != $v_current_mode) {
+          $p_next_mode = $v_item_mode;
           if ($i_nom_jour != $p_jour) $p_next_jour = $i_nom_jour;
-          $p_next_time = $i_heure.'h';
+          if ($v_mode_demiheure) {
+            if ($i_minute < 30) {
+              $p_next_time = $i_heure.'h';
+            }
+            else {
+              $p_next_time = $i_heure.'h30';
+            }
+          }
+          else {
+            $p_next_time = $i_heure.'h';
+          }
           centralepilote::log('debug', "cpProgNextModeFromClockTick() : Next mode :'".$p_next_mode."', time :'".$p_next_time."'.");
           return(true);
         }
-        if (($i_heure == $p_heure) && ($i_jour == $v_jour_index[$p_jour])) {
+        if (($i_minute == $p_minute) && ($i_heure == $v_heure_ref) && ($i_jour == $v_jour_index[$p_jour])) {
           centralepilote::log('debug', "cpProgNextModeFromClockTick() : Full week with same mode.");
           $v_loop_detected = true;
         }
@@ -1186,7 +1248,7 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
         
         // ----- Here I can change the value because the centrale eq is created in "enable" status.
-        $this->checkAndUpdateCmd('etat', 'Normal');
+        $this->checkAndUpdateCmd('etat', 'normal');
       }
 
       else {
@@ -1244,7 +1306,15 @@ class centralepilote extends eqLogic {
         
         // ----- Permet de décaler la sortie du délestage de x minutes x ne pouvant être que 0, 5, 30,60,90,120,150,180 (tranches de 30 minutes)
         $this->setConfiguration('delestage_sortie_delai', 0);
-        
+
+        // ----- Temperatures de référence par radiateur
+        // si vide, alors va utiliser la valeur au niveau de la centrale        
+        $this->setConfiguration('radiateur_temperature_confort', '');
+        $this->setConfiguration('radiateur_temperature_confort_1', '');
+        $this->setConfiguration('radiateur_temperature_confort_2', '');
+        $this->setConfiguration('radiateur_temperature_eco', '');
+        $this->setConfiguration('radiateur_temperature_horsgel', '');
+              
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }
@@ -1317,6 +1387,14 @@ class centralepilote extends eqLogic {
         // ----- Information concernant les declencheurs        
         $this->setConfiguration('trigger_list', array());
         
+        // ----- Temperatures de référence par zone
+        // si vide, alors va utiliser la valeur au niveau de la centrale        
+        $this->setConfiguration('zone_temperature_confort', '');
+        $this->setConfiguration('zone_temperature_confort_1', '');
+        $this->setConfiguration('zone_temperature_confort_2', '');
+        $this->setConfiguration('zone_temperature_eco', '');
+        $this->setConfiguration('zone_temperature_horsgel', '');
+              
         // ----- No data to store for postSave() tasks
         $this->_pre_save_cache = null; // New eqpt => Nothing to collect        
       }
@@ -1585,7 +1663,7 @@ class centralepilote extends eqLogic {
             // TBC : normalement l'eq centrale est créé en mode 'enable' et n'est jamais desctivé, donc ne vient jamais là ... sauf peut être lors de l'activation/desactivation du plugin lui-même
             $v_value = $this->cpCmdGetValue('etat');
             if ($v_value == '') {
-              $this->checkAndUpdateCmd('etat', 'Normal');
+              $this->checkAndUpdateCmd('etat', 'normal');
             }
           }
           
@@ -1793,14 +1871,16 @@ class centralepilote extends eqLogic {
         $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
       }
       
+      $v_etat = 'eco';
+      $v_etat_name = centralepilote::cpModeGetName($v_etat);
       $v_cmd = $this->getCmd(null, 'etat');
       if (is_object($v_cmd)) {         
         $v_etat_name = $v_cmd->execCmd();
         $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
         $replace['#cmd_etat_id#'] = $v_cmd->getId();
-        $replace['#cmd_etat_value#'] = $v_etat;
-        $replace['#cmd_etat_name#'] = $v_etat_name;     
       }
+      $replace['#cmd_etat_value#'] = $v_etat;
+      $replace['#cmd_etat_name#'] = $v_etat_name;     
       
       $v_pilotage_current = $this->cpCmdGetValue('pilotage');
       if ($v_pilotage_current == 'auto') {
@@ -1901,7 +1981,7 @@ class centralepilote extends eqLogic {
       // ----- Bypass mode
       $replace['#bypass_type#'] = $this->cpGetConf('bypass_type');
       $replace['#bypass_mode#'] = $this->cpGetConf('bypass_mode');
-        
+      
       // ----- Look for open window
       if ($this->cpGetConf('bypass_type') == 'open_window') {
         $replace['#cmd_window_style#'] = "background-color: #2C941A!important; color: white!important;";        
@@ -1951,7 +2031,12 @@ class centralepilote extends eqLogic {
       $replace['#title_programme#'] = __("Auto", __FILE__);
       $replace['#title_select_programmation#'] = __("Choisir la programmation", __FILE__);
       $replace['#title_pilotage_zone#'] = __("Pilotage par Zone", __FILE__);
-      $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      if (($this->cpGetConf('bypass_type') == 'delestage') && ($v_etat == 'off')) {
+        $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      }
+      else {
+        $replace['#title_delestage_centralise#'] = __("Pilotage Centralisé", __FILE__);
+      }
       $replace['#title_Retour#'] = __("Retour", __FILE__);
       $replace['#title_Annuler#'] = __("Annuler", __FILE__);
       $replace['#title_Valider#'] = __("Valider", __FILE__);
@@ -1964,7 +2049,7 @@ class centralepilote extends eqLogic {
       $replace['#title_a_min#'] = __("à", __FILE__);
       $replace['#title_missing_mode#'] = __("Faire un choix", __FILE__);
       $replace['#title_Choisir#'] = __("Choisir ...", __FILE__);
-      $replace['#title_next_mode#'] = __("Next", __FILE__);      
+      $replace['#title_next_mode#'] = __("Ensuite", __FILE__);      
       
       $replace['#width#'] = '320px';
       $replace['#height#'] = '160px';       
@@ -2006,14 +2091,16 @@ class centralepilote extends eqLogic {
         $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
       }
       
+      $v_etat = 'eco';
+      $v_etat_name = centralepilote::cpModeGetName($v_etat);
       $v_cmd = $this->getCmd(null, 'etat');
       if (is_object($v_cmd)) {         
         $v_etat_name = $v_cmd->execCmd();
         $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
         $replace['#cmd_etat_id#'] = $v_cmd->getId();
-        $replace['#cmd_etat_value#'] = $v_etat;
-        $replace['#cmd_etat_name#'] = $v_etat_name;     
       }
+      $replace['#cmd_etat_value#'] = $v_etat;
+      $replace['#cmd_etat_name#'] = $v_etat_name;     
       
       $v_pilotage_current = $this->cpCmdGetValue('pilotage');
       if ($v_pilotage_current == 'auto') {
@@ -2105,7 +2192,12 @@ class centralepilote extends eqLogic {
       $replace['#title_programme#'] = __("Auto", __FILE__);
       $replace['#title_select_programmation#'] = __("Choisir la programmation", __FILE__);
       $replace['#title_pilotage_zone#'] = __("Pilotage par Zone", __FILE__);
-      $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      if (($this->cpGetConf('bypass_type') == 'delestage') && ($v_etat == 'off')) {
+        $replace['#title_delestage_centralise#'] = __("Délestage Centralisé", __FILE__);
+      }
+      else {
+        $replace['#title_delestage_centralise#'] = __("Pilotage Centralisé", __FILE__);
+      }
       $replace['#title_Retour#'] = __("Retour", __FILE__);
       $replace['#title_Annuler#'] = __("Annuler", __FILE__);
       $replace['#title_Valider#'] = __("Valider", __FILE__);
@@ -2190,7 +2282,7 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpGetConf()
+     * Method : cpGetType()
      * Description :
      *   Retourne l'un des 3 types majeurs d'équipement : 'centrale', 'radiateur' ou 'zone'.
      * Parameters :
@@ -2537,6 +2629,7 @@ class centralepilote extends eqLogic {
         return;
       } 
       $v_cmd_tmp->setConfiguration('listValue', $p_value_list_str);
+      $v_cmd_tmp->save();
       
       // ----- Trick to update the widgets of all radiateurs ...
       // For standard widget change of listValue is not enough to clean the cache of the widget
@@ -2732,7 +2825,7 @@ class centralepilote extends eqLogic {
       
       // TBC : Look and improve ?
       if ($this->cpGetConf('support_'.$p_mode) == 0) {
-        centralepilote::log('debug',  "mode '".$p_mode."' not supported");
+        centralepilote::log('debug',  "mode '".$p_mode."' not supported on this device.");
         if (($v_fallback = $this->cpGetConf('fallback_'.$p_mode)) != '') {
           $p_mode = $v_fallback;
           centralepilote::log('debug',  "fallback to '".$p_mode."'");
@@ -2767,15 +2860,15 @@ class centralepilote extends eqLogic {
       
       if ($this->cpGetType() == 'radiateur') {
 
+        // ----- Look for alternative mode
+        $p_mode = $this->cpModeAlternative($p_mode);
+        
         // ----- Look if already the same mode        
         if (($this->cpModeGetFromCmd() == $p_mode) && (!$p_force)) {
           centralepilote::log('debug',  "Equipement '".$this->getName()."' is already in mode '".$p_mode."'. skip.");
           return;
         }
 
-        // ----- Look for alternative mode
-        $p_mode = $this->cpModeAlternative($p_mode);
-        
         $v_command = '';
         switch ($p_mode) {
           case 'confort':
@@ -3173,6 +3266,14 @@ class centralepilote extends eqLogic {
         else if ($p_bypass_mode == 'horsgel') {
           $v_mode = 'horsgel';
         }
+        else if ($p_bypass_mode == 'normal') {
+          $this->cpPilotageExitFromBypass();
+          return;
+        }
+        else {
+          centralepilote::log('debug',  "Error : unexpected bypass mode '".$p_bypass_mode."' here (".__FILE__.",".__LINE__.")");
+          return;
+        }
         
         // ----- When in delestage mode reset open_window status to close
         $this->checkAndUpdateCmd('window_status', 'close');
@@ -3180,7 +3281,7 @@ class centralepilote extends eqLogic {
       
       // ----- Unexpected values
       else {
-        centralepilote::log('debug',  "Error : unexpected bypass mode '".$p_bypass_mode."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('debug',  "Error : unexpected bypass type '".$p_bypass_type."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
@@ -3247,7 +3348,7 @@ class centralepilote extends eqLogic {
         
         // ----- Pas de delai donc on passe au pilotage d'avant
         else {
-          // rien à faire
+          // rien à faire on a déjà la valeur dans $v_pilotage
         }
         
         
@@ -3255,6 +3356,11 @@ class centralepilote extends eqLogic {
       
       else if ($v_current_bypass_type == 'open_window') {
         $this->checkAndUpdateCmd('window_status', 'close');
+      }
+      
+      else if ($v_current_bypass_type == 'no') {
+        // TBC : on est déjà hors bypass, donc normalement rien à faire, on sort ...
+        return;
       }
       
       else {
@@ -3564,10 +3670,13 @@ class centralepilote extends eqLogic {
       
       // ----- Check delestage ...
       $v_bypass = centralepilote::cpCentraleGet()->cpCmdGetValue('etat');
+      centralepilote::log('debug', "cpRadChangeToEnable() : Central bypass mode is set to '".$v_bypass."'");
       if (($v_bypass != '') && ($v_bypass != 'normal')) {
+        centralepilote::log('debug', "cpRadChangeToEnable() : device '".$this->getName()."' is set to bypass '".$v_bypass."'");
         $this->cpPilotageChangeToBypass('delestage', $v_bypass);
       }
       else {
+        centralepilote::log('debug', "cpRadChangeToEnable() : device '".$this->getName()."' is set to no bypass");
         // ----- Reset window_open to close
         $this->cpPilotageChangeToBypass('no');
       
@@ -3725,12 +3834,35 @@ class centralepilote extends eqLogic {
         $v_mode = $p_mode;
       }
       
-      // ----- Get target temperature for the mode for this radiateur (future)
-      // TBC
+      $v_type = $this->cpGetType();
+      
+      // ----- Get target temperature for the mode for this radiateur / zone
+      $v_value = '';      
+      if (($v_virtual_cmd = $this->cpGetConf($v_type.'_temperature_'.$v_mode)) != '') {
+      
+        $cmd = cmd::byId(str_replace('#', '', $v_virtual_cmd));
+        if (is_object($cmd)) {
+          $v_value = $cmd->execCmd();
+        }
+        else {
+          $v_value = $v_virtual_cmd;
+        }
+      }
       
       // ----- Get target temperature for the mode globally at the centrale level
-      $v_value = centralepilote::cpCentraleGetConfig('temperature_'.$v_mode);
-      //centralepilote::log('debug',  "Temp ".'temperature_'.$v_mode." '".$v_value."'.");
+      if ($v_value == '') {
+        $v_value = centralepilote::cpCentraleGetConfig('temperature_'.$v_mode);
+      }
+
+      if (is_numeric($v_value)) {
+        $v_value = round($v_value,1);
+      }
+      else {
+        // si c'est un objet ou un array, il vaut mieux renvoyer vide
+        $v_value = '';
+      }
+
+      //centralepilote::log('debug',  "cpEqGetTemperatureCible() ".'temperature_'.$v_mode." '".$v_value."'.");
       
       return($v_value);
     }
@@ -3756,7 +3888,7 @@ class centralepilote extends eqLogic {
       if (!is_object($cmd)) {        
         return('');
       }
-      $v_value = $cmd->execCmd($p_options);
+      $v_value = $cmd->execCmd();
       $v_value_round = round($v_value,1);
       //centralepilote::log('debug',  "Value '".$v_value."', rounded : '".$v_value_round."'");
       
@@ -4293,7 +4425,9 @@ class centralepiloteCmd extends cmd {
       // ----- Update all equip
       $eqLogics = eqLogic::byType('centralepilote');
       foreach ($eqLogics as $v_eq) {
-        $v_eq->cpPilotageChangeToBypass($v_bypass_type, $v_bypass_mode);
+        if ($v_eq->cpIsType(array('radiateur','zone'))) {
+          $v_eq->cpPilotageChangeToBypass($v_bypass_type, $v_bypass_mode);
+        }
       }      
       
       $p_centrale->refreshWidget();
