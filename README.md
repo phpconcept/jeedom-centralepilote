@@ -200,6 +200,8 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
+Release v1.4 (beta) :
+
 Release v1.3 :
 - Nouveautés :
   - Programmation : possibilité de dupliquer une programmation existante.

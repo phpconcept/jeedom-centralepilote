@@ -23,9 +23,29 @@
         <option value="1_commutateur_c_o">{{Un commutateur modes Confort / Off}}</option>
         <option value="1_commutateur_c_h">{{Un commutateur modes Confort / Hors-Gel}}</option>
         <option value="2_commutateur">{{Deux commutateurs modes Confort / Eco / Hors-Gel / Off}}</option>
+
+<?php 
+/*
+  $eqLogics = eqLogic::byType('z2m');
+  foreach ($eqLogics as $v_eq) {
+    $v_manuf = $v_eq->getConfiguration('manufacturer', '');
+    //echo "Manufacturer : ".$v_manuf."<br>";
+    $v_model = $v_eq->getConfiguration('model', '');
+    //echo "Model : ".$v_model."<br>";
+    if (($v_manuf == 'Adeo') && ($v_model == 'SIN-4-FP-21_EQU')) {
+      echo '<option value="device_Adeo_SIN_4_FP_21_EQU">Fil-Pilote Adeo (SIN-4-FP-21_EQU)</option>';
+    }
+    if (($v_manuf == 'NodOn') && ($v_model == 'SIN-4-FP-21')) {
+      echo '<option value="device_NodOn_SIN_4_FP_21">Fil-Pilote NodOn (SIN-4-FP-21)</option>';
+    }
+  }
+*/
+?>
+
       </select>
       </div>
   </div>
+
 
   <div class="row"><div class="col-sm-12">&nbsp;</div></div>
 
