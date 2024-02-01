@@ -20,6 +20,7 @@
       <div class="col-lg-10">
       <select class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="nature_fil_pilote" onchange="cp_nature_change(event)">
         <option value="virtuel" selected>{{Virtuel}}</option>
+        <option value="fp_device">{{Equipement natif fil-pilote}}</option>
         <option value="1_commutateur_c_o">{{Un commutateur modes Confort / Off}}</option>
         <option value="1_commutateur_c_h">{{Un commutateur modes Confort / Hors-Gel}}</option>
         <option value="2_commutateur">{{Deux commutateurs modes Confort / Eco / Hors-Gel / Off}}</option>
@@ -48,6 +49,65 @@
 
 
   <div class="row"><div class="col-sm-12">&nbsp;</div></div>
+
+<div id="cp_disp_fp_device" style="display:none;">
+  <div class="row">
+  <div class="col-lg-6">
+  
+  <!-- 
+  <div class="row">
+      <label class="col-lg-4 control-label">{{Equipement associé}}
+      <sup><i class="fa fa-question-circle tooltips" title="{{Indiquer comment est constitué le fil pilote, à partir de quels équipements et commandes.}}"></i></sup>
+      </label>
+    <div class="col-sm-7">
+      <textarea class="cp_attr_radiateur eqLogicAttr form-control input-sm" data-l1key="configuration" data-l2key="fp_device_id" style="height : 33px;" placeholder="{{Référence équipement commutateur associé}}"></textarea>
+      <a class="btn btn-default cursor cp_modal_select_equipement btn-sm" data-input="fp_device_id"><i class="fas fa-list-alt"></i> {{Rechercher équipement}}</a>
+    </div>
+    <div class="col-sm-1">
+    </div>
+  </div>
+  -->
+
+
+  <div class="row">
+      <label class="col-lg-4 control-label">{{Equipement fil-pilote}}
+      <sup><i class="fa fa-question-circle tooltips" title="{{Choisir parmi la liste des équipements existants et supportés}}"></i></sup>
+      </label>
+    <div class="col-sm-7">
+
+      <select class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="fp_device_id" onchange="cp_fp_device_change(event)">
+        
+<?php 
+  $eqLogics = eqLogic::byType('z2m');
+  foreach ($eqLogics as $v_eq) {
+    $v_manuf = $v_eq->getConfiguration('manufacturer', '');
+    //echo "Manufacturer : ".$v_manuf."<br>";
+    $v_model = $v_eq->getConfiguration('model', '');
+    //echo "Model : ".$v_model."<br>";
+    if (($v_manuf == 'Adeo') && ($v_model == 'SIN-4-FP-21_EQU')) {
+     // echo '<option value="'.$v_eq->getId().'">'.$v_eq->getName().' ('.$v_manuf.' / '.$v_model.')</option>';
+      echo '<option value="#'.$v_eq->getHumanName().'#">'.$v_eq->getName().' ('.$v_manuf.' / '.$v_model.')</option>';
+    }
+    if (($v_manuf == 'NodOn') && ($v_model == 'SIN-4-FP-21')) {
+      echo '<option value="device_NodOn_SIN_4_FP_21">Fil-Pilote NodOn (SIN-4-FP-21)</option>';
+    }
+  }
+?>
+
+      </select>
+
+    </div>
+    <div class="col-sm-1">
+    </div>
+  </div>
+
+
+  </div>
+  <div class="col-lg-6">
+  <img id="img_fp_device" src="plugins/centralepilote/desktop/images/fp_1_commutateur_c_o.png" style="display:none;"/>
+  </div>
+</div>
+</div>
 
 <div id="cp_disp_1_commutateur" style="display:none;">
   <div class="row">

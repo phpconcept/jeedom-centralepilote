@@ -1280,7 +1280,7 @@ class centralepilote extends eqLogic {
       // The trick is that before the first save the eq is not in the DB so it has not yet a deviceId
       // In my plugin I need to remember I first save the device in javscript with the sub-type 'radiateur', 'centrale' or 'zone'
       if ($this->getId() == '') {
-        centralepilotelog::log('debug', "preSave() : new radiateur ...");
+        centralepilotelog::log('debug', "preSaveRadiateur() : new radiateur, init properties");
         
         // ----- Set default values
         $this->setConfiguration('support_confort', '1');
@@ -1321,8 +1321,12 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "preSaveRadiateur() : existing radiateur.");
+
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
+        // $this : contient donc l'objet PHP avec les nouvelles valeurs, avant leur sauvegarde dans la DB
+        // $eqLogic : contient les valeurs dans la DB qui vont être remplacées par la sauvegarde de $this dans la DB
       	$eqLogic = self::byId($this->getId());
         
         $v_support_modes  = $eqLogic->getConfiguration('support_confort','').',';
@@ -1364,7 +1368,7 @@ class centralepilote extends eqLogic {
       // The trick is that before the first save the eq is not in the DB so it has not yet a deviceId
       // In my plugin I need to remember I first save the device in javscript with the sub-type 'radiateur', 'centrale' or 'zone'
       if ($this->getId() == '') {
-        centralepilotelog::log('debug', "preSave() : new zone ...");
+        centralepilotelog::log('debug', "preSaveZone() : new zone, init properties");
         
         // ----- Set default values
         $this->setConfiguration('support_confort', '1');
@@ -1401,8 +1405,10 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "preSaveZone() : existing radiateur.");
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
+        // Voir explication dans preSaveRadiateur()
       	$eqLogic = self::byId($this->getId());
 
         $v_support_modes  = $eqLogic->getConfiguration('support_confort','').',';
@@ -1421,7 +1427,7 @@ class centralepilote extends eqLogic {
     }
 
     public function preSaveCentrale() {
-      centralepilotelog::log('debug', "preSave() : centrale ...");
+      //centralepilotelog::log('debug', "preSave() : centrale ...");
       
       // It's time to gather informations that will be used in postSave
       
@@ -1429,7 +1435,7 @@ class centralepilote extends eqLogic {
       // The trick is that before the first save the eq is not in the DB so it has not yet a deviceId
       // In my plugin I need to remember I first save the device in javscript with the sub-type 'radiateur', 'centrale' or 'zone'
       if ($this->getId() == '') {
-        centralepilotelog::log('debug', "preSave() : new centrale ...");
+        centralepilotelog::log('debug', "preSaveCentrale() : new centrale, init properties");
         
         // ----- Set default values
         $this->setConfiguration('temperature_confort', '19');
@@ -1444,6 +1450,7 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "preSaveCentrale() : existing centrale.");
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
       	$eqLogic = self::byId($this->getId());
@@ -1473,11 +1480,12 @@ class centralepilote extends eqLogic {
 
     public function postSaveRadiateur() {
 
-      centralepilotelog::log('debug', "postSave() radiateur");
+      //centralepilotelog::log('debug', "postSave() radiateur");
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
-        centralepilotelog::log('debug', "postSave() : new radiateur");
+        centralepilotelog::log('debug', "postSaveRadiateur() : new radiateur saved in DB.");
+        centralepilotelog::log('debug', "postSaveRadiateur() : create refresh cmd.");
         
 /* Herité du plugIn Virtual */
 		$createRefreshCmd = true;
@@ -1506,6 +1514,8 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "postSaveRadiateur() : radiateur saved in DB.");
+
         // ----- Look if device enable is changed
         if ($this->_pre_save_cache['isEnable'] != $this->getIsEnable()) {
         
@@ -1567,7 +1577,8 @@ class centralepilote extends eqLogic {
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
-        centralepilotelog::log('debug', "postSave() : new equipement");
+        centralepilotelog::log('debug', "postSaveZone() : new zone, saved in DB");
+        centralepilotelog::log('debug', "postSaveZone() : create refresh cmd.");
 
 /* Herité du plugIn Virtual */
 		$createRefreshCmd = true;
@@ -1596,6 +1607,8 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "postSaveZone() : zone saved in DB.");
+
         // ----- Look if device enable is changed
         if ($this->_pre_save_cache['isEnable'] != $this->getIsEnable()) {
         
@@ -1638,11 +1651,11 @@ class centralepilote extends eqLogic {
 
     public function postSaveCentrale() {
 
-      centralepilotelog::log('debug', "postSave() : centrale");
+      //centralepilotelog::log('debug', "postSave() : centrale");
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
-        centralepilotelog::log('debug', "postSave() : new centrale");
+        centralepilotelog::log('debug', "postSaveCentrale() : new centrale saved in DB.");
 
         /* already done in create default centrale
         if ($this->cpGetType() == 'centrale') {
@@ -1654,6 +1667,8 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "postSaveCentrale() : centrale saved in DB.");
+
         // ----- Look if device enable is changed
         if ($this->_pre_save_cache['isEnable'] != $this->getIsEnable()) {
         
@@ -1679,7 +1694,7 @@ class centralepilote extends eqLogic {
   
       }
       
-      centralepilotelog::log('debug', "postSave() : end");
+      centralepilotelog::log('debug', "postSaveCentrale() : end");
     }
 
     public function start() {
@@ -4243,6 +4258,62 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('support_eco', 1);
         $this->setConfiguration('support_horsgel', 1);
         $this->setConfiguration('support_off', 1);               
+      }
+
+      else if ($p_nature == 'fp_device') {
+        // ----- Get filpilote device id
+        $v_eq_id = $this->cpGetConf('fp_device_id');
+        $v_eq_id = str_replace('#', '', $v_eq_id);
+        $v_eq_id = str_replace('eqLogic', '', $v_eq_id);
+        centralepilote::log('debug', "File Pilote device id : '".$v_eq_id."'");
+        
+        // ----- Look if eq exists
+        if (($v_eq_id == '') || !is_object(($v_eq = eqLogic::byId($v_eq_id)))) {
+          centralepilote::log('debug', "Fail to find an equipement with id '".$v_eq_id."', return to virtual.");
+          $this->setConfiguration('nature_fil_pilote', 'virtuel');
+          return;
+        }
+        
+        $v_manuf = '';
+        $v_model = '';
+
+        $v_human_name = $v_eq->getHumanName();
+        $v_manuf = $v_eq->getConfiguration('manufacturer', '');
+        $v_model = $v_eq->getConfiguration('model', '');
+        
+        if (($v_manuf == 'Adeo') && ($v_model == 'SIN-4-FP-21_EQU')) {
+
+          $this->setConfiguration('command_confort', "#".$v_human_name."[pilot_wire_mode comfort]#");              
+          $this->setConfiguration('command_confort_1', "#".$v_human_name."[pilot_wire_mode comfort_-1]#");              
+          $this->setConfiguration('command_confort_2', "#".$v_human_name."[pilot_wire_mode comfort_-2]#");              
+          $this->setConfiguration('command_eco', "#".$v_human_name."[pilot_wire_mode eco]#");              
+          $this->setConfiguration('command_horsgel', "#".$v_human_name."[pilot_wire_mode frost_protection]#");              
+          $this->setConfiguration('command_off', "#".$v_human_name."[pilot_wire_mode off]#");              
+
+          $this->setConfiguration('statut_confort', '(#'.$v_human_name.'[pilot_wire_mode]# == "comfort")');              
+          $this->setConfiguration('statut_confort_1', '(#'.$v_human_name.'[pilot_wire_mode]# == "comfort_-1")');              
+          $this->setConfiguration('statut_confort_2', '(#'.$v_human_name.'[pilot_wire_mode]# == "comfort_-2")');              
+          $this->setConfiguration('statut_eco', '(#'.$v_human_name.'[pilot_wire_mode]# == "eco")');              
+          $this->setConfiguration('statut_horsgel', '(#'.$v_human_name.'[pilot_wire_mode]# == "frost_protection")');              
+          $this->setConfiguration('statut_off', '(#'.$v_human_name.'[pilot_wire_mode]# == "off")');              
+
+          $this->setConfiguration('support_confort', 1);
+          $this->setConfiguration('support_confort_1', 1);
+          $this->setConfiguration('support_confort_2', 1);
+          $this->setConfiguration('support_eco', 1);
+          $this->setConfiguration('support_horsgel', 1);
+          $this->setConfiguration('support_off', 1);
+          
+        }
+        else {
+          centralepilote::log('debug', "Equipement model (".$v_model.") et fabriquant (".$v_manuf.") non supporté");
+          $this->setConfiguration('nature_fil_pilote', 'virtuel');
+          return;
+        }
+      }
+      
+      else {
+        // TBC : Ne devrait jamais arriver ... 
       }
 
       
