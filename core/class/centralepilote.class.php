@@ -4274,6 +4274,27 @@ class centralepilote extends eqLogic {
           return;
         }
         
+        $v_cmd_list = centralepilote::cpDeviceSupportedInfo($v_eq);
+        if ($v_cmd_list === null) {
+          centralepilote::log('debug', "Fail to find supported information for '".$v_eq_id."', return to virtual.");
+          $this->setConfiguration('nature_fil_pilote', 'virtuel');
+          return;
+        }
+        
+        centralepilote::log('debug', "Commands : '".print_r($v_cmd_list, true)."'");
+        
+        foreach ($v_cmd_list as $v_cmd_name => $v_cmd) {
+          centralepilote::log('debug', "  Command '".$v_cmd_name."' : type = '".$v_cmd['type']."', value = '".$v_cmd['cmd']."'");
+        }
+        
+        $v_cmd_id_list = ['command_confort','command_confort_1','command_confort_2',
+                          'command_eco','command_horsgel','command_off',
+                          'statut_confort','statut_confort_1','statut_confort_2',
+                          'statut_eco','statut_horsgel','statut_off'];
+                       
+        foreach ($v_cmd_id_list as $v_cmd_id) {
+        }
+        
         $v_manuf = '';
         $v_model = '';
 
@@ -4320,6 +4341,246 @@ class centralepilote extends eqLogic {
     }
     /* -------------------------------------------------------------------------*/
 
+    /**---------------------------------------------------------------------------
+     * Method : cpDeviceSupportedList()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    static function cpDeviceSupportedList() {
+
+/*
+        $v_json = <<<MYTEXT
+        { "z2m" : [
+                  { "maufacturer":"Adeo",
+                    "model":"SIN-4-FP-21_EQU",
+                    "mapping": {
+                      "command_confort":"#__HUMAN_NAME__[pilot_wire_mode comfort]#",              
+                      "command_confort_1":"#__HUMAN_NAME__[pilot_wire_mode comfort_-1]#",              
+                      "command_confort_2":"#__HUMAN_NAME__[pilot_wire_mode comfort_-2]#",              
+                      "command_eco":"#__HUMAN_NAME__[pilot_wire_mode eco]#",              
+                      "command_horsgel":"#__HUMAN_NAME__[pilot_wire_mode frost_protection]#",              
+                      "command_off":"#__HUMAN_NAME__[pilot_wire_mode off]#",              
+
+                      "statut_confort":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'comfort')",              
+                      "statut_confort_1":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'comfort_-1')",              
+                      "statut_confort_2":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'comfort_-2')",              
+                      "statut_eco":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'eco')",              
+                      "statut_horsgel":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'frost_protection')",              
+                      "statut_off":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"            
+                    },
+                  },
+                  { "maufacturer":"NodOn",
+                    "model":"SIN-4-FP-21",
+                    "mapping": {
+                      "command_confort":"#__HUMAN_NAME__[pilot_wire_mode comfort]#",              
+                      "command_confort_1":"#__HUMAN_NAME__[pilot_wire_mode comfort_-1]#",              
+                      "command_confort_2":"#__HUMAN_NAME__[pilot_wire_mode comfort_-2]#",              
+                      "command_eco":"#__HUMAN_NAME__[pilot_wire_mode eco]#",              
+                      "command_horsgel":"#__HUMAN_NAME__[pilot_wire_mode frost_protection]#",              
+                      "command_off":"#__HUMAN_NAME__[pilot_wire_mode off]#",              
+
+                      "statut_confort":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'comfort')",              
+                      "statut_confort_1":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'comfort_-1')",              
+                      "statut_confort_2":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'comfort_-2')",              
+                      "statut_eco":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'eco')",              
+                      "statut_horsgel":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'frost_protection')",              
+                      "statut_off":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"            
+                    }
+                  }
+                  ]
+        }
+        MYTEXT;
+*/
+        
+        $v_json = <<<MYTEXT
+          {
+             "z2m":{
+                "Adeo":{
+                   "name":"Adeo",
+                   "models":{
+                      "SIN-4-FP-21_EQU":{
+                         "name":"SIN-4-FP-21_EQU",
+                         "commands":{
+                            "command_confort":{"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                            "command_confort_1":{"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-1"},
+                            "command_confort_2":{"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-2"},
+                            "command_eco":{"type":"single_cmd", "cmd":"pilot_wire_mode eco"},
+                            "command_horsgel":{"type":"single_cmd", "cmd":"pilot_wire_mode frost_protection"},
+                            "command_off":{"type":"single_cmd", "cmd":"pilot_wire_mode off"},
+                            
+                            "statut_confort":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                            "statut_confort_1":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-1"},
+                            "statut_confort_2":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-2"},
+                            "statut_eco":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"eco"},
+                            "statut_horsgel":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
+                            "statut_off":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
+                            
+                            "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                            "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},
+                            
+                            "exemple_info_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                            "exemple_info_2" : {"type":"expression", "expression":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"}
+                         }
+                      }
+                   }
+                },
+                "NodOn":{
+                   "name":"NodOn",
+                   "models":{
+                      "SIN-4-FP-21":{
+                         "name":"SIN-4-FP-21",
+                         "commands":{
+                            "command_confort":{"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                            "command_confort_1":{"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-1"},
+                            "command_confort_2":{"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-2"},
+                            "command_eco":{"type":"single_cmd", "cmd":"pilot_wire_mode eco"},
+                            "command_horsgel":{"type":"single_cmd", "cmd":"pilot_wire_mode frost_protection"},
+                            "command_off":{"type":"single_cmd", "cmd":"pilot_wire_mode off"},
+                            
+                            "statut_confort":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                            "statut_confort_1":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-1"},
+                            "statut_confort_2":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-2"},
+                            "statut_eco":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"eco"},
+                            "statut_horsgel":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
+                            "statut_off":{"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
+                            
+                            "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                            "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},
+                            
+                            "exemple_info_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                            "exemple_info_2" : {"type":"expression", "expression":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"}
+                         }
+                      }
+                   }
+                }
+             }
+          }
+       MYTEXT;
+        
+        $v_json = <<<MYTEXT
+          {
+            "my_name" : {
+              "plugin_id" : "z2m",
+              "search_by_config_name" : {
+                "manufacturer" : "Adeo",
+                "model" : "SIN-4-FP-21_EQU"
+              },
+              "manufacturer" : "my_name",
+              "model" : "my_name",
+              "commands" : {
+                "command_confort" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                "command_confort_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-1"},
+                "command_confort_2" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-2"},
+                "command_eco" : {"type":"single_cmd", "cmd":"pilot_wire_mode eco"},
+                "command_horsgel" : {"type":"single_cmd", "cmd":"pilot_wire_mode frost_protection"},
+                "command_off" : {"type":"single_cmd", "cmd":"pilot_wire_mode off"},
+                
+                "statut_confort" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                "statut_confort_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-1"},
+                "statut_confort_2" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-2"},
+                "statut_eco" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"eco"},
+                "statut_horsgel" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
+                "statut_off" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
+                
+                "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},
+                
+                "exemple_info_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                "exemple_info_2" : {"type":"expression", "expression":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"}
+              }               
+            },
+
+            "bad_for_test" : {
+              "plugin_id" : "z2mTT",
+              "search_by_config_name" : {
+                "config_name_1" : "value",
+                "config_name_2" : "value"
+              },
+              "manufacturer" : "my_name",
+              "model" : "my_name",
+              "commands" : {
+                "command_confort" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                "command_confort_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-1"},
+                "command_confort_2" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-2"},
+                "command_eco" : {"type":"single_cmd", "cmd":"pilot_wire_mode eco"},
+                "command_horsgel" : {"type":"single_cmd", "cmd":"pilot_wire_mode frost_protection"},
+                "command_off" : {"type":"single_cmd", "cmd":"pilot_wire_mode off"},
+                
+                "statut_confort" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                "statut_confort_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-1"},
+                "statut_confort_2" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-2"},
+                "statut_eco" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"eco"},
+                "statut_horsgel" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
+                "statut_off" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
+                
+                "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
+                "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},
+                
+                "exemple_info_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
+                "exemple_info_2" : {"type":"expression", "expression":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"}
+              }               
+            }
+
+          }
+        MYTEXT;
+        
+
+      $v_list = json_decode($v_json, true);
+      if (json_last_error() != JSON_ERROR_NONE) {
+       centralepilote::log('debug', "erreur decodage json:".json_last_error_msg());
+       $v_list = array();
+      }
+      
+      //centralepilote::log('debug', "json:".print_r($v_arr ,true));
+      //centralepilote::log('debug', "json:".$v_json);
+
+      return($v_list);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpDeviceSupportedInfo()
+     * Description :
+     * Parameters :
+     *   $p_eqDevice : must be a valid pointer to an eqLogic
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    static function cpDeviceSupportedInfo($p_eqDevice) {
+        
+      // ----- Recupération de la liste
+      $v_list = centralepilote::cpDeviceSupportedList();
+      
+      // ----- Rcupération du plugin du eqDevice
+      $v_plugin_id = $p_eqDevice->getEqType_name();
+      centralepilote::log('debug', "Supported device name plugin : ".$v_plugin_id);
+      
+      foreach ($v_list as $v_name => $v_device) {
+        centralepilote::log('debug', "Supported device name : ".$v_name);
+        if ($v_device['plugin_id'] != $v_plugin_id) continue;
+        $v_found = true;
+        foreach ($v_device['search_by_config_name'] as $v_config_name => $v_config_value) {
+          $v_value = $p_eqDevice->getConfiguration($v_config_name);
+          centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' expected : '".$v_config_value."'");
+          if ($v_value != $v_config_value) {
+            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' expected : '".$v_config_value."'");
+            $v_found = false;
+            break;
+          }
+        }
+        if ($v_found) {
+          // TBC
+          centralepilote::log('debug', "Found !!");
+          $v_cmd_list = $v_device['commands'];
+          return($v_cmd_list);
+        }
+      }
+
+      return(null);
+    }
+    /* -------------------------------------------------------------------------*/
 
 
 }
