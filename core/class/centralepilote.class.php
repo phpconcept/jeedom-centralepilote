@@ -4055,13 +4055,15 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public function cpNatureChangeTo($p_nature) {
+      centralepilote::log('debug', "cpNatureChangeTo('".$p_nature."')");
+      
       // ----- Only for 'radiateur' 
       if (!$this->cpIsType('radiateur')) {
         centralepilote::log('debug', "This method cpNatureChangeTo() should not be used for not radiateur device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
-      centralepilote::log('debug', "Change fil-pilote nature of radiateur '".$this->getName()."' to '".$p_nature."'");
+      centralepilote::log('debug', "  Change fil-pilote nature of radiateur '".$this->getName()."' to '".$p_nature."'");
       
       // ----- Look for natures
       if ($p_nature == 'virtuel') {
@@ -4263,9 +4265,9 @@ class centralepilote extends eqLogic {
       else if ($p_nature == 'fp_device') {
         // ----- Get filpilote device id
         $v_eq_id = $this->cpGetConf('fp_device_id');
+        centralepilote::log('debug', "  Fil Pilote device id : '".$v_eq_id."'");
         $v_eq_id = str_replace('#', '', $v_eq_id);
         $v_eq_id = str_replace('eqLogic', '', $v_eq_id);
-        centralepilote::log('debug', "File Pilote device id : '".$v_eq_id."'");
         
         // ----- Look if eq exists
         if (($v_eq_id == '') || !is_object(($v_eq = eqLogic::byId($v_eq_id)))) {
@@ -4281,56 +4283,51 @@ class centralepilote extends eqLogic {
           return;
         }
         
+        // ----- Récuperer le nom de l'équipement        
+        $v_human_name = $v_eq->getHumanName();
+        centralepilote::log('debug', "  Fil Pilote human name : '".$v_human_name."'");
+
+/*
         centralepilote::log('debug', "Commands : '".print_r($v_cmd_list, true)."'");
         
         foreach ($v_cmd_list as $v_cmd_name => $v_cmd) {
           centralepilote::log('debug', "  Command '".$v_cmd_name."' : type = '".$v_cmd['type']."', value = '".$v_cmd['cmd']."'");
         }
+*/
         
         $v_cmd_id_list = ['command_confort','command_confort_1','command_confort_2',
                           'command_eco','command_horsgel','command_off',
                           'statut_confort','statut_confort_1','statut_confort_2',
                           'statut_eco','statut_horsgel','statut_off'];
-                       
+
+        // ----- Constituer chaque commande à partir du modèle
         foreach ($v_cmd_id_list as $v_cmd_id) {
-        }
-        
-        $v_manuf = '';
-        $v_model = '';
-
-        $v_human_name = $v_eq->getHumanName();
-        $v_manuf = $v_eq->getConfiguration('manufacturer', '');
-        $v_model = $v_eq->getConfiguration('model', '');
-        
-        if (($v_manuf == 'Adeo') && ($v_model == 'SIN-4-FP-21_EQU')) {
-
-          $this->setConfiguration('command_confort', "#".$v_human_name."[pilot_wire_mode comfort]#");              
-          $this->setConfiguration('command_confort_1', "#".$v_human_name."[pilot_wire_mode comfort_-1]#");              
-          $this->setConfiguration('command_confort_2', "#".$v_human_name."[pilot_wire_mode comfort_-2]#");              
-          $this->setConfiguration('command_eco', "#".$v_human_name."[pilot_wire_mode eco]#");              
-          $this->setConfiguration('command_horsgel', "#".$v_human_name."[pilot_wire_mode frost_protection]#");              
-          $this->setConfiguration('command_off', "#".$v_human_name."[pilot_wire_mode off]#");              
-
-          $this->setConfiguration('statut_confort', '(#'.$v_human_name.'[pilot_wire_mode]# == "comfort")');              
-          $this->setConfiguration('statut_confort_1', '(#'.$v_human_name.'[pilot_wire_mode]# == "comfort_-1")');              
-          $this->setConfiguration('statut_confort_2', '(#'.$v_human_name.'[pilot_wire_mode]# == "comfort_-2")');              
-          $this->setConfiguration('statut_eco', '(#'.$v_human_name.'[pilot_wire_mode]# == "eco")');              
-          $this->setConfiguration('statut_horsgel', '(#'.$v_human_name.'[pilot_wire_mode]# == "frost_protection")');              
-          $this->setConfiguration('statut_off', '(#'.$v_human_name.'[pilot_wire_mode]# == "off")');              
-
-          $this->setConfiguration('support_confort', 1);
-          $this->setConfiguration('support_confort_1', 1);
-          $this->setConfiguration('support_confort_2', 1);
-          $this->setConfiguration('support_eco', 1);
-          $this->setConfiguration('support_horsgel', 1);
-          $this->setConfiguration('support_off', 1);
+          if (!isset($v_cmd_list[$v_cmd_id])) continue;
+          $v_type = $v_cmd_list[$v_cmd_id]['type'];
+          if ($v_type == 'single_cmd') {
+            $v_value = "#".$v_human_name."[".$v_cmd_list[$v_cmd_id]['cmd']."]#";
+          }
+          else if ($v_type == 'cmd_value') {
+            $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_cmd_id]['cmd']."]# == \"".$v_cmd_list[$v_cmd_id]['value']."\")"; 
+          }
+          else if ($v_type == 'double_cmd') {
+            // TBC : a developper
+            $v_value = "";
+          }
+          else if ($v_type == 'expression') {
+            // TBC : a developper
+            $v_value = "";
+          }
+          else {
+            centralepilote::log('debug', "  Unknown command type '".$v_type."'");
+            $v_value = "";
+          }
           
+          // ----- Fixer la commande
+          centralepilote::log('debug', "  Cmd '".$v_cmd_id."' = '".$v_value."'");
+          $this->setConfiguration($v_cmd_id, $v_value);  
         }
-        else {
-          centralepilote::log('debug', "Equipement model (".$v_model.") et fabriquant (".$v_manuf.") non supporté");
-          $this->setConfiguration('nature_fil_pilote', 'virtuel');
-          return;
-        }
+        
       }
       
       else {
