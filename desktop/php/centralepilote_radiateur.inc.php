@@ -78,20 +78,28 @@
       <select class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="fp_device_id" onchange="cp_fp_device_change(event)">
         
 <?php 
-  $eqLogics = eqLogic::byType('z2m');
-  foreach ($eqLogics as $v_eq) {
-    $v_manuf = $v_eq->getConfiguration('manufacturer', '');
-    //echo "Manufacturer : ".$v_manuf."<br>";
-    $v_model = $v_eq->getConfiguration('model', '');
-    //echo "Model : ".$v_model."<br>";
-    if (($v_manuf == 'Adeo') && ($v_model == 'SIN-4-FP-21_EQU')) {
-     // echo '<option value="'.$v_eq->getId().'">'.$v_eq->getName().' ('.$v_manuf.' / '.$v_model.')</option>';
-      echo '<option value="#'.$v_eq->getHumanName().'#">'.$v_eq->getName().' ('.$v_manuf.' / '.$v_model.')</option>';
-    }
-    if (($v_manuf == 'NodOn') && ($v_model == 'SIN-4-FP-21')) {
-      echo '<option value="device_NodOn_SIN_4_FP_21">Fil-Pilote NodOn (SIN-4-FP-21)</option>';
+  
+  $v_device_info_list = centralepilote::cpDeviceSupportedList();  
+  
+  $v_plugin_list = plugin::listPlugin(true);
+  foreach ($v_plugin_list as $v_plugin) {
+  	$v_plugin_id = $v_plugin->getId();
+  	if (!isset($v_device_info_list[$v_plugin_id])) continue;
+        
+    //echo '<option value="xx">PlugIn : '.$v_plugin_id.'</option>';
+    
+    $eqLogics = eqLogic::byType($v_plugin_id);
+    foreach ($eqLogics as $v_eq) {
+      $v_device_info = centralepilote::cpDeviceSupportedInfo($v_eq);
+      if ($v_device_info != null) {
+        $v_human_name = $v_eq->getHumanName();
+        $v_name = (isset($v_device_info['name'])?' ('.$v_device_info['name'].')':'');
+        
+        echo '<option value="#'.$v_human_name.'#">'.$v_human_name.$v_name.'</option>';
+      }
     }
   }
+  
 ?>
 
       </select>

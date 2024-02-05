@@ -4276,7 +4276,7 @@ class centralepilote extends eqLogic {
           return;
         }
         
-        $v_cmd_list = centralepilote::cpDeviceSupportedInfo($v_eq);
+        $v_cmd_list = centralepilote::cpDeviceSupportedCommands($v_eq);
         if ($v_cmd_list === null) {
           centralepilote::log('debug', "Fail to find supported information for '".$v_eq_id."', return to virtual.");
           $this->setConfiguration('nature_fil_pilote', 'virtuel');
@@ -4286,14 +4286,6 @@ class centralepilote extends eqLogic {
         // ----- Récuperer le nom de l'équipement        
         $v_human_name = $v_eq->getHumanName();
         centralepilote::log('debug', "  Fil Pilote human name : '".$v_human_name."'");
-
-/*
-        centralepilote::log('debug', "Commands : '".print_r($v_cmd_list, true)."'");
-        
-        foreach ($v_cmd_list as $v_cmd_name => $v_cmd) {
-          centralepilote::log('debug', "  Command '".$v_cmd_name."' : type = '".$v_cmd['type']."', value = '".$v_cmd['cmd']."'");
-        }
-*/
         
         $v_cmd_id_list = ['command_confort','command_confort_1','command_confort_2',
                           'command_eco','command_horsgel','command_off',
@@ -4347,91 +4339,31 @@ class centralepilote extends eqLogic {
      */
     static function cpDeviceSupportedList() {
         
-        $v_json = <<<MYTEXT
-          {
-            "Adeo SIN-4-FP-21_EQU" : {
-              "plugin_id" : "z2m",
-              "search_by_config_value" : {
-                "manufacturer" : "Adeo",
-                "model" : "SIN-4-FP-21_EQU"
-              },
-              "manufacturer" : "Adeo",
-              "model" : "SIN-4-FP-21_EQU",
-              "commands" : {
-                "command_confort" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
-                "command_confort_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-1"},
-                "command_confort_2" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-2"},
-                "command_eco" : {"type":"single_cmd", "cmd":"pilot_wire_mode eco"},
-                "command_horsgel" : {"type":"single_cmd", "cmd":"pilot_wire_mode frost_protection"},
-                "command_off" : {"type":"single_cmd", "cmd":"pilot_wire_mode off"},
-                
-                "statut_confort" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
-                "statut_confort_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-1"},
-                "statut_confort_2" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-2"},
-                "statut_eco" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"eco"},
-                "statut_horsgel" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
-                "statut_off" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
-              }               
-            },
+      // ----- Inclure la liste des devices fil-pilote natif
+      include dirname(__FILE__) . '/../../core/config/devices/fil_pilote_device_list.inc.php';
 
-
-            "ceci_est_un_exemple" : {
-              "plugin_id" : "ceci_est_un_exemple",
-              "search_by_config_value" : {
-                "config_name_1" : "value1",
-                "config_name_2" : "value2"
-              },
-              "manufacturer" : "my_name",
-              "model" : "my_name",
-              "commands" : {
-                "command_confort" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
-                "command_confort_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-1"},
-                "command_confort_2" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-2"},
-                "command_eco" : {"type":"single_cmd", "cmd":"pilot_wire_mode eco"},
-                "command_horsgel" : {"type":"single_cmd", "cmd":"pilot_wire_mode frost_protection"},
-                "command_off" : {"type":"single_cmd", "cmd":"pilot_wire_mode off"},
-                
-                "statut_confort" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
-                "statut_confort_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-1"},
-                "statut_confort_2" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-2"},
-                "statut_eco" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"eco"},
-                "statut_horsgel" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
-                "statut_off" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
-                
-                "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
-                "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},
-                
-                "exemple_info_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
-                "exemple_info_2" : {"type":"expression", "expression":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"}
-              }               
-            }
-
-          }
-        MYTEXT;
-        
-
-      $v_list = json_decode($v_json, true);
+      $v_list = json_decode($v_device_list_json, true);
       if (json_last_error() != JSON_ERROR_NONE) {
-       centralepilote::log('debug', "erreur decodage json:".json_last_error_msg());
+       centralepilote::log('error', "Erreur dans le format json du fichier 'core/config/fil_pilote_device_list.inc.php' (".json_last_error_msg().")");
        $v_list = array();
       }
       
-      //centralepilote::log('debug', "json:".print_r($v_arr ,true));
-      //centralepilote::log('debug', "json:".$v_json);
+      //centralepilote::log('debug', "json:".print_r($v_list ,true));
+      //centralepilote::log('debug', "json:".$v_device_list_json);
 
       return($v_list);
     }
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpDeviceSupportedInfo()
+     * Method : cpDeviceSupportedCommands()
      * Description :
      * Parameters :
      *   $p_eqDevice : must be a valid pointer to an eqLogic
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    static function cpDeviceSupportedInfo($p_eqDevice) {
+    static function cpDeviceSupportedCommands_SAVE($p_eqDevice) {
         
       // ----- Recupération de la liste
       $v_list = centralepilote::cpDeviceSupportedList();
@@ -4461,6 +4393,108 @@ class centralepilote extends eqLogic {
       }
 
       return(null);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpDeviceSupportedInfo()
+     * Description :
+     * Parameters :
+     *   $p_eqDevice : must be a valid pointer to an eqLogic
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    static function cpDeviceSupportedInfo($p_eqDevice) {
+        
+      // ----- Recupération de la liste
+      $v_list = centralepilote::cpDeviceSupportedList();
+      
+      // ----- Rcupération du plugin du eqDevice
+      $v_plugin_id = $p_eqDevice->getEqType_name();
+      centralepilote::log('debug', "Device name plugin : ".$v_plugin_id);
+      
+     if (!isset($v_list[$v_plugin_id])) {
+       centralepilote::log('debug', "Plugin : ".$v_plugin_id." not in supported list.");
+       return(null);
+     }
+     
+     $v_device_list = $v_list[$v_plugin_id];
+      
+      foreach ($v_device_list as $v_name => $v_device) {
+        centralepilote::log('debug', "Check with device model : ".$v_name);
+        $v_found = true;
+        foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
+          $v_value = $p_eqDevice->getConfiguration($v_config_name);
+          centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
+          if ($v_value != $v_config_value) {
+            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
+            $v_found = false;
+            break;
+          }
+        }
+        if ($v_found) {
+          centralepilote::log('debug', "Found !!");
+          return($v_device);
+        }
+      }
+
+      return(null);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpDeviceSupportedCommands()
+     * Description :
+     * Parameters :
+     *   $p_eqDevice : must be a valid pointer to an eqLogic
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    static function cpDeviceSupportedCommands($p_eqDevice) {
+    
+      $v_device_info = centralepilote::cpDeviceSupportedInfo($p_eqDevice);
+      if ($v_device_info == null) return(null);
+      
+      if (!isset($v_device_info['commands'])) return(null);
+      
+      return($v_device_info['commands']);
+      
+/*      
+      // ----- Recupération de la liste
+      $v_list = centralepilote::cpDeviceSupportedList();
+      
+      // ----- Rcupération du plugin du eqDevice
+      $v_plugin_id = $p_eqDevice->getEqType_name();
+      centralepilote::log('debug', "Device name plugin : ".$v_plugin_id);
+      
+     if (!isset($v_list[$v_plugin_id])) {
+       centralepilote::log('debug', "Plugin : ".$v_plugin_id." not in supported list.");
+       return(null);
+     }
+     
+     $v_device_list = $v_list[$v_plugin_id];
+      
+      foreach ($v_device_list as $v_name => $v_device) {
+        centralepilote::log('debug', "Check with device model : ".$v_name);
+        $v_found = true;
+        foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
+          $v_value = $p_eqDevice->getConfiguration($v_config_name);
+          centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
+          if ($v_value != $v_config_value) {
+            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
+            $v_found = false;
+            break;
+          }
+        }
+        if ($v_found) {
+          centralepilote::log('debug', "Found !!");
+          $v_cmd_list = $v_device['commands'];
+          return($v_cmd_list);
+        }
+      }
+
+      return(null);
+      */
     }
     /* -------------------------------------------------------------------------*/
 
