@@ -59,7 +59,7 @@
  *         /!\ Attention /!\
  *         Si vous modifiez ce fichier,
  *         Il est vivement conseillé de vérifier la validité du format JSON de cette valeur
- *         par exemple en utilisant des outils de validation en ligne.
+ *         par exemple en utilisant des outils de validation en ligne (en ajoutant {} autour si besoin)
  */
     
   $v_device_json = <<<MYTEXT
@@ -122,6 +122,10 @@
             "config_name_1" : "value1",
             "config_name_2" : "value2"
           },
+          "search_by_command_name" : [
+            "command_name_1",
+            "command_name_2"
+          ],
           "name" : "ceci_est_un_exemple",
           "manufacturer" : "my_name",
           "model" : "my_name",

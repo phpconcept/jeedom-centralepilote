@@ -1348,6 +1348,8 @@ class centralepilote extends eqLogic {
         // Doing change before the save
         $v_nature_fil_pilote = $this->cpGetConf('nature_fil_pilote');
         if (   ($eqLogic->cpGetConf('nature_fil_pilote') != $v_nature_fil_pilote)
+            || (   ($v_nature_fil_pilote == 'fp_device') 
+                && ($eqLogic->cpGetConf('fp_device_id') != $this->cpGetConf('fp_device_id')))
             || ($eqLogic->cpGetConf('lien_commutateur') != $this->cpGetConf('lien_commutateur'))
             || ($eqLogic->cpGetConf('lien_commutateur_a') != $this->cpGetConf('lien_commutateur_a'))
             || ($eqLogic->cpGetConf('lien_commutateur_b') != $this->cpGetConf('lien_commutateur_b')) ) {
@@ -4287,20 +4289,44 @@ class centralepilote extends eqLogic {
         $v_human_name = $v_eq->getHumanName();
         centralepilote::log('debug', "  Fil Pilote human name : '".$v_human_name."'");
         
+        /*
         $v_cmd_id_list = ['command_confort','command_confort_1','command_confort_2',
                           'command_eco','command_horsgel','command_off',
                           'statut_confort','statut_confort_1','statut_confort_2',
                           'statut_eco','statut_horsgel','statut_off'];
+        */
+
+        $v_cmd_id_list = ['confort','confort_1','confort_2',
+                          'eco','horsgel','off',
+                          'confort','confort_1','confort_2',
+                          'eco','horsgel','off'];
 
         // ----- Constituer chaque commande à partir du modèle
+        $v_key = 'command';
+        foreach (['command', 'statut'] as $v_key) {
         foreach ($v_cmd_id_list as $v_cmd_id) {
-          if (!isset($v_cmd_list[$v_cmd_id])) continue;
-          $v_type = $v_cmd_list[$v_cmd_id]['type'];
+          $v_index = $v_key.'_'.$v_cmd_id;
+
+          // ----- on éteint par défaut le support du mode (checkbox)
+          $this->setConfiguration('support_'.$v_cmd_id, 0);
+
+          if (!isset($v_cmd_list[$v_index])) {
+          /*
+            // ----- on éteint le support du mode (checkbox)
+            if ($v_key == 'command') {
+              $this->setConfiguration('support_'.$v_cmd_id, 0);
+            }
+            */
+            // ----- On reset la valeur de la commande
+            $this->setConfiguration($v_index, '');
+            continue;
+          }
+          $v_type = $v_cmd_list[$v_index]['type'];
           if ($v_type == 'single_cmd') {
-            $v_value = "#".$v_human_name."[".$v_cmd_list[$v_cmd_id]['cmd']."]#";
+            $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]#";
           }
           else if ($v_type == 'cmd_value') {
-            $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_cmd_id]['cmd']."]# == \"".$v_cmd_list[$v_cmd_id]['value']."\")"; 
+            $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]# == \"".$v_cmd_list[$v_index]['value']."\")"; 
           }
           else if ($v_type == 'double_cmd') {
             // TBC : a developper
@@ -4314,10 +4340,15 @@ class centralepilote extends eqLogic {
             centralepilote::log('debug', "  Unknown command type '".$v_type."'");
             $v_value = "";
           }
+
+          if ($v_value != "") {
+            $this->setConfiguration('support_'.$v_cmd_id, 1);
+          }
           
           // ----- Fixer la commande
-          centralepilote::log('debug', "  Cmd '".$v_cmd_id."' = '".$v_value."'");
-          $this->setConfiguration($v_cmd_id, $v_value);  
+          centralepilote::log('debug', "  Cmd '".$v_index."' = '".$v_value."'");
+          $this->setConfiguration($v_index, $v_value);  
+        }
         }
         
       }
@@ -4356,47 +4387,6 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
-     * Method : cpDeviceSupportedCommands()
-     * Description :
-     * Parameters :
-     *   $p_eqDevice : must be a valid pointer to an eqLogic
-     * Returned value : 
-     * ---------------------------------------------------------------------------
-     */
-    static function cpDeviceSupportedCommands_SAVE($p_eqDevice) {
-        
-      // ----- Recupération de la liste
-      $v_list = centralepilote::cpDeviceSupportedList();
-      
-      // ----- Rcupération du plugin du eqDevice
-      $v_plugin_id = $p_eqDevice->getEqType_name();
-      centralepilote::log('debug', "Device name plugin : ".$v_plugin_id);
-      
-      foreach ($v_list as $v_name => $v_device) {
-        centralepilote::log('debug', "Check with device model : ".$v_name);
-        if ($v_device['plugin_id'] != $v_plugin_id) continue;
-        $v_found = true;
-        foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
-          $v_value = $p_eqDevice->getConfiguration($v_config_name);
-          centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
-          if ($v_value != $v_config_value) {
-            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
-            $v_found = false;
-            break;
-          }
-        }
-        if ($v_found) {
-          centralepilote::log('debug', "Found !!");
-          $v_cmd_list = $v_device['commands'];
-          return($v_cmd_list);
-        }
-      }
-
-      return(null);
-    }
-    /* -------------------------------------------------------------------------*/
-
-    /**---------------------------------------------------------------------------
      * Method : cpDeviceSupportedInfo()
      * Description :
      * Parameters :
@@ -4411,27 +4401,50 @@ class centralepilote extends eqLogic {
       
       // ----- Rcupération du plugin du eqDevice
       $v_plugin_id = $p_eqDevice->getEqType_name();
-      centralepilote::log('debug', "Device name plugin : ".$v_plugin_id);
+      centralepilote::log('debug', "Search if device '".$p_eqDevice->getHumanName()."' (".$v_plugin_id.") is supported");
       
-     if (!isset($v_list[$v_plugin_id])) {
-       centralepilote::log('debug', "Plugin : ".$v_plugin_id." not in supported list.");
-       return(null);
-     }
+      if (!isset($v_list[$v_plugin_id])) {
+        centralepilote::log('debug', "Plugin : ".$v_plugin_id." not in supported list.");
+        return(null);
+      }
      
-     $v_device_list = $v_list[$v_plugin_id];
+      $v_device_list = $v_list[$v_plugin_id];
       
       foreach ($v_device_list as $v_name => $v_device) {
         centralepilote::log('debug', "Check with device model : ".$v_name);
         $v_found = true;
-        foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
-          $v_value = $p_eqDevice->getConfiguration($v_config_name);
-          centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
-          if ($v_value != $v_config_value) {
-            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
-            $v_found = false;
-            break;
+        // ----- On recherche d'abord le matching sur les configurations
+        if (isset($v_device['search_by_config_value'])) {
+          foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
+            $v_value = $p_eqDevice->getConfiguration($v_config_name);
+            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
+            if ($v_value != $v_config_value) {
+              centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
+              $v_found = false;
+              break;
+            }
+            else {
+              centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' is ok'");
+            }
           }
         }
+        
+        // ----- Si ça match sur les configurations (ou si pas de configurations), on recherche sur les commandes
+        if ($v_found && isset($v_device['search_by_command_name'])) {
+          foreach ($v_device['search_by_command_name'] as $v_command_name) {            
+            $v_cmd = cmd::byEqLogicIdCmdName($p_eqDevice->getId(), $v_command_name);
+            if (!is_object($v_cmd)) {
+              centralepilote::log('debug', "Command '".$v_command_name."' not present");
+              $v_found = false;
+              break;
+            }
+            else {
+              centralepilote::log('debug', "Command '".$v_command_name."' is present");
+            }
+          }
+        }
+        
+        // ----- Si a match a la fois les config et les commandes
         if ($v_found) {
           centralepilote::log('debug', "Found !!");
           return($v_device);
@@ -4458,43 +4471,6 @@ class centralepilote extends eqLogic {
       if (!isset($v_device_info['commands'])) return(null);
       
       return($v_device_info['commands']);
-      
-/*      
-      // ----- Recupération de la liste
-      $v_list = centralepilote::cpDeviceSupportedList();
-      
-      // ----- Rcupération du plugin du eqDevice
-      $v_plugin_id = $p_eqDevice->getEqType_name();
-      centralepilote::log('debug', "Device name plugin : ".$v_plugin_id);
-      
-     if (!isset($v_list[$v_plugin_id])) {
-       centralepilote::log('debug', "Plugin : ".$v_plugin_id." not in supported list.");
-       return(null);
-     }
-     
-     $v_device_list = $v_list[$v_plugin_id];
-      
-      foreach ($v_device_list as $v_name => $v_device) {
-        centralepilote::log('debug', "Check with device model : ".$v_name);
-        $v_found = true;
-        foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
-          $v_value = $p_eqDevice->getConfiguration($v_config_name);
-          centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
-          if ($v_value != $v_config_value) {
-            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
-            $v_found = false;
-            break;
-          }
-        }
-        if ($v_found) {
-          centralepilote::log('debug', "Found !!");
-          $v_cmd_list = $v_device['commands'];
-          return($v_cmd_list);
-        }
-      }
-
-      return(null);
-      */
     }
     /* -------------------------------------------------------------------------*/
 

@@ -59,7 +59,7 @@
  *         /!\ Attention /!\
  *         Si vous modifiez ce fichier,
  *         Il est vivement conseillé de vérifier la validité du format JSON de cette valeur
- *         par exemple en utilisant des outils de validation en ligne.
+ *         par exemple en utilisant des outils de validation en ligne (en ajoutant {} autour si besoin)
  */
 
 
@@ -156,28 +156,88 @@
 
       "virtual" : {
 
+        "FilPilote_simulated_1" : {
+          "search_by_command_name" : [
+            "confort",
+            "confort_1",
+            "confort_2",
+            "eco",
+            "horsgel",
+            "off"
+          ],
+          "name" : "Simul Fil-pilote 6 cmd",
+          "manufacturer" : "VB",
+          "model" : "FP",
+          "commands" : {
+            "command_confort" : {"type":"single_cmd", "cmd":"confort"},
+            "command_confort_1" : {"type":"single_cmd", "cmd":"confort_1"},
+            "command_confort_2" : {"type":"single_cmd", "cmd":"confort_2"},
+            "command_eco" : {"type":"single_cmd", "cmd":"eco"},
+            "command_horsgel" : {"type":"single_cmd", "cmd":"horsgel"},
+            "command_off" : {"type":"single_cmd", "cmd":"off"},
+            
+            "statut_confort" : {"type":"cmd_value", "cmd":"etat", "value":"confort"},
+            "statut_confort_1" : {"type":"cmd_value", "cmd":"etat", "value":"confort_1"},
+            "statut_confort_2" : {"type":"cmd_value", "cmd":"etat", "value":"confort_2"},
+            "statut_eco" : {"type":"cmd_value", "cmd":"etat", "value":"eco"},
+            "statut_horsgel" : {"type":"cmd_value", "cmd":"etat", "value":"horsgel"},
+            "statut_off" : {"type":"cmd_value", "cmd":"etat", "value":"off"}
+          }               
+        },
+
+        "FilPilote_simulated_2" : {
+          "search_by_command_name" : [
+            "confort",
+            "eco",
+            "horsgel",
+            "off"
+          ],
+          "name" : "Simul Fil-pilote 4 cmd",
+          "manufacturer" : "VB",
+          "model" : "FP",
+          "commands" : {
+            "command_confort" : {"type":"single_cmd", "cmd":"confort"},
+            "command_eco" : {"type":"single_cmd", "cmd":"eco"},
+            "command_horsgel" : {"type":"single_cmd", "cmd":"horsgel"},
+            "command_off" : {"type":"single_cmd", "cmd":"off"},
+            
+            "statut_confort" : {"type":"cmd_value", "cmd":"etat", "value":"confort"},
+            "statut_eco" : {"type":"cmd_value", "cmd":"etat", "value":"eco"},
+            "statut_horsgel" : {"type":"cmd_value", "cmd":"etat", "value":"horsgel"},
+            "statut_off" : {"type":"cmd_value", "cmd":"etat", "value":"off"}
+          }               
+        },
+
         "ceci_est_un_exemple" : {
           "search_by_config_value" : {
             "config_name_1" : "value1",
             "config_name_2" : "value2"
           },
+          "search_by_command_name" : [
+            "command_name_1",
+            "command_name_2"
+          ],
+          "search_by_tag" : [
+            "tag_name_1",
+            "tag_name_2"
+          ],
           "name" : "ceci_est_un_exemple",
           "manufacturer" : "my_name",
           "model" : "my_name",
           "commands" : {
-            "command_confort" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
-            "command_confort_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-1"},
-            "command_confort_2" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort_-2"},
-            "command_eco" : {"type":"single_cmd", "cmd":"pilot_wire_mode eco"},
-            "command_horsgel" : {"type":"single_cmd", "cmd":"pilot_wire_mode frost_protection"},
-            "command_off" : {"type":"single_cmd", "cmd":"pilot_wire_mode off"},
+            "command_confort" : {"type":"single_cmd", "cmd":"confort"},
+            "command_confort_1" : {"type":"single_cmd", "cmd":"confort_1"},
+            "command_confort_2" : {"type":"single_cmd", "cmd":"confort_2"},
+            "command_eco" : {"type":"single_cmd", "cmd":"eco"},
+            "command_horsgel" : {"type":"single_cmd", "cmd":"horsgel"},
+            "command_off" : {"type":"single_cmd", "cmd":"off"},
             
-            "statut_confort" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
-            "statut_confort_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-1"},
-            "statut_confort_2" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort_-2"},
-            "statut_eco" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"eco"},
-            "statut_horsgel" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
-            "statut_off" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
+            "statut_confort" : {"type":"cmd_value", "cmd":"etat", "value":"confort"},
+            "statut_confort_1" : {"type":"cmd_value", "cmd":"etat", "value":"confort_1"},
+            "statut_confort_2" : {"type":"cmd_value", "cmd":"etat", "value":"confort_2"},
+            "statut_eco" : {"type":"cmd_value", "cmd":"etat", "value":"eco"},
+            "statut_horsgel" : {"type":"cmd_value", "cmd":"etat", "value":"horsgel"},
+            "statut_off" : {"type":"cmd_value", "cmd":"etat", "value":"off"}
             
             "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
             "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},

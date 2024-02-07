@@ -54,21 +54,6 @@
   <div class="row">
   <div class="col-lg-6">
   
-  <!-- 
-  <div class="row">
-      <label class="col-lg-4 control-label">{{Equipement associé}}
-      <sup><i class="fa fa-question-circle tooltips" title="{{Indiquer comment est constitué le fil pilote, à partir de quels équipements et commandes.}}"></i></sup>
-      </label>
-    <div class="col-sm-7">
-      <textarea class="cp_attr_radiateur eqLogicAttr form-control input-sm" data-l1key="configuration" data-l2key="fp_device_id" style="height : 33px;" placeholder="{{Référence équipement commutateur associé}}"></textarea>
-      <a class="btn btn-default cursor cp_modal_select_equipement btn-sm" data-input="fp_device_id"><i class="fas fa-list-alt"></i> {{Rechercher équipement}}</a>
-    </div>
-    <div class="col-sm-1">
-    </div>
-  </div>
-  -->
-
-
   <div class="row">
       <label class="col-lg-4 control-label">{{Equipement fil-pilote}}
       <sup><i class="fa fa-question-circle tooltips" title="{{Choisir parmi la liste des équipements existants et supportés}}"></i></sup>

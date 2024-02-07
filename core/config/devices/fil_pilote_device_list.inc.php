@@ -59,7 +59,7 @@
  *         /!\ Attention /!\
  *         Si vous modifiez ce fichier,
  *         Il est vivement conseillé de vérifier la validité du format JSON de cette valeur
- *         par exemple en utilisant des outils de validation en ligne.
+ *         par exemple en utilisant des outils de validation en ligne (en ajoutant {} autour si besoin)
  */
 
   static $v_device_list_json = '{';
