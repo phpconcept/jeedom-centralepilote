@@ -4289,13 +4289,6 @@ class centralepilote extends eqLogic {
         $v_human_name = $v_eq->getHumanName();
         centralepilote::log('debug', "  Fil Pilote human name : '".$v_human_name."'");
         
-        /*
-        $v_cmd_id_list = ['command_confort','command_confort_1','command_confort_2',
-                          'command_eco','command_horsgel','command_off',
-                          'statut_confort','statut_confort_1','statut_confort_2',
-                          'statut_eco','statut_horsgel','statut_off'];
-        */
-
         $v_cmd_id_list = ['confort','confort_1','confort_2',
                           'eco','horsgel','off',
                           'confort','confort_1','confort_2',
@@ -4304,57 +4297,52 @@ class centralepilote extends eqLogic {
         // ----- Constituer chaque commande à partir du modèle
         $v_key = 'command';
         foreach (['command', 'statut'] as $v_key) {
-        foreach ($v_cmd_id_list as $v_cmd_id) {
-          $v_index = $v_key.'_'.$v_cmd_id;
+          foreach ($v_cmd_id_list as $v_cmd_id) {
+            $v_index = $v_key.'_'.$v_cmd_id;
 
-          // ----- on éteint par défaut le support du mode (checkbox)
-          $this->setConfiguration('support_'.$v_cmd_id, 0);
+            // ----- on éteint par défaut le support du mode (checkbox)
+            $this->setConfiguration('support_'.$v_cmd_id, 0);
 
-          if (!isset($v_cmd_list[$v_index])) {
-          /*
-            // ----- on éteint le support du mode (checkbox)
-            if ($v_key == 'command') {
-              $this->setConfiguration('support_'.$v_cmd_id, 0);
+            if (!isset($v_cmd_list[$v_index])) {
+              // ----- On reset la valeur de la commande
+              $this->setConfiguration($v_index, '');
+              continue;
             }
-            */
-            // ----- On reset la valeur de la commande
-            $this->setConfiguration($v_index, '');
-            continue;
-          }
-          $v_type = $v_cmd_list[$v_index]['type'];
-          if ($v_type == 'single_cmd') {
-            $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]#";
-          }
-          else if ($v_type == 'cmd_value') {
-            $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]# == \"".$v_cmd_list[$v_index]['value']."\")"; 
-          }
-          else if ($v_type == 'double_cmd') {
-            // TBC : a developper
-            $v_value = "";
-          }
-          else if ($v_type == 'expression') {
-            // TBC : a developper
-            $v_value = "";
-          }
-          else {
-            centralepilote::log('debug', "  Unknown command type '".$v_type."'");
-            $v_value = "";
-          }
+            $v_type = $v_cmd_list[$v_index]['type'];
+            if ($v_type == 'single_cmd') {
+              $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]#";
+            }
+            else if ($v_type == 'cmd_value') {
+              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]# == \"".$v_cmd_list[$v_index]['value']."\")"; 
+            }
+            else if ($v_type == 'double_cmd') {
+              // TBC : a developper
+              $v_value = "";
+            }
+            else if ($v_type == 'expression') {
+              // TBC : a developper
+              $v_value = "";
+            }
+            else {
+              centralepilote::log('debug', "  Unknown command type '".$v_type."'");
+              $v_value = "";
+            }
 
-          if ($v_value != "") {
-            $this->setConfiguration('support_'.$v_cmd_id, 1);
+            if ($v_value != "") {
+              $this->setConfiguration('support_'.$v_cmd_id, 1);
+            }
+            
+            // ----- Fixer la commande
+            $v_value_trans = cmd::humanReadableToCmd($v_value);
+            centralepilote::log('debug', "  Cmd '".$v_index."' = '".$v_value."' (".$v_value_trans.")");            
+            $this->setConfiguration($v_index, $v_value_trans);  
           }
-          
-          // ----- Fixer la commande
-          centralepilote::log('debug', "  Cmd '".$v_index."' = '".$v_value."'");
-          $this->setConfiguration($v_index, $v_value);  
-        }
         }
         
       }
       
       else {
-        // TBC : Ne devrait jamais arriver ... 
+        centralepilote::log('debug', "!! nature = '".$p_nature."' : Erreur on ne devrait jamais arriver là (".__FILE__.",".__LINE__.")");
       }
 
       

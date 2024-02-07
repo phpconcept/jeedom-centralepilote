@@ -217,10 +217,6 @@
             "command_name_1",
             "command_name_2"
           ],
-          "search_by_tag" : [
-            "tag_name_1",
-            "tag_name_2"
-          ],
           "name" : "ceci_est_un_exemple",
           "manufacturer" : "my_name",
           "model" : "my_name",
@@ -237,7 +233,7 @@
             "statut_confort_2" : {"type":"cmd_value", "cmd":"etat", "value":"confort_2"},
             "statut_eco" : {"type":"cmd_value", "cmd":"etat", "value":"eco"},
             "statut_horsgel" : {"type":"cmd_value", "cmd":"etat", "value":"horsgel"},
-            "statut_off" : {"type":"cmd_value", "cmd":"etat", "value":"off"}
+            "statut_off" : {"type":"cmd_value", "cmd":"etat", "value":"off"},
             
             "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
             "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},

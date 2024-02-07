@@ -56,7 +56,7 @@
   
   <div class="row">
       <label class="col-lg-4 control-label">{{Equipement fil-pilote}}
-      <sup><i class="fa fa-question-circle tooltips" title="{{Choisir parmi la liste des équipements existants et supportés}}"></i></sup>
+      <sup><i class="fa fa-question-circle tooltips" title="{{Choisir parmi la liste des équipements existants et supportés, automatiquement reconnus par le plugin}}"></i></sup>
       </label>
     <div class="col-sm-7">
 
