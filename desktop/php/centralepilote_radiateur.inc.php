@@ -71,16 +71,15 @@
   	$v_plugin_id = $v_plugin->getId();
   	if (!isset($v_device_info_list[$v_plugin_id])) continue;
         
-    //echo '<option value="xx">PlugIn : '.$v_plugin_id.'</option>';
-    
     $eqLogics = eqLogic::byType($v_plugin_id);
     foreach ($eqLogics as $v_eq) {
       $v_device_info = centralepilote::cpDeviceSupportedInfo($v_eq);
       if ($v_device_info != null) {
         $v_human_name = $v_eq->getHumanName();
-        $v_name = (isset($v_device_info['name'])?' ('.$v_device_info['name'].')':'');
+        //$v_name = (isset($v_device_info['name'])?' ('.$v_device_info['name'].')':'');
         
-        echo '<option value="#'.$v_human_name.'#">'.$v_human_name.$v_name.'</option>';
+        //echo '<option value="#'.$v_human_name.'#">'.$v_human_name.$v_name.'</option>';
+        echo '<option value="#'.$v_human_name.'#">'.$v_human_name.'</option>';
       }
     }
   }

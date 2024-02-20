@@ -4313,7 +4313,7 @@ class centralepilote extends eqLogic {
               $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]#";
             }
             else if ($v_type == 'cmd_value') {
-              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]# == \"".$v_cmd_list[$v_index]['value']."\")"; 
+              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]# == \"".$v_cmd_list[$v_index]['value']."\")";
             }
             else if ($v_type == 'double_cmd') {
               $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]#";
@@ -4329,7 +4329,7 @@ class centralepilote extends eqLogic {
               $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]# == \"".$v_cmd_list[$v_index]['value_1']."\")"; 
               $v_value .= " || ";
               $v_value .= "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]# == \"".$v_cmd_list[$v_index]['value_2']."\")"; 
-            }            
+            }
             else if ($v_type == 'expression') {
               $v_value = str_replace('__HUMAN_NAME__', $v_human_name, $v_cmd_list[$v_index]['expression']);
             }
@@ -4344,7 +4344,7 @@ class centralepilote extends eqLogic {
             
             // ----- Fixer la commande
             $v_value_trans = cmd::humanReadableToCmd($v_value);
-            centralepilote::log('debug', "  Cmd '".$v_index."' = '".$v_value."' (".$v_value_trans.")");            
+            centralepilote::log('debug', "  Cmd '".$v_index."' = '".$v_value."' (".$v_value_trans.")");                     
             $this->setConfiguration($v_index, $v_value_trans);  
           }
         }
@@ -4409,20 +4409,20 @@ class centralepilote extends eqLogic {
       $v_device_list = $v_list[$v_plugin_id];
       
       foreach ($v_device_list as $v_name => $v_device) {
-        centralepilote::log('debug', "Check with device model : ".$v_name);
+        //centralepilote::log('debug', "Check with device model : ".$v_name);
         $v_found = true;
         // ----- On recherche d'abord le matching sur les configurations
         if (isset($v_device['search_by_config_value'])) {
           foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
             $v_value = $p_eqDevice->getConfiguration($v_config_name);
-            centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
+            //centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
             if ($v_value != $v_config_value) {
-              centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
+              //centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
               $v_found = false;
               break;
             }
             else {
-              centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' is ok'");
+              //centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' is ok'");
             }
           }
         }
@@ -4432,22 +4432,24 @@ class centralepilote extends eqLogic {
           foreach ($v_device['search_by_command_name'] as $v_command_name) {            
             $v_cmd = cmd::byEqLogicIdCmdName($p_eqDevice->getId(), $v_command_name);
             if (!is_object($v_cmd)) {
-              centralepilote::log('debug', "Command '".$v_command_name."' not present");
+              //centralepilote::log('debug', "Command '".$v_command_name."' not present");
               $v_found = false;
               break;
             }
             else {
-              centralepilote::log('debug', "Command '".$v_command_name."' is present");
+              //centralepilote::log('debug', "Command '".$v_command_name."' is present");
             }
           }
         }
         
         // ----- Si a match a la fois les config et les commandes
         if ($v_found) {
-          centralepilote::log('debug', "Found !!");
+          centralepilote::log('debug', "  found.");
           return($v_device);
         }
       }
+      
+      centralepilote::log('debug', "  not found.");
 
       return(null);
     }
