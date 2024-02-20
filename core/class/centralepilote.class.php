@@ -4316,9 +4316,20 @@ class centralepilote extends eqLogic {
               $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]# == \"".$v_cmd_list[$v_index]['value']."\")"; 
             }
             else if ($v_type == 'double_cmd') {
-              // TBC : a developper
-              $v_value = "";
+              $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]#";
+              $v_value .= " && ";
+              $v_value .= "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]#";
             }
+            else if ($v_type == 'double_cmd_value_and') {
+              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]# == \"".$v_cmd_list[$v_index]['value_1']."\")"; 
+              $v_value .= " && ";
+              $v_value .= "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]# == \"".$v_cmd_list[$v_index]['value_2']."\")"; 
+            }            
+            else if ($v_type == 'double_cmd_value_or') {
+              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]# == \"".$v_cmd_list[$v_index]['value_1']."\")"; 
+              $v_value .= " || ";
+              $v_value .= "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]# == \"".$v_cmd_list[$v_index]['value_2']."\")"; 
+            }            
             else if ($v_type == 'expression') {
               // TBC : a developper
               $v_value = "";

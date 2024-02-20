@@ -144,11 +144,14 @@
             "statut_horsgel" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"frost_protection"},
             "statut_off" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"off"},
             
-            "exemple_1" : {"type":"single_cmd", "cmd":"pilot_wire_mode comfort"},
-            "exemple_2" : {"type":"double_cmd", "cmd_1":"pilot_wire_mode comfort", "cmd_2":"pilot_wire_mode comfort"},
-            
-            "exemple_info_1" : {"type":"cmd_value", "cmd":"pilot_wire_mode", "value":"comfort"},
-            "exemple_info_2" : {"type":"expression", "expression":"(#__HUMAN_NAME__[pilot_wire_mode]# == 'off')"}
+            "exemple_cmd_1" : {"type":"single_cmd", "cmd":"la_commande_a_utiliser"},
+            "exemple_cmd_2" : {"type":"double_cmd", "cmd_1":"la_commande_a_utiliser", "cmd_2":"la_commande_a_utiliser"},
+            "exemple_cmd_3" : {"type":"expression", "expression":"(#__HUMAN_NAME__[la_commande_a_utiliser]#)"},
+
+            "exemple_statut_1" : {"type":"cmd_value", "cmd":"la_commande_a_utiliser", "value":"la_valeur"},
+            "exemple_statut_2" : {"type":"double_cmd_value_and", "cmd_1":"la_commande_a_utiliser_1", "value_1":"la_valeur_1", "cmd_2":"la_commande_a_utiliser_2", "value_2":"la_valeur_2"},
+            "exemple_statut_3" : {"type":"double_cmd_value_or", "cmd_1":"la_commande_a_utiliser_1", "value_1":"la_valeur_1", "cmd_2":"la_commande_a_utiliser_2", "value_2":"la_valeur_2"},
+            "exemple_statut_4" : {"type":"expression", "expression":"(#__HUMAN_NAME__[la_commande_a_utiliser]# == 'la_valeur')"}
           }               
         }
 
