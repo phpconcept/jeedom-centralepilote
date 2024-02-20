@@ -2914,7 +2914,7 @@ class centralepilote extends eqLogic {
             $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
           }
           else {
-            centralepilote::log('error',  "Impossible d'executer la commande : '".$v_command."'");
+            centralepilote::log('error',  "Impossible d'executer la commande '".$v_command."' pour '".$this->getName()."'");
           }
         }
         else {
