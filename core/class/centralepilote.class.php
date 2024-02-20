@@ -4331,8 +4331,7 @@ class centralepilote extends eqLogic {
               $v_value .= "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]# == \"".$v_cmd_list[$v_index]['value_2']."\")"; 
             }            
             else if ($v_type == 'expression') {
-              // TBC : a developper
-              $v_value = "";
+              $v_value = str_replace('__HUMAN_NAME__', $v_human_name, $v_cmd_list[$v_index]['expression']);
             }
             else {
               centralepilote::log('debug', "  Unknown command type '".$v_type."'");
