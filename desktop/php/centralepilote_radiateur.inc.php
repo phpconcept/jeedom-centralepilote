@@ -60,10 +60,11 @@
       </label>
     <div class="col-sm-7">
 
-      <select class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="fp_device_id" onchange="cp_fp_device_change(event)">
+      <select id="cp_fp_device_list" class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="fp_device_id" onchange="cp_fp_device_change(event)">
         
 <?php 
-  
+  // ----- Remplacé par un call uniquement lors de l'affichage voir cp_fp_update_list()
+  /*
   $v_device_info_list = centralepilote::cpDeviceSupportedList();  
   
   $v_plugin_list = plugin::listPlugin(true);
@@ -83,6 +84,7 @@
       }
     }
   }
+  */
   
 ?>
 

@@ -508,11 +508,47 @@ function cp_nature_change(event) {
   }
   
   else if (event.target.value == 'fp_device') {
-    // TBC : a changer
+    // ----- Mise à jour de la liste des eq fil-pilote compatibles
+    cp_fp_update_list();
+    
+    // ----- Afficher le div
     $('#cp_disp_fp_device').show();
   }
   
 }
+
+function cp_fp_update_list() {
+
+  $.ajax({
+    type: "POST",
+    url: "plugins/centralepilote/core/ajax/centralepilote.ajax.php",
+    data: {
+      action: "cpFpSupportedList"
+    },
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error);
+    },
+    success: function (data) {
+      if (data.state != 'ok') {
+        $('#div_alert').showAlert({message: data.result, level: 'danger'});
+        return;
+      }
+      v_val = data.result;
+      v_data = JSON.parse(v_val);
+      
+      var v_html = '';
+      for (var i in v_data) {
+        v_html += '<option value="#'+v_data[i]['human_name']+'#">'+v_data[i]['human_name']+'</option>';
+      }
+    
+      $('#cp_fp_device_list').html(v_html);
+
+    }
+  });
+  
+}
+
 
 function cp_fp_device_change(event) {
   //alert('Hello :'+event.target.value);
