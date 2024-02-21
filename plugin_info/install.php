@@ -109,6 +109,8 @@ function centralepilote_update_v_1_3($v_from_version='') {
 
   log::add('centralepilote', 'info', "Update devices to version 1.3 of plugin 'centralepilote'");
   
+  try {
+  
   // ----- Look for each equip
   $eqLogics = eqLogic::byType('centralepilote');
   foreach ($eqLogics as $v_eq) {
@@ -147,6 +149,13 @@ function centralepilote_update_v_1_3($v_from_version='') {
     }
     
   }
+  
+
+} catch (Exception $e) {
+  log::add('centralepilote', 'info', "Error update !!!!");
+    ajax::error(displayException($e), $e->getCode());
+}
+
   
 }
 
