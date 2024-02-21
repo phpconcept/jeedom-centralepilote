@@ -2293,7 +2293,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-	private function cpGetConf($p_key) {
+	function cpGetConf($p_key) {
 	  return $this->getConfiguration($p_key, $this->cpGetDefaultConfiguration($p_key));
 	}
     /* -------------------------------------------------------------------------*/
@@ -2306,7 +2306,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-	private function cpGetType() {
+	function cpGetType() {
 	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration($p_key));
 	}
     /* -------------------------------------------------------------------------*/
@@ -2343,7 +2343,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-	private function cpGetDefaultConfiguration($p_key) {
+	function cpGetDefaultConfiguration($p_key) {
     
     // TBC : splitt per type
 		$v_conf_keys = array(
