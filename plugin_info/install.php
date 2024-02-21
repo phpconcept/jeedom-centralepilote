@@ -81,6 +81,7 @@ function centralepilote_update() {
   */
 
   if ($v_version < '1.2') centralepilote_update_v_1_2($v_version);
+  log::add('centralepilote', 'info', "Done 1");
   if ($v_version < '1.3') centralepilote_update_v_1_3($v_version);
   if ($v_version < '1.4') centralepilote_update_v_1_4($v_version);
   if ($v_version < '1.5') centralepilote_update_v_1_5($v_version);
@@ -152,10 +153,10 @@ function centralepilote_update_v_1_3($v_from_version='') {
   
 
 } catch (Exception $e) {
-  log::add('centralepilote', 'info', "Error update !!!!");
-    ajax::error(displayException($e), $e->getCode());
+  log::add('centralepilote', 'info', $e->getMessage());
 }
 
+log::add('centralepilote', 'info', "Done 0");
   
 }
 
