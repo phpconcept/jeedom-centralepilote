@@ -451,6 +451,8 @@ function cp_nature_change(event) {
   $('#cp_disp_1_commutateur').hide();
   $('#cp_disp_2_commutateur').hide();
   $('#cp_disp_virtuel').hide();
+  $('#cp_disp_fp_device').hide();
+  
   
   if (event.target.value == '1_commutateur_c_o') {
     
@@ -505,6 +507,15 @@ function cp_nature_change(event) {
     $('#cp_disp_virtuel').show();
   }
   
+  else if (event.target.value == 'fp_device') {
+    // TBC : a changer
+    $('#cp_disp_fp_device').show();
+  }
+  
+}
+
+function cp_fp_device_change(event) {
+  //alert('Hello :'+event.target.value);
 }
 
 
@@ -556,7 +567,8 @@ function saveEqLogic(_eqLogic) {
                            "radiateur_temperature_confort_1":1,
                            "radiateur_temperature_confort_2":1,
                            "radiateur_temperature_eco":1,
-                           "radiateur_temperature_horsgel":1
+                           "radiateur_temperature_horsgel":1,
+                           "fp_device_id":1
                            }
                         ,"zone" : 
                           {"support_confort":1,

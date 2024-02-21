@@ -200,6 +200,12 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
+Release v1.4 (beta) :
+- Nouveautés :
+  - Ajout du support natif de l'équipement fil-pilote NodOn SIN-4-FP-21 et équivalent Leroy-Merlin/Adeo SIN-4-FP-21-EQU
+  - Ajout d'un mécanisme générique permettant d'ajouter à terme pas simple description JSON tout type d'équipement fil-pilote venant de tout type de plugin
+  
+  
 Release v1.3 :
 - Nouveautés :
   - Programmation : possibilité de dupliquer une programmation existante.

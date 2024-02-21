@@ -1280,7 +1280,7 @@ class centralepilote extends eqLogic {
       // The trick is that before the first save the eq is not in the DB so it has not yet a deviceId
       // In my plugin I need to remember I first save the device in javscript with the sub-type 'radiateur', 'centrale' or 'zone'
       if ($this->getId() == '') {
-        centralepilotelog::log('debug', "preSave() : new radiateur ...");
+        centralepilotelog::log('debug', "preSaveRadiateur() : new radiateur, init properties");
         
         // ----- Set default values
         $this->setConfiguration('support_confort', '1');
@@ -1321,8 +1321,12 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "preSaveRadiateur() : existing radiateur.");
+
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
+        // $this : contient donc l'objet PHP avec les nouvelles valeurs, avant leur sauvegarde dans la DB
+        // $eqLogic : contient les valeurs dans la DB qui vont être remplacées par la sauvegarde de $this dans la DB
       	$eqLogic = self::byId($this->getId());
         
         $v_support_modes  = $eqLogic->getConfiguration('support_confort','').',';
@@ -1344,6 +1348,8 @@ class centralepilote extends eqLogic {
         // Doing change before the save
         $v_nature_fil_pilote = $this->cpGetConf('nature_fil_pilote');
         if (   ($eqLogic->cpGetConf('nature_fil_pilote') != $v_nature_fil_pilote)
+            || (   ($v_nature_fil_pilote == 'fp_device') 
+                && ($eqLogic->cpGetConf('fp_device_id') != $this->cpGetConf('fp_device_id')))
             || ($eqLogic->cpGetConf('lien_commutateur') != $this->cpGetConf('lien_commutateur'))
             || ($eqLogic->cpGetConf('lien_commutateur_a') != $this->cpGetConf('lien_commutateur_a'))
             || ($eqLogic->cpGetConf('lien_commutateur_b') != $this->cpGetConf('lien_commutateur_b')) ) {
@@ -1364,7 +1370,7 @@ class centralepilote extends eqLogic {
       // The trick is that before the first save the eq is not in the DB so it has not yet a deviceId
       // In my plugin I need to remember I first save the device in javscript with the sub-type 'radiateur', 'centrale' or 'zone'
       if ($this->getId() == '') {
-        centralepilotelog::log('debug', "preSave() : new zone ...");
+        centralepilotelog::log('debug', "preSaveZone() : new zone, init properties");
         
         // ----- Set default values
         $this->setConfiguration('support_confort', '1');
@@ -1401,8 +1407,10 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "preSaveZone() : existing radiateur.");
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
+        // Voir explication dans preSaveRadiateur()
       	$eqLogic = self::byId($this->getId());
 
         $v_support_modes  = $eqLogic->getConfiguration('support_confort','').',';
@@ -1421,7 +1429,7 @@ class centralepilote extends eqLogic {
     }
 
     public function preSaveCentrale() {
-      centralepilotelog::log('debug', "preSave() : centrale ...");
+      //centralepilotelog::log('debug', "preSave() : centrale ...");
       
       // It's time to gather informations that will be used in postSave
       
@@ -1429,7 +1437,7 @@ class centralepilote extends eqLogic {
       // The trick is that before the first save the eq is not in the DB so it has not yet a deviceId
       // In my plugin I need to remember I first save the device in javscript with the sub-type 'radiateur', 'centrale' or 'zone'
       if ($this->getId() == '') {
-        centralepilotelog::log('debug', "preSave() : new centrale ...");
+        centralepilotelog::log('debug', "preSaveCentrale() : new centrale, init properties");
         
         // ----- Set default values
         $this->setConfiguration('temperature_confort', '19');
@@ -1444,6 +1452,7 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "preSaveCentrale() : existing centrale.");
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
       	$eqLogic = self::byId($this->getId());
@@ -1473,11 +1482,12 @@ class centralepilote extends eqLogic {
 
     public function postSaveRadiateur() {
 
-      centralepilotelog::log('debug', "postSave() radiateur");
+      //centralepilotelog::log('debug', "postSave() radiateur");
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
-        centralepilotelog::log('debug', "postSave() : new radiateur");
+        centralepilotelog::log('debug', "postSaveRadiateur() : new radiateur saved in DB.");
+        centralepilotelog::log('debug', "postSaveRadiateur() : create refresh cmd.");
         
 /* Herité du plugIn Virtual */
 		$createRefreshCmd = true;
@@ -1506,6 +1516,8 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "postSaveRadiateur() : radiateur saved in DB.");
+
         // ----- Look if device enable is changed
         if ($this->_pre_save_cache['isEnable'] != $this->getIsEnable()) {
         
@@ -1567,7 +1579,8 @@ class centralepilote extends eqLogic {
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
-        centralepilotelog::log('debug', "postSave() : new equipement");
+        centralepilotelog::log('debug', "postSaveZone() : new zone, saved in DB");
+        centralepilotelog::log('debug', "postSaveZone() : create refresh cmd.");
 
 /* Herité du plugIn Virtual */
 		$createRefreshCmd = true;
@@ -1596,6 +1609,8 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "postSaveZone() : zone saved in DB.");
+
         // ----- Look if device enable is changed
         if ($this->_pre_save_cache['isEnable'] != $this->getIsEnable()) {
         
@@ -1638,11 +1653,11 @@ class centralepilote extends eqLogic {
 
     public function postSaveCentrale() {
 
-      centralepilotelog::log('debug', "postSave() : centrale");
+      //centralepilotelog::log('debug', "postSave() : centrale");
 
       // ----- Look for new device
       if (is_null($this->_pre_save_cache)) {
-        centralepilotelog::log('debug', "postSave() : new centrale");
+        centralepilotelog::log('debug', "postSaveCentrale() : new centrale saved in DB.");
 
         /* already done in create default centrale
         if ($this->cpGetType() == 'centrale') {
@@ -1654,6 +1669,8 @@ class centralepilote extends eqLogic {
       
       // ----- Look for existing device
       else {
+        centralepilotelog::log('debug', "postSaveCentrale() : centrale saved in DB.");
+
         // ----- Look if device enable is changed
         if ($this->_pre_save_cache['isEnable'] != $this->getIsEnable()) {
         
@@ -1679,7 +1696,7 @@ class centralepilote extends eqLogic {
   
       }
       
-      centralepilotelog::log('debug', "postSave() : end");
+      centralepilotelog::log('debug', "postSaveCentrale() : end");
     }
 
     public function start() {
@@ -2897,7 +2914,7 @@ class centralepilote extends eqLogic {
             $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
           }
           else {
-            centralepilote::log('error',  "Impossible d'executer la commande : '".$v_command."'");
+            centralepilote::log('error',  "Impossible d'executer la commande '".$v_command."' pour '".$this->getName()."'");
           }
         }
         else {
@@ -4040,13 +4057,15 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public function cpNatureChangeTo($p_nature) {
+      centralepilote::log('debug', "cpNatureChangeTo('".$p_nature."')");
+      
       // ----- Only for 'radiateur' 
       if (!$this->cpIsType('radiateur')) {
         centralepilote::log('debug', "This method cpNatureChangeTo() should not be used for not radiateur device '".$this->getName()."' here (".__FILE__.",".__LINE__.")");
         return;
       }
 
-      centralepilote::log('debug', "Change fil-pilote nature of radiateur '".$this->getName()."' to '".$p_nature."'");
+      centralepilote::log('debug', "  Change fil-pilote nature of radiateur '".$this->getName()."' to '".$p_nature."'");
       
       // ----- Look for natures
       if ($p_nature == 'virtuel') {
@@ -4245,10 +4264,215 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('support_off', 1);               
       }
 
+      else if ($p_nature == 'fp_device') {
+        // ----- Get filpilote device id
+        $v_eq_id = $this->cpGetConf('fp_device_id');
+        centralepilote::log('debug', "  Fil Pilote device id : '".$v_eq_id."'");
+        $v_eq_id = str_replace('#', '', $v_eq_id);
+        $v_eq_id = str_replace('eqLogic', '', $v_eq_id);
+        
+        // ----- Look if eq exists
+        if (($v_eq_id == '') || !is_object(($v_eq = eqLogic::byId($v_eq_id)))) {
+          centralepilote::log('debug', "Fail to find an equipement with id '".$v_eq_id."', return to virtual.");
+          $this->setConfiguration('nature_fil_pilote', 'virtuel');
+          return;
+        }
+        
+        $v_cmd_list = centralepilote::cpDeviceSupportedCommands($v_eq);
+        if ($v_cmd_list === null) {
+          centralepilote::log('debug', "Fail to find supported information for '".$v_eq_id."', return to virtual.");
+          $this->setConfiguration('nature_fil_pilote', 'virtuel');
+          return;
+        }
+        
+        // ----- Récuperer le nom de l'équipement        
+        $v_human_name = $v_eq->getHumanName();
+        centralepilote::log('debug', "  Fil Pilote human name : '".$v_human_name."'");
+        
+        $v_cmd_id_list = ['confort','confort_1','confort_2',
+                          'eco','horsgel','off',
+                          'confort','confort_1','confort_2',
+                          'eco','horsgel','off'];
+
+        // ----- Constituer chaque commande à partir du modèle
+        $v_key = 'command';
+        foreach (['command', 'statut'] as $v_key) {
+          foreach ($v_cmd_id_list as $v_cmd_id) {
+            $v_index = $v_key.'_'.$v_cmd_id;
+
+            // ----- on éteint par défaut le support du mode (checkbox)
+            $this->setConfiguration('support_'.$v_cmd_id, 0);
+
+            if (!isset($v_cmd_list[$v_index])) {
+              // ----- On reset la valeur de la commande
+              $this->setConfiguration($v_index, '');
+              continue;
+            }
+            $v_type = $v_cmd_list[$v_index]['type'];
+            if ($v_type == 'single_cmd') {
+              $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]#";
+            }
+            else if ($v_type == 'cmd_value') {
+              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd']."]# == \"".$v_cmd_list[$v_index]['value']."\")";
+            }
+            else if ($v_type == 'double_cmd') {
+              $v_value = "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]#";
+              $v_value .= " && ";
+              $v_value .= "#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]#";
+            }
+            else if ($v_type == 'double_cmd_value_and') {
+              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]# == \"".$v_cmd_list[$v_index]['value_1']."\")"; 
+              $v_value .= " && ";
+              $v_value .= "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]# == \"".$v_cmd_list[$v_index]['value_2']."\")"; 
+            }            
+            else if ($v_type == 'double_cmd_value_or') {
+              $v_value = "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_1']."]# == \"".$v_cmd_list[$v_index]['value_1']."\")"; 
+              $v_value .= " || ";
+              $v_value .= "(#".$v_human_name."[".$v_cmd_list[$v_index]['cmd_2']."]# == \"".$v_cmd_list[$v_index]['value_2']."\")"; 
+            }
+            else if ($v_type == 'expression') {
+              $v_value = str_replace('__HUMAN_NAME__', $v_human_name, $v_cmd_list[$v_index]['expression']);
+            }
+            else {
+              centralepilote::log('debug', "  Unknown command type '".$v_type."'");
+              $v_value = "";
+            }
+
+            if ($v_value != "") {
+              $this->setConfiguration('support_'.$v_cmd_id, 1);
+            }
+            
+            // ----- Fixer la commande
+            $v_value_trans = cmd::humanReadableToCmd($v_value);
+            centralepilote::log('debug', "  Cmd '".$v_index."' = '".$v_value."' (".$v_value_trans.")");                     
+            $this->setConfiguration($v_index, $v_value_trans);  
+          }
+        }
+        
+      }
+      
+      else {
+        centralepilote::log('debug', "!! nature = '".$p_nature."' : Erreur on ne devrait jamais arriver là (".__FILE__.",".__LINE__.")");
+      }
+
       
     }
     /* -------------------------------------------------------------------------*/
 
+    /**---------------------------------------------------------------------------
+     * Method : cpDeviceSupportedList()
+     * Description :
+     * Parameters :
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    static function cpDeviceSupportedList() {
+        
+      // ----- Inclure la liste des devices fil-pilote natif
+      include dirname(__FILE__) . '/../../core/config/devices/fil_pilote_device_list.inc.php';
+
+      $v_list = json_decode($v_device_list_json, true);
+      if (json_last_error() != JSON_ERROR_NONE) {
+       centralepilote::log('error', "Erreur dans le format json du fichier 'core/config/fil_pilote_device_list.inc.php' (".json_last_error_msg().")");
+       $v_list = array();
+      }
+      
+      //centralepilote::log('debug', "json:".print_r($v_list ,true));
+      //centralepilote::log('debug', "json:".$v_device_list_json);
+
+      return($v_list);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpDeviceSupportedInfo()
+     * Description :
+     * Parameters :
+     *   $p_eqDevice : must be a valid pointer to an eqLogic
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    static function cpDeviceSupportedInfo($p_eqDevice) {
+        
+      // ----- Recupération de la liste
+      $v_list = centralepilote::cpDeviceSupportedList();
+      
+      // ----- Rcupération du plugin du eqDevice
+      $v_plugin_id = $p_eqDevice->getEqType_name();
+      centralepilote::log('debug', "Search if device '".$p_eqDevice->getHumanName()."' (".$v_plugin_id.") is supported");
+      
+      if (!isset($v_list[$v_plugin_id])) {
+        centralepilote::log('debug', "Plugin : ".$v_plugin_id." not in supported list.");
+        return(null);
+      }
+     
+      $v_device_list = $v_list[$v_plugin_id];
+      
+      foreach ($v_device_list as $v_name => $v_device) {
+        //centralepilote::log('debug', "Check with device model : ".$v_name);
+        $v_found = true;
+        // ----- On recherche d'abord le matching sur les configurations
+        if (isset($v_device['search_by_config_value'])) {
+          foreach ($v_device['search_by_config_value'] as $v_config_name => $v_config_value) {
+            $v_value = $p_eqDevice->getConfiguration($v_config_name);
+            //centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' compare with '".$v_config_value."'");
+            if ($v_value != $v_config_value) {
+              //centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' not the expected '".$v_config_value."'");
+              $v_found = false;
+              break;
+            }
+            else {
+              //centralepilote::log('debug', "Config '".$v_config_name."' = '".$v_value."' is ok'");
+            }
+          }
+        }
+        
+        // ----- Si ça match sur les configurations (ou si pas de configurations), on recherche sur les commandes
+        if ($v_found && isset($v_device['search_by_command_name'])) {
+          foreach ($v_device['search_by_command_name'] as $v_command_name) {            
+            $v_cmd = cmd::byEqLogicIdCmdName($p_eqDevice->getId(), $v_command_name);
+            if (!is_object($v_cmd)) {
+              //centralepilote::log('debug', "Command '".$v_command_name."' not present");
+              $v_found = false;
+              break;
+            }
+            else {
+              //centralepilote::log('debug', "Command '".$v_command_name."' is present");
+            }
+          }
+        }
+        
+        // ----- Si a match a la fois les config et les commandes
+        if ($v_found) {
+          centralepilote::log('debug', "  found.");
+          return($v_device);
+        }
+      }
+      
+      centralepilote::log('debug', "  not found.");
+
+      return(null);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpDeviceSupportedCommands()
+     * Description :
+     * Parameters :
+     *   $p_eqDevice : must be a valid pointer to an eqLogic
+     * Returned value : 
+     * ---------------------------------------------------------------------------
+     */
+    static function cpDeviceSupportedCommands($p_eqDevice) {
+    
+      $v_device_info = centralepilote::cpDeviceSupportedInfo($p_eqDevice);
+      if ($v_device_info == null) return(null);
+      
+      if (!isset($v_device_info['commands'])) return(null);
+      
+      return($v_device_info['commands']);
+    }
+    /* -------------------------------------------------------------------------*/
 
 
 }
