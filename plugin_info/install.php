@@ -81,8 +81,8 @@ function centralepilote_update() {
   */
 
   if ($v_version < '1.2') centralepilote_update_v_1_2($v_version);
-  log::add('centralepilote', 'info', "Done 1");
   if ($v_version < '1.3') centralepilote_update_v_1_3($v_version);
+  log::add('centralepilote', 'info', "Done 1");
   if ($v_version < '1.4') centralepilote_update_v_1_4($v_version);
   if ($v_version < '1.5') centralepilote_update_v_1_5($v_version);
     
@@ -110,19 +110,26 @@ function centralepilote_update_v_1_3($v_from_version='') {
 
   log::add('centralepilote', 'info', "Update devices to version 1.3 of plugin 'centralepilote'");
   
-  try {
-  
   // ----- Look for each equip
   $eqLogics = eqLogic::byType('centralepilote');
+  
+  log::add('centralepilote', 'info', "Step 1");
+  
+  
   foreach ($eqLogics as $v_eq) {
     $v_flag_save = false;
+    
+    log::add('centralepilote', 'info', "Step 2");
     
     if (!$v_eq->cpIsType(array('radiateur','zone'))) {
       continue;
     }
     
+    log::add('centralepilote', 'info', "Step 3");
+    
     $v_type = $v_eq->cpGetType();
     
+    log::add('centralepilote', 'info', "Step 4");
     // ----- Ajout des configurations de temperature cible par radiateur
     if ($v_eq->getConfiguration($v_type.'_temperature_confort', '') == '') {
       $v_eq->setConfiguration($v_type.'_temperature_confort', '');
@@ -145,18 +152,15 @@ function centralepilote_update_v_1_3($v_from_version='') {
       $v_flag_save = true;
     }
 
+    log::add('centralepilote', 'info', "Step 5");
     if ($v_flag_save) {
       $v_eq->save();
+    log::add('centralepilote', 'info', "Step 5b");
     }
+    log::add('centralepilote', 'info', "Step 6");
     
   }
   
-
-} catch (Exception $e) {
-  log::add('centralepilote', 'info', $e->getMessage());
-}
-
-log::add('centralepilote', 'info', "Done 0");
   
 }
 
