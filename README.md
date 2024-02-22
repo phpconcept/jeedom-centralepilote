@@ -200,7 +200,7 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
-Release v1.5 (dev) :
+Release v1.5 (beta) :
 - Bug corrections :
   - Correction de la fonction d'update vers la version 1.3 qui échouait sans que cela soit visible.
   - Amélioration du code pour limiter l'appel trop souvent à la recherche des équipements natifs fil-pilote supportés.
