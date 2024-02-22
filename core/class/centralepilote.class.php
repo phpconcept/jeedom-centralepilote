@@ -1039,6 +1039,46 @@ class centralepilote extends eqLogic {
     /* -------------------------------------------------------------------------*/
 
     /**---------------------------------------------------------------------------
+     * Method : cpFpSupportedList()
+     * Description :
+     *   Cette fonction prend tous les plugins et tous les objets des plugins
+     *   et regarde s'ils sont dans la liste des eq supportés.
+     * Parameters :
+     * Returned value : 
+     *   La liste des eq supportés
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpFpSupportedList() {
+      $v_list = array();
+      $i=0;
+      
+      //centralepilote::log('debug', "cpFpSupportedList()");
+    
+      $v_device_info_list = centralepilote::cpDeviceSupportedList();  
+      
+      $v_plugin_list = plugin::listPlugin(true);
+      foreach ($v_plugin_list as $v_plugin) {
+      	$v_plugin_id = $v_plugin->getId();
+      	if (!isset($v_device_info_list[$v_plugin_id])) continue;
+            
+        $eqLogics = eqLogic::byType($v_plugin_id);
+        foreach ($eqLogics as $v_eq) {
+          $v_device_info = centralepilote::cpDeviceSupportedInfo($v_eq);
+          if ($v_device_info != null) {
+            $v_human_name = $v_eq->getHumanName();
+            
+            $v_list[$i]['human_name'] = $v_human_name;
+            $v_list[$i]['name'] = (isset($v_device_info['name'])?$v_device_info['name']:'');
+            $i++;
+          }
+        }
+      }
+                
+      return($v_list);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
      * Method : cpEqList()
      * Description :
      *   centralepilote::cpEqList('radiateur', ['zone'=>'', 'ddd'=>'vvv'])
@@ -2293,7 +2333,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-	private function cpGetConf($p_key) {
+	function cpGetConf($p_key) {
 	  return $this->getConfiguration($p_key, $this->cpGetDefaultConfiguration($p_key));
 	}
     /* -------------------------------------------------------------------------*/
@@ -2306,7 +2346,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-	private function cpGetType() {
+	function cpGetType() {
 	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration($p_key));
 	}
     /* -------------------------------------------------------------------------*/
@@ -2343,7 +2383,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-	private function cpGetDefaultConfiguration($p_key) {
+	function cpGetDefaultConfiguration($p_key) {
     
     // TBC : splitt per type
 		$v_conf_keys = array(
