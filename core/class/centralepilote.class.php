@@ -2108,8 +2108,12 @@ class centralepilote extends eqLogic {
       $replace['#title_Choisir#'] = __("Choisir ...", __FILE__);
       $replace['#title_next_mode#'] = __("Ensuite", __FILE__);      
       
-      $replace['#width#'] = '320px';
-      $replace['#height#'] = '160px';       
+      if (!isset($replace['#width#'])) {
+        $replace['#width#'] = '320px';
+      }
+      if (!isset($replace['#height#'])) {
+        $replace['#height#'] = '160px';       
+      }
       $replace['#icon_button_trigger#'] = 'icon divers-circular114';       
       $replace['#icon_button_window#'] = 'icon jeedom-fenetre-ouverte';       
       $replace['#icon_button_prog#'] = 'icon divers-calendar2';    

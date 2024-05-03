@@ -201,7 +201,8 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 ### Change Logs
 
 Release v1.6 (dev) :
-
+- Bug corrections :
+  - Correction de l'affichage du widget avec les zone show/hide. Et meilleur support pour le core 4.4
 
 Release v1.5 (beta) :
 - Bug corrections :
