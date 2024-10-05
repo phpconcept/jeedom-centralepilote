@@ -277,12 +277,6 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').show();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_pilotage_buttons').show();   
       
-      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_prog_select').css("display","none");
-      //$('#cp_area_prog_select_#uid#').hide();
-      
-      //$('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_prog_select').remove();
-      
-      console.log( "value: .eqLogic[data-eqLogic_uid=#uid#] .cp_area" );   
     }
     
     else {
@@ -294,22 +288,13 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_pilotage_buttons').show();      
 
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_button_prog').remove();
-      
-/*
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_prog_select').remove();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_add').remove();
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_show').remove();
-*/
-      
+            
     }
 
     if ("#bypass_type#" == 'open_window') {
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_trigger_open').hide();    
     }
     
-  //  $('.eqLogic[data-eqLogic_uid=#uid#]').resize(function() { alert('Resize !');});
-     
-     
     /**---------------------------------------------------------------------------
      * End of Runtime actions
      * ---------------------------------------------------------------------------
@@ -345,7 +330,6 @@
      * ---------------------------------------------------------------------------
      */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select_close").on('click', function () {
-//      console.log( "close" ); 
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area').hide();
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
@@ -494,7 +478,6 @@
         jeedom.cmd.execute({id: '#cmd_window_swap_id#'});
       }
     });
-    
     
   </script>
 
