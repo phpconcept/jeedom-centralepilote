@@ -24,14 +24,6 @@ function centralepilote_install() {
 
   log::add('centralepilote', 'info', "Start installation/activation of plugin 'centralepilote' version ".CP_VERSION);
 
-  // ----- Default parameters
-  /*
-  $v_prog_display_mode = config::byKey('prog_display_mode', 'centralepilote', '');
-  if ($v_prog_display_mode == '') {
-    config::save('prog_display_mode', 'icon_color', 'centralepilote');  // 'icon_color' or icon' or 'color'
-  }
-  */
-  
   // ----- Create a default centrale object (if not exists)
   centralepilote::cpCentraleCreateDefault();
   
@@ -90,11 +82,35 @@ function centralepilote_update() {
 
   if ($v_version < '1.2') centralepilote_update_v_1_2($v_version);
   if ($v_version < '1.3') centralepilote_update_v_1_3($v_version);
+  if ($v_version < '1.4') centralepilote_update_v_1_4($v_version);
+  if ($v_version < '1.5') centralepilote_update_v_1_5($v_version);
+  if ($v_version < '1.6') centralepilote_update_v_1_6($v_version);
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
+}
+
+function centralepilote_update_v_1_6($v_from_version='') {
+
+  log::add('centralepilote', 'info', "Update devices to version 1.6 of plugin 'centralepilote'");
+  log::add('centralepilote', 'info', "  Nothing to do.");
+  
+}
+
+function centralepilote_update_v_1_5($v_from_version='') {
+
+  log::add('centralepilote', 'info', "Update devices to version 1.5 of plugin 'centralepilote'");
+  log::add('centralepilote', 'info', "  Nothing to do.");
+  
+}
+
+function centralepilote_update_v_1_4($v_from_version='') {
+
+  log::add('centralepilote', 'info', "Update devices to version 1.4 of plugin 'centralepilote'");
+  log::add('centralepilote', 'info', "  Nothing to do.");
+  
 }
 
 function centralepilote_update_v_1_3($v_from_version='') {
@@ -103,6 +119,7 @@ function centralepilote_update_v_1_3($v_from_version='') {
   
   // ----- Look for each equip
   $eqLogics = eqLogic::byType('centralepilote');
+  
   foreach ($eqLogics as $v_eq) {
     $v_flag_save = false;
     
@@ -139,6 +156,7 @@ function centralepilote_update_v_1_3($v_from_version='') {
     }
     
   }
+  
   
 }
 

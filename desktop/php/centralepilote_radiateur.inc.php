@@ -20,14 +20,88 @@
       <div class="col-lg-10">
       <select class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="nature_fil_pilote" onchange="cp_nature_change(event)">
         <option value="virtuel" selected>{{Virtuel}}</option>
+        <option value="fp_device">{{Equipement natif fil-pilote}}</option>
         <option value="1_commutateur_c_o">{{Un commutateur modes Confort / Off}}</option>
         <option value="1_commutateur_c_h">{{Un commutateur modes Confort / Hors-Gel}}</option>
         <option value="2_commutateur">{{Deux commutateurs modes Confort / Eco / Hors-Gel / Off}}</option>
+
+<?php 
+/*
+  $eqLogics = eqLogic::byType('z2m');
+  foreach ($eqLogics as $v_eq) {
+    $v_manuf = $v_eq->getConfiguration('manufacturer', '');
+    //echo "Manufacturer : ".$v_manuf."<br>";
+    $v_model = $v_eq->getConfiguration('model', '');
+    //echo "Model : ".$v_model."<br>";
+    if (($v_manuf == 'Adeo') && ($v_model == 'SIN-4-FP-21_EQU')) {
+      echo '<option value="device_Adeo_SIN_4_FP_21_EQU">Fil-Pilote Adeo (SIN-4-FP-21_EQU)</option>';
+    }
+    if (($v_manuf == 'NodOn') && ($v_model == 'SIN-4-FP-21')) {
+      echo '<option value="device_NodOn_SIN_4_FP_21">Fil-Pilote NodOn (SIN-4-FP-21)</option>';
+    }
+  }
+*/
+?>
+
       </select>
       </div>
   </div>
 
+
   <div class="row"><div class="col-sm-12">&nbsp;</div></div>
+
+<div id="cp_disp_fp_device" style="display:none;">
+  <div class="row">
+  <div class="col-lg-6">
+  
+  <div class="row">
+      <label class="col-lg-4 control-label">{{Equipement fil-pilote}}
+      <sup><i class="fa fa-question-circle tooltips" title="{{Choisir parmi la liste des équipements existants et supportés, automatiquement reconnus par le plugin}}"></i></sup>
+      </label>
+    <div class="col-sm-7">
+
+      <select id="cp_fp_device_list" class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="fp_device_id" onchange="cp_fp_device_change(event)">
+        
+<?php 
+  // ----- Remplacé par un call uniquement lors de l'affichage voir cp_fp_update_list()
+  /*
+  $v_device_info_list = centralepilote::cpDeviceSupportedList();  
+  
+  $v_plugin_list = plugin::listPlugin(true);
+  foreach ($v_plugin_list as $v_plugin) {
+  	$v_plugin_id = $v_plugin->getId();
+  	if (!isset($v_device_info_list[$v_plugin_id])) continue;
+        
+    $eqLogics = eqLogic::byType($v_plugin_id);
+    foreach ($eqLogics as $v_eq) {
+      $v_device_info = centralepilote::cpDeviceSupportedInfo($v_eq);
+      if ($v_device_info != null) {
+        $v_human_name = $v_eq->getHumanName();
+        //$v_name = (isset($v_device_info['name'])?' ('.$v_device_info['name'].')':'');
+        
+        //echo '<option value="#'.$v_human_name.'#">'.$v_human_name.$v_name.'</option>';
+        echo '<option value="#'.$v_human_name.'#">'.$v_human_name.'</option>';
+      }
+    }
+  }
+  */
+  
+?>
+
+      </select>
+
+    </div>
+    <div class="col-sm-1">
+    </div>
+  </div>
+
+
+  </div>
+  <div class="col-lg-6">
+  <img id="img_fp_device" src="plugins/centralepilote/desktop/images/fp_1_commutateur_c_o.png" style="display:none;"/>
+  </div>
+</div>
+</div>
 
 <div id="cp_disp_1_commutateur" style="display:none;">
   <div class="row">

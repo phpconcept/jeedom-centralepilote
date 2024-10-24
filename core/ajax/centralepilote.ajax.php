@@ -66,6 +66,13 @@ try {
         }
 	}
 
+	if (init('action') == 'cpFpSupportedList') {
+		$v_val = centralepilote::cpFpSupportedList();
+		ajax::success(json_encode($v_val, JSON_FORCE_OBJECT));
+	}
+
+
+
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {

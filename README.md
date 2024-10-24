@@ -11,9 +11,15 @@ En attendant une description dans cette page, vous pouvez aller voir : https://f
 ### Créer un Radiateur "Fil-Pilote"
 
 Lors de la création d'un équipement de type "Radiateur", il va falloir indiquer comment est réalisé la fonction de fil-pilote pour ce radiateur. Autrement dit quels contacteurs sont utilisés pour envoyer les ordres fil-pilote au radiateur.
-Le plugin offre actuellement 4 possibilités. Les 3 premières sont à base de contacteurs simples on/off, la 4ème est à base d'objets virtuels, et permet (normalement) de couvrir tous les autres cas d'objets connectés permettant d'envoyer une commande fil-pilote sans être des contacteurs simples.
+Le plugin offre actuellement 5 possibilités :
+- La première permet de reconnaitre certains objets qui sont nativement "fil-pilote", il y a alors rien d'autre à faire que les sélectionner,
+- Les 3 suivantes sont à base de contacteurs simples on/off, il faut alors choisir les bons contacteurs en fonction des schémas proposés,
+- La 4ème est à base d'objets virtuels, et permet (normalement) de couvrir tous les autres cas d'objets connectés permettant d'envoyer une commande fil-pilote sans être des contacteurs simples.
 
-Un schéma permet de bien expliciter comment est réalisé la fonction de fil pilote, et ainsi simplifier la chose.
+- Constitution d'un fil-pilote avec un contacteur natif
+
+Le plugin va automatiquemnet reconnaitre certains objets qui sont nativement fil pilote (comme le NodOn SIN-4-FP-21 par exemple) et les proposer dans une liste déroulante.
+Si vous utiliser un type d'objet non reconnu, faites le nous savoir pour que nous puissions l'inclure, et utiliser le mode "vituel" en attendant. 
 
 - Constitution du fil-pilote par deux commutateurs
 
@@ -200,6 +206,25 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
+Release v1.7 :
+- Passage release stable
+
+Release v1.6 (dev) :
+- Bug corrections :
+  - Correction de l'affichage du widget avec les zone show/hide. Et meilleur support pour le core 4.4
+
+Release v1.5 (beta) :
+- Bug corrections :
+  - Correction de la fonction d'update vers la version 1.3 qui échouait sans que cela soit visible.
+  - Amélioration du code pour limiter l'appel trop souvent à la recherche des équipements natifs fil-pilote supportés.
+  
+  
+Release v1.4 (beta) :
+- Nouveautés :
+  - Ajout du support natif de l'équipement fil-pilote NodOn SIN-4-FP-21 et équivalent Leroy-Merlin/Adeo SIN-4-FP-21-EQU
+  - Ajout d'un mécanisme générique permettant d'ajouter à terme pas simple description JSON tout type d'équipement fil-pilote venant de tout type de plugin
+  
+  
 Release v1.3 :
 - Nouveautés :
   - Programmation : possibilité de dupliquer une programmation existante.
