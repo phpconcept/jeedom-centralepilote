@@ -2351,7 +2351,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
 	function cpGetType() {
-	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration($p_key));
+	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration('type'));
 	}
     /* -------------------------------------------------------------------------*/
 
