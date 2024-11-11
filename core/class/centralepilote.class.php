@@ -1739,8 +1739,8 @@ class centralepilote extends eqLogic {
       centralepilotelog::log('debug', "postSaveCentrale() : end");
     }
 
-    public function start() {
-      centralepilotelog::log('info', "Start plugin Centrale Fil-Pilote");
+    public static function start() {
+      centralepilotelog::log('info', "Démarrage du plugin Centrale Fil-Pilote");
       
       if (centralepilote::cpCentraleGet() === null) {
         centralepilotelog::log('debug', "First time the plugin is starting.");
@@ -1749,7 +1749,7 @@ class centralepilote extends eqLogic {
       
       // ----- Look for clean start
       if (config::byKey('clean_stop', 'centralepilote') != '') {
-        centralepilotelog::log('debug', "PlugIn was clean stopped at : ".config::byKey('clean_stop', 'centralepilote'));
+        centralepilotelog::log('info', "Le plugin avait été proprement arrêté le : ".config::byKey('clean_stop', 'centralepilote'));
 
         // ----- Reset clean stop flag
         config::save('clean_stop', '', 'centralepilote');
@@ -1758,7 +1758,7 @@ class centralepilote extends eqLogic {
       }
 
       // ----- Not clean
-      centralepilotelog::log('debug', "PlugIn was not clean stopped");
+      centralepilotelog::log('info', "Le plugin n'avait pas été proprement arrêté. Resynchronisation des radiateurs.");
       
       // ----- Refresh all radiators to ensure default commutateur values are changed to expected one
       $v_list = centralepilote::cpRadList(['_isEnable'=>true]);
@@ -1768,8 +1768,8 @@ class centralepilote extends eqLogic {
       
     }
 
-    public function stop() {
-      centralepilotelog::log('info', "Stop plugin Centrale Fil-Pilote");
+    public static function stop() {
+      centralepilotelog::log('info', "Arrêt du plugin Centrale Fil-Pilote");
 
       // ----- Set clean stop flag
       config::save('clean_stop', date("d-m-Y H:i"), 'centralepilote');
@@ -2351,7 +2351,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
 	function cpGetType() {
-	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration($p_key));
+	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration('type'));
 	}
     /* -------------------------------------------------------------------------*/
 
