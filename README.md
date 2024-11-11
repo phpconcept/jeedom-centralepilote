@@ -206,6 +206,12 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible de
 
 ### Change Logs
 
+Release v1.7.1 :
+- Bug corrections :
+  - utilisation d'une variable non définie
+  - mise en "public static" des fonctions start() et stop() 
+  - Modification des messages de warning/info pour donner plus d'information lors du démarrage / arrêt correct ou non du plugin.
+  
 Release v1.7 :
 - Passage release stable
 
