@@ -206,6 +206,10 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
+Release v1.8.0 (dev) :
+- Nouveautés :
+  - Ajout des modes confort-1 et confort-2 dans les programmations des radiateurs.
+
 Release v1.7.1 (beta) :
 - Bug corrections :
   - utilisation d'une variable non définie
