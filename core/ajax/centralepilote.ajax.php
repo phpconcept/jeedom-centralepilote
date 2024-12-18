@@ -71,6 +71,11 @@ try {
 		ajax::success(json_encode($v_val, JSON_FORCE_OBJECT));
 	}
 
+	if (init('action') == 'cpModeGetList') {
+		$v_val = centralepilote::cpModeGetList(true);
+		ajax::success(json_encode($v_val, JSON_FORCE_OBJECT));
+	}
+
 
 
     throw new Exception(__('Aucune méthode correspondante à : ', __FILE__) . init('action'));

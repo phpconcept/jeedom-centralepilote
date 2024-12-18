@@ -33,10 +33,16 @@ $(".cp_mode_select").off('click').on('click', function () {
   // Select the next mode from the current
   if ((g_cache_last_click == v_new_cache) || ((g_cache_last_click == '') && (g_cache_selected_mode == ''))) {
     // TBC : automatiser
+    /*
     if (v_mode == 'eco') v_new_mode = 'confort';
     if (v_mode == 'confort') v_new_mode = 'horsgel';
     if (v_mode == 'horsgel') v_new_mode = 'off';
     if (v_mode == 'off') v_new_mode = 'eco';
+    */
+    
+    const modes = ['confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off'];
+    const currentIndex = modes.indexOf(v_mode);
+    v_new_mode = modes[(currentIndex + 1) % modes.length];    
   }
   else {
     v_new_mode = g_cache_selected_mode;
@@ -596,5 +602,66 @@ function cp_mode_reset() {
   
 
 }
+
+
+function cp_mode_list_load() {
+  
+  $.ajax({
+    type: "POST",
+    url: "plugins/centralepilote/core/ajax/centralepilote.ajax.php",
+    data: {
+      action: "cpModeGetList",
+      data: "tbd"
+    },
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error);
+    },
+    success: function (data) {
+      if (data.state != 'ok') {
+        $('#div_alert').showAlert({message: data.result, level: 'danger'});
+        return;
+      }
+      
+      $('#cp_debug_value').html('Loaded : '+data.result+'');
+      
+      cp_mode_update_list(data.result);
+    }
+  });
+
+}
+
+
+function cp_mode_update_list(p_json_list) {
+
+  try {
+    var v_list = JSON.parse(p_json_list);
+  }
+  catch (err) { 
+    $('#div_alert').showAlert({message: 'Error while parsing JSON result : '+p_json_list, level: 'danger'});
+    return;
+  }
+  
+  var v_txt = '';
+  for (v_item in v_list) {
+    v_txt += '<button type="button" ';
+    v_txt += 'class="btn btn-xs cp_mode_select_button" ';
+    v_txt += 'style="top: -1px !important; right: -6px !important;" ';
+    v_txt += 'data-mode="'+v_item+'">';
+    v_txt += '<i class="'+v_list[v_item]["icon"]+'"';
+    v_txt += ' style="color: '+v_list[v_item]["color"]+';"';
+    v_txt += '></i> '+v_list[v_item]["name"]+'</button>';
+  }
+  $("#cp_prog_bt_horaire").html(v_txt);
+  $("#cp_prog_bt_demiheure").html(v_txt);
+  
+  
+  $(".cp_mode_select_button").off('click').on('click', function () {
+    cp_mode_change_selected($(this).data('mode'));
+    g_cache_last_click = '';
+  });
+
+}
+
 
 

@@ -21,6 +21,13 @@ if (!isConnect('admin')) {
 
 require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/centralepilote.inc.php";
 
+  $v_days = array('lundi' => __('Lundi', __FILE__), 
+                  'mardi' => __('Mardi', __FILE__),
+                  'mercredi' => __('Mercredi', __FILE__),
+                  'jeudi' => __('Jeudi', __FILE__),
+                  'vendredi' => __('Vendredi', __FILE__),
+                  'samedi' => __('Samedi', __FILE__),
+                  'dimanche' => __('Dimanche', __FILE__));
 
 ?>
 
@@ -111,11 +118,8 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     </div>
     <div class="col-sm-10">
       <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}
-      <div class="btn-group pull-right">
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="confort"><i class="fab fa-hotjar "></i> Confort</button>
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="eco"><i class="fas fa-leaf "></i> Eco</button>
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="horsgel"><i class="far fa-snowflake "></i> Hors Gel</button>
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="off"><i class="fas fa-power-off "></i> Off</button>
+      <div id="cp_prog_bt_horaire" class="btn-group pull-right">
+      Filled by javascript
       </div>
       </div>
     </div>
@@ -140,39 +144,19 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
        </div>
      </td>
 
-     <td>0h</td>
-     <td>1h</td>
-     <td>2h</td>
-     <td>3h</td>
+<?php
 
-     <td>4h</td>
-     <td>5h</td>
-     <td>6h</td>
-     <td>7h</td>
-
-     <td>8h</td>
-     <td>9h</td>
-     <td>10h</td>
-     <td>11h</td>
-
-     <td>12h</td>
-     <td>13h</td>
-     <td>14h</td>
-     <td>15h</td>
-
-     <td>16h</td>
-     <td>17h</td>
-     <td>18h</td>
-     <td>19h</td>
-
-     <td>20h</td>
-     <td>21h</td>
-     <td>22h</td>
-     <td>23h</td>
+for ($hour = 0; $hour < 24; $hour++) {
+    echo "<td style='text-align: center; vertical-align: middle;'>{$hour}h</td>";
+}
+  
+?>
 
      </tr>
      
 <?php 
+
+/*
   $v_days = array('lundi' => __('Lundi', __FILE__), 
                   'mardi' => __('Mardi', __FILE__),
                   'mercredi' => __('Mercredi', __FILE__),
@@ -180,6 +164,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
                   'vendredi' => __('Vendredi', __FILE__),
                   'samedi' => __('Samedi', __FILE__),
                   'dimanche' => __('Dimanche', __FILE__));
+*/
 
   // ----- Get display mode
   //$v_display_mode = centralepilote::cpGetProgDisplayMode();
@@ -247,11 +232,8 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
   <div class="row">
     <div class="col-sm-12">
       <div style="background-color: #039be5; padding: 2px 5px; color: white; margin: 10px 0; font-weight: bold;">{{Agenda}}
-      <div class="btn-group pull-right">
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="confort"><i class="fab fa-hotjar "></i> Confort</button>
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="eco"><i class="fas fa-leaf "></i> Eco</button>
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="horsgel"><i class="far fa-snowflake "></i> Hors Gel</button>
-      <button type="button" class="btn btn-xs cp_mode_select_button" style="top: -1px !important; right: -6px !important;" data-mode="off"><i class="fas fa-power-off "></i> Off</button>
+      <div id="cp_prog_bt_demiheure" class="btn-group pull-right" >
+      Filled by javascript
       </div>
       </div>
     </div>
@@ -275,39 +257,17 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
        </div>
      </td>
 
-     <td>0h<br>00/30</td>
-     <td>1h<br>00/30</td>
-     <td>2h<br>00/30</td>
-     <td>3h<br>00/30</td>
-
-     <td>4h<br>00/30</td>
-     <td>5h<br>00/30</td>
-     <td>6h<br>00/30</td>
-     <td>7h<br>00/30</td>
-
-     <td>8h<br>00/30</td>
-     <td>9h<br>00/30</td>
-     <td>10h<br>00/30</td>
-     <td>11h<br>00/30</td>
-
-     <td>12h<br>00/30</td>
-     <td>13h<br>00/30</td>
-     <td>14h<br>00/30</td>
-     <td>15h<br>00/30</td>
-
-     <td>16h<br>00/30</td>
-     <td>17h<br>00/30</td>
-     <td>18h<br>00/30</td>
-     <td>19h<br>00/30</td>
-
-     <td>20h<br>00/30</td>
-     <td>21h<br>00/30</td>
-     <td>22h<br>00/30</td>
-     <td>23h<br>00/30</td>
+<?php
+for ($hour = 0; $hour < 24; $hour++) {
+    echo "<td style='text-align: center; vertical-align: middle;'>{$hour}h<br>00/30</td>";
+}
+?>
 
      </tr>
      
 <?php 
+
+/*
   $v_days = array('lundi' => __('Lundi', __FILE__), 
                   'mardi' => __('Mardi', __FILE__),
                   'mercredi' => __('Mercredi', __FILE__),
@@ -315,6 +275,8 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
                   'vendredi' => __('Vendredi', __FILE__),
                   'samedi' => __('Samedi', __FILE__),
                   'dimanche' => __('Dimanche', __FILE__));
+*/
+
 
   // ----- Get display mode
   //$v_display_mode = centralepilote::cpGetProgDisplayMode();
@@ -369,25 +331,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
     </div>
   </div>
   </div>
-  
-<!-- A retirer à terme -->
-<div class="col-sm-12"  style="display:none;">                        
-  <div class="row">
-    <div class="col-sm-4" ></div>
-    <div class="col-sm-4">
 
-      <div class="btn-group">  
-        <button type="button" class="btn cp_mode_select_button" data-mode="confort"><i class="fab fa-hotjar "></i> Confort</button>
-        <button type="button" class="btn cp_mode_select_button" data-mode="eco"><i class="fas fa-leaf "></i> Eco</button>
-        <button type="button" class="btn cp_mode_select_button" data-mode="horsgel"><i class="far fa-snowflake "></i> Hors Gel</button>
-        <button type="button" class="btn cp_mode_select_button" data-mode="off"><i class="fas fa-power-off "></i> Off</button>
-        <br>&nbsp;
-      </div>
-
-    </div>
-    <div class="col-sm-4" ></div>
-  </div>
-</div>
 
     </div>
   </div>
@@ -403,6 +347,7 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
 
   cp_prog_load(0);
   cp_prog_list_load();
+  cp_mode_list_load();
 
 </script>
 

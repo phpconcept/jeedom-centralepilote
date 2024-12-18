@@ -321,11 +321,11 @@ class centralepilote extends eqLogic {
                       'confort_1' => ['name'=> __('Confort -1', __FILE__),
                                       'icon' => 'fab fa-hotjar',
                                       'large_icon' => 'icon jeedom-pilote-conf',
-                                      'color' => 'red'],
+                                      'color' => 'orange'],
                       'confort_2' => ['name'=> __('Confort -2', __FILE__),
                                       'icon' => 'fab fa-hotjar',
                                       'large_icon' => 'icon jeedom-pilote-conf',
-                                      'color' => 'red'],
+                                      'color' => 'yellow'],
                       'eco'       => ['name'=> __('Eco', __FILE__),
                                       'icon' => 'fas fa-leaf',
                                       'large_icon' => 'icon jeedom-pilote-eco',
@@ -337,7 +337,7 @@ class centralepilote extends eqLogic {
                       'off'       => ['name'=> __('Off', __FILE__),
                                       'icon' => 'fas fa-power-off',
                                       'large_icon' => 'icon jeedom-pilote-off',
-                                      'color' => '']
+                                      'color' => 'gray']
                      ];
     
       if ($p_detail) {
