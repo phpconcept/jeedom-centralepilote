@@ -17,7 +17,7 @@
 */
 
   // ----- Current version
-  define('CP_VERSION', '1.7.1');
+  define('CP_VERSION', '1.8.1');
 
 
 ?>
