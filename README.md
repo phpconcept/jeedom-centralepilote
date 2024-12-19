@@ -206,6 +206,11 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
+Release v1.8.1 (beta) :
+- Nouveautés :
+  - Ajout des modes confort-1 et confort-2 dans les programmations des radiateurs.
+  - L'affichage des modes (en particulier confort-1 et confort-2) ne se feront que si au moins un radiateur utilise ces modes. Cela dans l'objectif d'alléger le nombre de boutons pour les autres.
+
 Release v1.7.1 (beta) :
 - Bug corrections :
   - utilisation d'une variable non définie
