@@ -15,6 +15,15 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+  // ----- Global values
+  var g_cache_selected_mode = '';
+  var g_cache_last_click = '';
+  var g_cache_agenda = '';
+  
+  var g_mode_active_list = {};
+  var g_mode_all_list = {};
+
 /*
  * 
  */
@@ -31,28 +40,21 @@ $(".cp_mode_select").off('click').on('click', function () {
   
   // ----- Look for click on same
   // Select the next mode from the current
-  if ((g_cache_last_click == v_new_cache) || ((g_cache_last_click == '') && (g_cache_selected_mode == ''))) {
-    // TBC : automatiser
-    /*
-    if (v_mode == 'eco') v_new_mode = 'confort';
-    if (v_mode == 'confort') v_new_mode = 'horsgel';
-    if (v_mode == 'horsgel') v_new_mode = 'off';
-    if (v_mode == 'off') v_new_mode = 'eco';
-    */
-    
-    const modes = ['confort', 'confort_1', 'confort_2', 'eco', 'horsgel', 'off'];
-    const currentIndex = modes.indexOf(v_mode);
-    v_new_mode = modes[(currentIndex + 1) % modes.length];    
+  if ((g_cache_last_click == v_new_cache) || ((g_cache_last_click == '') && (g_cache_selected_mode == ''))) {    
+    // ----- On trouve l'index suivant dans le tableau des modes
+    const keys = Object.keys(g_mode_active_list);
+    const index = keys.findIndex(key => key === v_mode);
+    v_new_mode = keys[(index + 1) % keys.length];   
   }
   else {
     v_new_mode = g_cache_selected_mode;
   }
   
-  $('#cp_debug_value').html('Courant : '+v_jour+' '+v_heure+': '+v_mode+'('+g_cache_last_click+','+v_new_cache+') --> '+v_new_mode+': '+g_mode_attr[v_new_mode]['icon']);
+  $('#cp_debug_value').html('Courant : '+v_jour+' '+v_heure+': '+v_mode+'('+g_cache_last_click+','+v_new_cache+') --> '+v_new_mode+': '+g_mode_all_list[v_new_mode]['icon']);
     
   $(this).data('mode', v_new_mode);
-  $(this).removeClass( g_mode_attr[v_mode]['icon'] ).addClass( g_mode_attr[v_new_mode]['icon'] );
-  $(this).css('color', g_mode_attr[v_new_mode]['color']);
+  $(this).removeClass( g_mode_all_list[v_mode]['icon'] ).addClass( g_mode_all_list[v_new_mode]['icon'] );
+  $(this).css('color', g_mode_all_list[v_new_mode]['color']);
 
   // ----- Change cached mode (update dependencies)
   cp_mode_change_selected(v_new_mode);
@@ -68,8 +70,8 @@ function cp_mode_set_slot(v_jour, v_heure, v_new_mode) {
   var v_mode = v_elt.data('mode');
   
   v_elt.data('mode', v_new_mode);
-  v_elt.removeClass( g_mode_attr[v_mode]['icon'] ).addClass( g_mode_attr[v_new_mode]['icon'] );
-  v_elt.css('color', g_mode_attr[v_new_mode]['color']);
+  v_elt.removeClass( g_mode_all_list[v_mode]["icon"] ).addClass( g_mode_all_list[v_new_mode]["icon"] );
+  v_elt.css('color', g_mode_all_list[v_new_mode]['color']);
 
 }
 
@@ -604,14 +606,36 @@ function cp_mode_reset() {
 }
 
 
-function cp_mode_list_load() {
+function cp_mode_update_list() {
+
+  var v_txt = '';
+  for (v_item in g_mode_active_list) {
+    v_txt += '<button type="button" ';
+    v_txt += 'class="btn btn-xs cp_mode_select_button" ';
+    v_txt += 'style="top: -1px !important; right: -6px !important;" ';
+    v_txt += 'data-mode="'+v_item+'">';
+    v_txt += '<i class="'+g_mode_active_list[v_item]["icon"]+'"';
+    v_txt += ' style="color: '+g_mode_active_list[v_item]["color"]+';"';
+    v_txt += '></i> '+g_mode_active_list[v_item]["name"]+'</button>';
+  }
+  $("#cp_prog_bt_horaire").html(v_txt);
+  $("#cp_prog_bt_demiheure").html(v_txt);
+  
+  $(".cp_mode_select_button").off('click').on('click', function () {
+    cp_mode_change_selected($(this).data('mode'));
+    g_cache_last_click = '';
+  });
+
+}
+
+function cp_prog_modal_init() {
   
   $.ajax({
     type: "POST",
     url: "plugins/centralepilote/core/ajax/centralepilote.ajax.php",
     data: {
       action: "cpModeGetList",
-      data: "tbd"
+      show_active_flag: true
     },
     dataType: 'json',
     error: function (request, status, error) {
@@ -623,45 +647,34 @@ function cp_mode_list_load() {
         return;
       }
       
-      $('#cp_debug_value').html('Loaded : '+data.result+'');
+      try {
+        var v_list = JSON.parse(data.result);
+      }
+      catch (err) { 
+        $('#div_alert').showAlert({message: 'Error while parsing JSON result : '+data.result, level: 'danger'});
+        return;
+      }
+
+      for (v_item in v_list) {
+        g_mode_all_list[v_item] = v_list[v_item];
+        if (v_list[v_item]['flag_active'] == 1)
+          g_mode_active_list[v_item] = v_list[v_item];
+      }
+
+      /*
+      console.log('g_mode_all_list=');
+      console.log(g_mode_all_list);
+      console.log('g_mode_active_list=');
+      console.log(g_mode_active_list);
+      */
       
-      cp_mode_update_list(data.result);
+      cp_mode_update_list();
+      
+      cp_prog_load(0);
+      cp_prog_list_load();
+
     }
   });
 
 }
-
-
-function cp_mode_update_list(p_json_list) {
-
-  try {
-    var v_list = JSON.parse(p_json_list);
-  }
-  catch (err) { 
-    $('#div_alert').showAlert({message: 'Error while parsing JSON result : '+p_json_list, level: 'danger'});
-    return;
-  }
-  
-  var v_txt = '';
-  for (v_item in v_list) {
-    v_txt += '<button type="button" ';
-    v_txt += 'class="btn btn-xs cp_mode_select_button" ';
-    v_txt += 'style="top: -1px !important; right: -6px !important;" ';
-    v_txt += 'data-mode="'+v_item+'">';
-    v_txt += '<i class="'+v_list[v_item]["icon"]+'"';
-    v_txt += ' style="color: '+v_list[v_item]["color"]+';"';
-    v_txt += '></i> '+v_list[v_item]["name"]+'</button>';
-  }
-  $("#cp_prog_bt_horaire").html(v_txt);
-  $("#cp_prog_bt_demiheure").html(v_txt);
-  
-  
-  $(".cp_mode_select_button").off('click').on('click', function () {
-    cp_mode_change_selected($(this).data('mode'));
-    g_cache_last_click = '';
-  });
-
-}
-
-
 

@@ -72,7 +72,9 @@ try {
 	}
 
 	if (init('action') == 'cpModeGetList') {
-		$v_val = centralepilote::cpModeGetList(true);
+        $v_options = array();
+        $v_options['show_active_flag'] = init('show_active_flag');
+		$v_val = centralepilote::cpModeGetList($v_options);
 		ajax::success(json_encode($v_val, JSON_FORCE_OBJECT));
 	}
 

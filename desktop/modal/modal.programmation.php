@@ -345,9 +345,7 @@ for ($hour = 0; $hour < 24; $hour++) {
 
 <script type="text/javascript">
 
-  cp_prog_load(0);
-  cp_prog_list_load();
-  cp_mode_list_load();
-
+  cp_prog_modal_init();
+  
 </script>
 
