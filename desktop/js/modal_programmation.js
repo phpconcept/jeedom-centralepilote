@@ -670,8 +670,8 @@ function cp_prog_modal_init() {
       
       cp_mode_update_list();
       
-      cp_prog_load(0);
       cp_prog_list_load();
+      cp_prog_load(prog_id);
 
     }
   });
