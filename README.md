@@ -206,6 +206,10 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
+Release v1.8.3 (beta) :
+- Nouveautés :
+  - Lorsque le dialogue de configuration des programmes est ouvert depuis le widget d'un radiateur, le programme sélectionné pour le radiateur est automatiquement affiché au lieu du programme par défaut.
+
 Release v1.8.2 (beta) :
 - Nouveautés :
   - Ajout d'un bouton dans le widget d'un radiateur pour pouvoir directement accéder au dialogue de configuration des programmations sans avoir à aller dans la configuration du plugin.
