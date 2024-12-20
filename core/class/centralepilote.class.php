@@ -2163,7 +2163,10 @@ class centralepilote extends eqLogic {
       $replace['#icon_button_trash#'] = 'far fa-trash-alt';    
       $replace['#icon_button_validate#'] = 'fas fa-check';    
       $replace['#icon_button_cancel#'] = 'fas fa-reply';    
+      $replace['#icon_button_settings#'] = 'fas fa-wrench';    
       $replace['#icon_button_add#'] = 'fas fa-plus-circle';
+      
+      $replace['#prog_modal_title#'] = __("Gestion des modèles de programmation", __FILE__);
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
