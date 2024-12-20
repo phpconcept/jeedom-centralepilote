@@ -80,9 +80,11 @@ La seconde partie contient :
  
 #### Sélection du programme automatique
 
-En utilisant le bouton en bas à gauche ![selection de la programmation](docs/images/bouton_programme.png), une fenêtre additionnelle aparait et permet de configurer le programme associé au radiateur.
+En utilisant le bouton en bas à gauche ![selection de la programmation](docs/images/bouton_programme.png), une fenêtre additionnelle apparait et permet de configurer le programme associé au radiateur.
 
 ![Widget custom](docs/images/radiateur_show_select_prog.png) ![Widget custom](docs/images/radiateur_show_select_prog_2.png)
+
+Le bouton illustré par une clé à mollette permet d'ouvrir la fenêtre de configuration des programmes afin soit de vérifier rapidement la nature du programme configuré, soit de modifier celui-ci.
 
 #### Création, suppression et visualisation des déclenchements unitaires programmés
 
@@ -155,13 +157,30 @@ Le plugin arrive avec une programmation par défaut qu'il n'est pas possible de 
 
 Il est ensuite possible de créer des programmations personnalisées.
 
-La configuration des modes de chauffage en fonction des heures se fait simplement en cliquant sur les icônes des modes. A chaque click le mode suivant est proposé. Il est aussi possible de choisir le mode par les boutons se trouvant en dessous, puis de clicker sur les plages horaires.
+La configuration des modes de chauffage en fonction des heures se fait simplement en cliquant sur les icônes des modes. A chaque click le mode suivant est proposé. Il est aussi possible de choisir le mode par les boutons se trouvant dans l'entête du tableau, puis de clicker sur les plages horaires.
+
+La liste des modes affichés est automatiquement crée et correspond aux modes réellement activés dans les radiateurs. Cela permet d'alléger l'utilisation, en particulier pour ceux qui n'utilisent pas par exemple les modes confort -1 et confort -2. 
 
 N'oublez pas de sauvegarder avant de quitter.
 
 Configuration des plages horaires :
 
 ![Programmation](docs/images/programmation_1.png)
+
+Deux modes horaires sont possibles : soit par incrément de 1h, soit par incrément d'une 1/2 heure. Il est possible de passer de l'un à l'autre. Cependant lorsque l'on passe du mode 1/2h vers le mode 1h, la valeur retenue est celle de la première 1/2h, la seconde étant alors perdue.
+
+Configuration des plages horaires en mode 1/2h :
+
+![Programmation](docs/images/programmation_2.png)
+
+Pour ne pas avoir à refaire toutes les journées, une par une, un menu "d'outils" est disponible à droite du nom de chaque jour, il permet de copier la programmation d'une ligne déjà faite. Ou de réinitialiser toute la ligne.
+
+![Programmation](docs/images/programmation_3.png)
+
+Il est possible aussi de réinitialiser tous les jours d'un coup :
+
+![Programmation](docs/images/programmation_4.png)
+
 
 ### Utilisation des plages horaires
 
