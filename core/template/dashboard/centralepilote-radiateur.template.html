@@ -342,8 +342,10 @@
      * ---------------------------------------------------------------------------
      */
     $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_settings").on('click', function () {
+      var prog_id = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select').val();
+      //console.log('id='+prog_id);
       $('#md_modal').dialog({title: "#prog_modal_title#"});
-      $('#md_modal').load('index.php?v=d&plugin=centralepilote&modal=modal.programmation').dialog('open');
+      $('#md_modal').load('index.php?v=d&plugin=centralepilote&modal=modal.programmation&prog_id='+prog_id).dialog('open');
     });
          
     /**---------------------------------------------------------------------------

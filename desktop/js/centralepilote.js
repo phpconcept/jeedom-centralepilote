@@ -68,7 +68,7 @@ function refreshDeviceList() {
  */
 function modal_programmation_display() {
   $('#md_modal').dialog({title: "{{Gestion des modèles de programmation}}"});
-  $('#md_modal').load('index.php?v=d&plugin=centralepilote&modal=modal.programmation&id=' + $('.eqLogicAttr[data-l1key=id]').value()).dialog('open');
+  $('#md_modal').load('index.php?v=d&plugin=centralepilote&modal=modal.programmation&prog_id=0').dialog('open');
 }
 
 

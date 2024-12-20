@@ -31,6 +31,13 @@ require_once dirname(__FILE__) . "/../../../../plugins/centralepilote/core/php/c
 
 ?>
 
+<script>
+    // ----- Récupération du paramètre passé en argument PHP
+    var prog_id = <?php if (isset($_GET['prog_id'])) {echo json_encode($_GET['prog_id']);} else { echo 0;} ?>;
+    //console.log('ID récupéré en PHP :', prog_id);
+</script>
+
+
 <div class="col-sm-12">
     <div class="panel panel-primary">
         <div class="panel-heading" style="background-color: #039be5;">
