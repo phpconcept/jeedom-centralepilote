@@ -119,28 +119,28 @@ function centralepilote_update_v_1_8_5($v_from_version='') {
     $v_cmd = $v_eq->getCmd(null, 'temp_ref_confort_1');
     if (!is_object($v_cmd)) {
       centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_confort_1'");
-      $v_eq->cpCmdCreate('temp_ref_confort_1', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->cpCmdCreate('temp_ref_confort_1', ['name'=>'Temp_Ref_Confort-1', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
       $v_eq->checkAndUpdateCmd('temp_ref_confort_1', $v_eq->getConfiguration('temperature_confort_1','18'));
     }
 
     $v_cmd = $v_eq->getCmd(null, 'temp_ref_confort_2');
     if (!is_object($v_cmd)) {
       centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_confort_2'");
-      $v_eq->cpCmdCreate('temp_ref_confort_2', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->cpCmdCreate('temp_ref_confort_2', ['name'=>'Temp_Ref_Confort-2', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
       $v_eq->checkAndUpdateCmd('temp_ref_confort_2', $v_eq->getConfiguration('temperature_confort_2','17'));
     }
 
     $v_cmd = $v_eq->getCmd(null, 'temp_ref_eco');
     if (!is_object($v_cmd)) {
       centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_eco'");
-      $v_eq->cpCmdCreate('temp_ref_eco', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->cpCmdCreate('temp_ref_eco', ['name'=>'Temp_Ref_Eco', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
       $v_eq->checkAndUpdateCmd('temp_ref_eco', $v_eq->getConfiguration('temperature_eco','15'));
     }
 
     $v_cmd = $v_eq->getCmd(null, 'temp_ref_horsgel');
     if (!is_object($v_cmd)) {
       centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_horsgel'");
-      $v_eq->cpCmdCreate('temp_ref_horsgel', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->cpCmdCreate('temp_ref_horsgel', ['name'=>'Temp_Ref_HorsGel', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
       $v_eq->checkAndUpdateCmd('temp_ref_horsgel', $v_eq->getConfiguration('temperature_horsgel','3'));
     }
 
