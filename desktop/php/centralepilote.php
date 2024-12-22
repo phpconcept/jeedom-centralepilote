@@ -14,37 +14,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
 ?>
 <script type="text/javascript">
 
-  var g_cache_selected_mode = '';
-  var g_cache_last_click = '';
-  var g_cache_agenda = '';
-  
   $(document).ready(function() {
     // do this stuff when the HTML is all ready
     refreshDeviceList();
   });
 
 </script>
-
-<?php
-  /*
-  * Création de l'objet g_mode_attr qui est un 'tableau' avec toutes les propriétés des modes (nom, icon, etc)
-  */
-  $v_txt = '';
-  $v_txt .=  '<script type="text/javascript">'; 
-  $v_txt .= 'var g_mode_attr = {';
-  $v_mode_list = ['confort','confort_1','confort_2','eco','horsgel','off'];
-  $v_first=1;
-  foreach ($v_mode_list as $v_mode) {
-    if ($v_first==0) { $v_txt .=  ","; }
-    $v_first=0; 
-    $v_txt .=  ' "'.$v_mode.'" : {"name":"'.centralepilote::cpModeGetName($v_mode).'", "icon":"'.centralepilote::cpModeGetIconClass($v_mode).'", "color":"'.centralepilote::cpModeGetColor($v_mode).'"} ';
-  }
-  $v_txt .=  "";
-  $v_txt .=  '};';
-  $v_txt .=  '</script>'; 
-
-  echo $v_txt;
-?>
 
 
 <div class="row row-overflow">

@@ -82,11 +82,17 @@
         <div class="col-sm-12" >
           <br>
           <span ><i>#title_select_programmation#</i> : </span>
-          <select class="selectCmd cp_prog_select" style="width:80%!important;">
+          <select class="selectCmd cp_prog_select" style="width:80%!important; margin-bottom:5px;">
             <option value="0">Default</option>
           </select>
-          <br><br>
-          <a class="btn btn-sm btn-default tooltips cp_prog_select_close" ><i class="#icon_button_cancel#" style="font-size:16px;"></i> #title_Retour#</a></span>
+          <a class="btn btn-sm btn-default tooltips cp_prog_select_close" >
+            <i class="#icon_button_cancel#" style="font-size:16px;"></i> #title_Retour#
+          </a>
+          &nbsp;
+          <a class="btn btn-sm btn-default tooltips cp_prog_settings" >
+            <i class="#icon_button_settings#" style="font-size:16px;"></i>
+          </a>
+          </span>
         </div>
       </div>
     </div>
@@ -299,11 +305,7 @@
      * End of Runtime actions
      * ---------------------------------------------------------------------------
      */
-     
-     
-     
-     
-         
+          
     /**---------------------------------------------------------------------------
      * Method : $('.eqLogic[data-eqLogic_uid=#uid#] .cmd').on()
      * Description : Action for command buttons
@@ -334,6 +336,18 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_normal').show();      
     });
     
+    /**---------------------------------------------------------------------------
+     * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_settings").on()
+     * Description : Action to open programs settings modal
+     * ---------------------------------------------------------------------------
+     */
+    $(".eqLogic[data-eqLogic_uid=#uid#] .cp_prog_settings").on('click', function () {
+      var prog_id = $('.eqLogic[data-eqLogic_uid=#uid#] .cp_prog_select').val();
+      //console.log('id='+prog_id);
+      $('#md_modal').dialog({title: "#prog_modal_title#"});
+      $('#md_modal').load('index.php?v=d&plugin=centralepilote&modal=modal.programmation&prog_id='+prog_id).dialog('open');
+    });
+         
     /**---------------------------------------------------------------------------
      * Method : $(".eqLogic[data-eqLogic_uid=#uid#] .selectCmd").on()
      * Description : Action called when a new program is selected

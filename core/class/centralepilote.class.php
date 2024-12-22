@@ -247,7 +247,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public static function cpModeGetAtt($p_mode, $p_att) {
-      $v_list = centralepilote::cpModeGetList(true);
+      $v_list = centralepilote::cpModeGetList(['details'=>true]);
       if ((!isset($v_list[$p_mode])) || (!isset($v_list[$p_mode][$p_att]))) {
         return('');
       }
@@ -308,44 +308,87 @@ class centralepilote extends eqLogic {
      * Method : cpModeGetList()
      * Description :
      *   cpModeGetList() will return the full array.
-     *   cpModeGetList(true) will return an array with only the mode id 'confort', 'eco', ...
+     *   cpModeGetList(['details'=>true]) will return an array with only the mode id 'confort', 'eco', ...
+     *   cpModeGetList(['show_active_flag'=>true]) will return a detailed array 
+     *   with a flag indicating of at least one radiateur is using the mode
      * Parameters :
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public static function cpModeGetList($p_detail=false) {
+    public static function cpModeGetList($p_options=array()) {
+    
+      $v_option_details = false;
+      if (isset($p_options['details']) && $p_options['details']) {
+        $v_option_details = true;
+      }
+      
+      $v_option_show_active_flag = false;
+      if (isset($p_options['show_active_flag']) && $p_options['show_active_flag']) {
+        $v_option_show_active_flag = true;
+        $v_option_details = true;
+      }
+    
       $v_mode_list = ['confort'   => ['name'=> __('Confort', __FILE__),
                                       'icon' => 'fab fa-hotjar',
                                       'large_icon' => 'icon jeedom-pilote-conf',
-                                      'color' => 'red'],
+                                      'color' => 'red',
+                                      'flag_active' => 0],
                       'confort_1' => ['name'=> __('Confort -1', __FILE__),
                                       'icon' => 'fab fa-hotjar',
                                       'large_icon' => 'icon jeedom-pilote-conf',
-                                      'color' => 'red'],
+                                      'color' => 'orange',
+                                      'flag_active' => 0],
                       'confort_2' => ['name'=> __('Confort -2', __FILE__),
                                       'icon' => 'fab fa-hotjar',
                                       'large_icon' => 'icon jeedom-pilote-conf',
-                                      'color' => 'red'],
+                                      'color' => 'yellow',
+                                      'flag_active' => 0],
                       'eco'       => ['name'=> __('Eco', __FILE__),
                                       'icon' => 'fas fa-leaf',
                                       'large_icon' => 'icon jeedom-pilote-eco',
-                                      'color' => 'green'],
+                                      'color' => 'green',
+                                      'flag_active' => 0],
                       'horsgel'   => ['name'=> __('Hors-Gel', __FILE__),
                                       'icon' => 'far fa-snowflake',
                                       'large_icon' => 'icon jeedom-pilote-hg',
-                                      'color' => 'blue'],
+                                      'color' => 'blue',
+                                      'flag_active' => 0],
                       'off'       => ['name'=> __('Off', __FILE__),
                                       'icon' => 'fas fa-power-off',
                                       'large_icon' => 'icon jeedom-pilote-off',
-                                      'color' => '']
+                                      'color' => 'gray',
+                                      'flag_active' => 0]
                      ];
-    
-      if ($p_detail) {
-        return($v_mode_list);
+
+      $v_result_list = array();
+      if ($v_option_show_active_flag) {
+        foreach ($v_mode_list as $v_mode_key => $v_mode_info) {
+          $v_result_list[$v_mode_key] = $v_mode_info;
+        }
+        // ----- On regarde tous les radiateurs, et pour chaque mode, si 
+        // au moins un radiateur l'a activé on le prend en compte.
+        $v_eq_list = centralepilote::cpRadList();
+        foreach ($v_eq_list as $v_eq) {
+          foreach ($v_mode_list as $v_mode_key => $v_mode_info) {
+            $v_value = $v_eq->cpGetConf('support_'.$v_mode_key);
+            if ($v_value == 1) {
+              $v_result_list[$v_mode_key]['flag_active'] = 1;
+            }
+            else {
+            }
+          }
+        }
+      }
+      else {
+        $v_result_list = $v_mode_list;
+      }
+      
+      if ($v_option_details) {
+        return($v_result_list);
       }
         
       $v_short_list = array();
-      foreach ($v_mode_list as $v_key => $v_data) {
+      foreach ($v_result_list as $v_key => $v_data) {
         $v_short_list[] = $v_key;
       }
     
@@ -362,7 +405,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public static function cpModeGetCodeFromName($p_mode_name) {
-      $v_list = centralepilote::cpModeGetList(true);
+      $v_list = centralepilote::cpModeGetList(['details'=>true]);
       foreach ($v_list as $v_key => $v_data) {
         if (isset($v_data['name']) && ($v_data['name'] == $p_mode_name)) {
           return($v_key);
@@ -388,7 +431,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public static function cpModeExist($p_mode) {
-      $v_list = centralepilote::cpModeGetList(true);
+      $v_list = centralepilote::cpModeGetList(['details'=>true]);
       return(isset($v_list[$p_mode]));
     }
     /* -------------------------------------------------------------------------*/
@@ -455,7 +498,7 @@ class centralepilote extends eqLogic {
      */
     public static function cpPilotageExist($p_mode) {
       if ($p_mode == 'auto') return(true);
-      $v_list = centralepilote::cpModeGetList(true);
+      $v_list = centralepilote::cpModeGetList(['details'=>true]);
       return(isset($v_list[$p_mode]));
     }
     /* -------------------------------------------------------------------------*/
@@ -1739,8 +1782,8 @@ class centralepilote extends eqLogic {
       centralepilotelog::log('debug', "postSaveCentrale() : end");
     }
 
-    public function start() {
-      centralepilotelog::log('info', "Start plugin Centrale Fil-Pilote");
+    public static function start() {
+      centralepilotelog::log('info', "Démarrage du plugin Centrale Fil-Pilote");
       
       if (centralepilote::cpCentraleGet() === null) {
         centralepilotelog::log('debug', "First time the plugin is starting.");
@@ -1749,7 +1792,7 @@ class centralepilote extends eqLogic {
       
       // ----- Look for clean start
       if (config::byKey('clean_stop', 'centralepilote') != '') {
-        centralepilotelog::log('debug', "PlugIn was clean stopped at : ".config::byKey('clean_stop', 'centralepilote'));
+        centralepilotelog::log('info', "Le plugin avait été proprement arrêté le : ".config::byKey('clean_stop', 'centralepilote'));
 
         // ----- Reset clean stop flag
         config::save('clean_stop', '', 'centralepilote');
@@ -1758,7 +1801,7 @@ class centralepilote extends eqLogic {
       }
 
       // ----- Not clean
-      centralepilotelog::log('debug', "PlugIn was not clean stopped");
+      centralepilotelog::log('info', "Le plugin n'avait pas été proprement arrêté. Resynchronisation des radiateurs.");
       
       // ----- Refresh all radiators to ensure default commutateur values are changed to expected one
       $v_list = centralepilote::cpRadList(['_isEnable'=>true]);
@@ -1768,8 +1811,8 @@ class centralepilote extends eqLogic {
       
     }
 
-    public function stop() {
-      centralepilotelog::log('info', "Stop plugin Centrale Fil-Pilote");
+    public static function stop() {
+      centralepilotelog::log('info', "Arrêt du plugin Centrale Fil-Pilote");
 
       // ----- Set clean stop flag
       config::save('clean_stop', date("d-m-Y H:i"), 'centralepilote');
@@ -2120,7 +2163,10 @@ class centralepilote extends eqLogic {
       $replace['#icon_button_trash#'] = 'far fa-trash-alt';    
       $replace['#icon_button_validate#'] = 'fas fa-check';    
       $replace['#icon_button_cancel#'] = 'fas fa-reply';    
+      $replace['#icon_button_settings#'] = 'fas fa-wrench';    
       $replace['#icon_button_add#'] = 'fas fa-plus-circle';
+      
+      $replace['#prog_modal_title#'] = __("Gestion des modèles de programmation", __FILE__);
       
       // postToHtml() : fait en fait le remplacement dans template + le cache du widget
       return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'centralepilote-radiateur.template', __CLASS__)));  
@@ -2351,7 +2397,7 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
 	function cpGetType() {
-	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration($p_key));
+	  return $this->getConfiguration('type', $this->cpGetDefaultConfiguration('type'));
 	}
     /* -------------------------------------------------------------------------*/
 
