@@ -1330,6 +1330,19 @@ class centralepilote extends eqLogic {
         
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
         
+        // ----- Creation de commandes infos, contenant les valeurs configurées pour les températures de références
+        $this->cpCmdCreate('temp_ref_confort', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_confort_1', ['name'=>'Temp_Ref_Confort-1', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_confort_2', ['name'=>'Temp_Ref_Confort-2', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_eco', ['name'=>'Temp_Ref_Eco', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_horsgel', ['name'=>'Temp_Ref_HorsGel', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+
+        $this->checkAndUpdateCmd('temp_ref_confort', '19');
+        $this->checkAndUpdateCmd('temperature_confort_1', '18');
+        $this->checkAndUpdateCmd('temperature_confort_2', '17');
+        $this->checkAndUpdateCmd('temperature_eco', '15');
+        $this->checkAndUpdateCmd('temperature_horsgel', '3');
+        
         // ----- Here I can change the value because the centrale eq is created in "enable" status.
         $this->checkAndUpdateCmd('etat', 'normal');
       }
@@ -1776,7 +1789,12 @@ class centralepilote extends eqLogic {
             //$this->save();        
           }
         }
-  
+        
+        $this->checkAndUpdateCmd('temp_ref_confort', $this->getConfiguration('temperature_confort','19'));
+        $this->checkAndUpdateCmd('temp_ref_confort_1', $this->getConfiguration('temperature_confort_1','18'));
+        $this->checkAndUpdateCmd('temp_ref_confort_2', $this->getConfiguration('temperature_confort_2','17'));
+        $this->checkAndUpdateCmd('temp_ref_eco', $this->getConfiguration('temperature_eco','15'));
+        $this->checkAndUpdateCmd('temp_ref_horsgel', $this->getConfiguration('temperature_horsgel','3'));  
       }
       
       centralepilotelog::log('debug', "postSaveCentrale() : end");
