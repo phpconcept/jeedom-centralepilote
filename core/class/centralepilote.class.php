@@ -1385,7 +1385,7 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('support_eco', '1');
         $this->setConfiguration('support_horsgel', '1');
         $this->setConfiguration('support_off', '1');        
-        $this->setConfiguration('nature_fil_pilote', '2_commutateur');        
+        $this->setConfiguration('nature_fil_pilote', 'virtuel');        
         
         $this->setConfiguration('pilotage', 'eco');
         $this->setConfiguration('programme_id', '0');
