@@ -225,6 +225,10 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
+Release v1.8.5 (beta) :
+- Nouveautés :
+  - Ajout de commandes de type 'info' pour récupérer par programmation les valeurs des températures de référence, configurées dans l'objet "Centrale fil-pilote" 
+
 Release v1.8.4 :
 - Nouveautés :
   - Ajout d'un bouton dans le widget d'un radiateur pour pouvoir directement accéder au dialogue de configuration des programmations sans avoir à aller dans la configuration du plugin.

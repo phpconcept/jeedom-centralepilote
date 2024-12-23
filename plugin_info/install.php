@@ -85,11 +85,67 @@ function centralepilote_update() {
   if ($v_version < '1.4') centralepilote_update_v_1_4($v_version);
   if ($v_version < '1.5') centralepilote_update_v_1_5($v_version);
   if ($v_version < '1.6') centralepilote_update_v_1_6($v_version);
+  
+  if (version_compare($v_version, '1.8.5', '<')) centralepilote_update_v_1_8_5($v_version);
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
+}
+
+function centralepilote_update_v_1_8_5($v_from_version='') {
+
+  log::add('centralepilote', 'info', "Update devices to version 1.8.5 of plugin 'centralepilote'");
+
+  // ----- Look for each centrale
+  $eqLogics = eqLogic::byType('centralepilote');
+  
+  foreach ($eqLogics as $v_eq) {
+    $v_flag_save = false;
+    
+    if (!$v_eq->cpIsType(array('centrale'))) {
+      continue;
+    }
+    
+    // ----- Look to add cmd
+    $v_cmd = $v_eq->getCmd(null, 'temp_ref_confort');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_confort'");
+      $v_eq->cpCmdCreate('temp_ref_confort', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->checkAndUpdateCmd('temp_ref_confort', $v_eq->getConfiguration('temperature_confort','19'));
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'temp_ref_confort_1');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_confort_1'");
+      $v_eq->cpCmdCreate('temp_ref_confort_1', ['name'=>'Temp_Ref_Confort-1', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->checkAndUpdateCmd('temp_ref_confort_1', $v_eq->getConfiguration('temperature_confort_1','18'));
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'temp_ref_confort_2');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_confort_2'");
+      $v_eq->cpCmdCreate('temp_ref_confort_2', ['name'=>'Temp_Ref_Confort-2', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->checkAndUpdateCmd('temp_ref_confort_2', $v_eq->getConfiguration('temperature_confort_2','17'));
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'temp_ref_eco');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_eco'");
+      $v_eq->cpCmdCreate('temp_ref_eco', ['name'=>'Temp_Ref_Eco', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->checkAndUpdateCmd('temp_ref_eco', $v_eq->getConfiguration('temperature_eco','15'));
+    }
+
+    $v_cmd = $v_eq->getCmd(null, 'temp_ref_horsgel');
+    if (!is_object($v_cmd)) {
+      centralepilotelog::log('debug', "Centrale '".$v_eq->getName()."' : Add missing cmd 'temp_ref_horsgel'");
+      $v_eq->cpCmdCreate('temp_ref_horsgel', ['name'=>'Temp_Ref_HorsGel', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0]);
+      $v_eq->checkAndUpdateCmd('temp_ref_horsgel', $v_eq->getConfiguration('temperature_horsgel','3'));
+    }
+
+  }
+    
 }
 
 function centralepilote_update_v_1_6($v_from_version='') {
