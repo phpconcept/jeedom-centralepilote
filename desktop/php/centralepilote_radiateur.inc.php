@@ -60,38 +60,21 @@
       </label>
     <div class="col-sm-7">
 
-      <select id="cp_fp_device_list" class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="fp_device_id" onchange="cp_fp_device_change(event)">
-        
-<?php 
-  // ----- Remplacé par un call uniquement lors de l'affichage voir cp_fp_update_list()
-  /*
-  $v_device_info_list = centralepilote::cpDeviceSupportedList();  
-  
-  $v_plugin_list = plugin::listPlugin(true);
-  foreach ($v_plugin_list as $v_plugin) {
-  	$v_plugin_id = $v_plugin->getId();
-  	if (!isset($v_device_info_list[$v_plugin_id])) continue;
-        
-    $eqLogics = eqLogic::byType($v_plugin_id);
-    foreach ($eqLogics as $v_eq) {
-      $v_device_info = centralepilote::cpDeviceSupportedInfo($v_eq);
-      if ($v_device_info != null) {
-        $v_human_name = $v_eq->getHumanName();
-        //$v_name = (isset($v_device_info['name'])?' ('.$v_device_info['name'].')':'');
-        
-        //echo '<option value="#'.$v_human_name.'#">'.$v_human_name.$v_name.'</option>';
-        echo '<option value="#'.$v_human_name.'#">'.$v_human_name.'</option>';
-      }
-    }
-  }
-  */
-  
-?>
-
+      <textarea id="cp_fp_device_selected" class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="fp_device_id" style="height : 33px;" placeholder="{{Référence équipement associé}}"></textarea>
+      <select id="cp_fp_device_list" class="cp_attr_radiateur  form-control" onchange="cp_fp_device_change(event)" style="display:none;">
+        <!-- Rempli par javascript -->
       </select>
+
 
     </div>
     <div class="col-sm-1">
+      <span id="cp_fp_device_list_open_span">
+      <a class="btn btn-default cursor  btn-sm" onClick="cp_fp_device_list_open( $('#cp_fp_device_selected').val() );"><i class="fas fa-sync"></i> {{Changer équipement}}</a>
+      </span>
+      <span id="cp_fp_device_select_span" style="display:none; white-space: nowrap;">
+      <a class="btn btn-default cursor  btn-sm" onClick="cp_fp_device_select( $('#cp_fp_device_list').val() );" ><i class="fas fa-check" ></i>&nbsp;{{Valider}}</a>
+      <a class="btn btn-default cursor  btn-sm" onClick="cp_fp_device_cancel_select( );"><i class="fas fa-ban" ></i>&nbsp;{{Annuler}}</a>
+      </span>
     </div>
   </div>
 

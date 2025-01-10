@@ -17,7 +17,7 @@
 */
 
   // ----- Current version
-  define('CP_VERSION', '1.8.5');
+  define('CP_VERSION', '1.8.6-beta');
 
 
 ?>
