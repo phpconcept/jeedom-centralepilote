@@ -508,16 +508,19 @@ function cp_nature_change(event) {
   }
   
   else if (event.target.value == 'fp_device') {
-    // ----- Mise à jour de la liste des eq fil-pilote compatibles
-    cp_fp_update_list();
-    
     // ----- Afficher le div
     $('#cp_disp_fp_device').show();
+    
+    /*
+    if ($('#cp_fp_device_selected').val() == '') {
+      cp_fp_device_list_open();
+    }
+    */
   }
   
 }
 
-function cp_fp_update_list() {
+function cp_fp_update_list_DEPRECATED(p_id='') {
 
   $.ajax({
     type: "POST",
@@ -539,7 +542,57 @@ function cp_fp_update_list() {
       
       var v_html = '';
       for (var i in v_data) {
-        v_html += '<option value="#'+v_data[i]['human_name']+'#">'+v_data[i]['human_name']+'</option>';
+        var v_item = "#"+v_data[i]['human_name']+"#";
+        if (v_item == p_id) {
+          v_html += '<option value="'+v_item+'" selected>'+v_item+'</option>';
+        }
+        else {
+          v_html += '<option value="'+v_item+'">'+v_item+'</option>';
+        }
+      }
+    
+      $('#cp_fp_device_list').html(v_html);
+
+    }
+  });
+  
+}
+
+function cp_fp_device_list_open(p_id='') {
+
+  $('#cp_fp_device_selected').hide();
+  $('#cp_fp_device_list_open_span').hide();
+
+  $('#cp_fp_device_list').show();
+  $('#cp_fp_device_select_span').show();
+  
+  $.ajax({
+    type: "POST",
+    url: "plugins/centralepilote/core/ajax/centralepilote.ajax.php",
+    data: {
+      action: "cpFpSupportedList"
+    },
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error);
+    },
+    success: function (data) {
+      if (data.state != 'ok') {
+        $('#div_alert').showAlert({message: data.result, level: 'danger'});
+        return;
+      }
+      v_val = data.result;
+      v_data = JSON.parse(v_val);
+      
+      var v_html = '';
+      for (var i in v_data) {
+        var v_item = "#"+v_data[i]['human_name']+"#";
+        if (v_item == p_id) {
+          v_html += '<option value="'+v_item+'" selected>'+v_item+'</option>';
+        }
+        else {
+          v_html += '<option value="'+v_item+'">'+v_item+'</option>';
+        }
       }
     
       $('#cp_fp_device_list').html(v_html);
@@ -551,7 +604,32 @@ function cp_fp_update_list() {
 
 
 function cp_fp_device_change(event) {
-  //alert('Hello :'+event.target.value);
+  //alert('target :'+event.target.value);
+  //$('#cp_fp_device_selected').val(event.target.value);
+  
+  
+}
+
+function cp_fp_device_select(p_value) {
+  //alert('target :'+event.target.value);
+  $('#cp_fp_device_selected').val(p_value);
+  
+  $('#cp_fp_device_selected').show();
+  $('#cp_fp_device_list_open_span').show();
+
+  $('#cp_fp_device_list').hide();
+  $('#cp_fp_device_select_span').hide();
+ 
+}
+
+function cp_fp_device_cancel_select() {
+  
+  $('#cp_fp_device_selected').show();
+  $('#cp_fp_device_list_open_span').show();
+
+  $('#cp_fp_device_list').hide();
+  $('#cp_fp_device_select_span').hide();
+ 
 }
 
 
