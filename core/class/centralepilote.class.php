@@ -1418,6 +1418,13 @@ class centralepilote extends eqLogic {
       // ----- Look for existing device
       else {
         centralepilotelog::log('debug', "preSaveRadiateur() : existing radiateur.");
+        
+        // ----- Verification de certains paramètres avant sauvegarde
+        $v_nature = $this->getConfiguration('nature_fil_pilote','');
+        $v_fp_device_id = $this->getConfiguration('fp_device_id','');
+        if (($v_nature == 'fp_device') && ($v_fp_device_id == '')) {
+          throw new Exception(__("Il manque l'identifiant de l'objet fil-pilote.", __FILE__));
+        }        
 
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
@@ -1456,7 +1463,8 @@ class centralepilote extends eqLogic {
       }
       centralepilotelog::log('debug', "preSaveRadiateur() done");
     }
-
+    
+    
     public function preSaveZone() {
       //centralepilotelog::log('debug', "preSave()");
       

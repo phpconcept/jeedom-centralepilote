@@ -227,6 +227,8 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 Release v1.8.6 (dev) :
 - Bug corrections :
+  - Lorsqu'un radiateur utilisait un objet connecté natif fil-pilote, l'identifiant de celui-ci n'était pas afficher correctement lorsque l'on revenait sur la page de configuration. Le mode de selection des objets a été modifié pour corriger cela et aussi pour optimiser le code listant les objets compatibles.
+  - Lorsque l'on était dans la vue de configuration d'un objet le retour par la petite flèche de gauche ne déclenchait pas le réaffichage de la liste des objets. Cela est maintenant le cas.
 
 Release v1.8.5 (beta) :
 - Nouveautés :

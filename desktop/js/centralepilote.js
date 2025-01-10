@@ -60,6 +60,7 @@ function addCmdToTable(_cmd) {
 var refresh_timeout;
 
 function refreshDeviceList() {
+  //console.log('refresh device list');
   $('#device_list').load('index.php?v=d&plugin=centralepilote&modal=modal.device_list');
 }
 
@@ -596,6 +597,9 @@ function cp_fp_device_list_open(p_id='') {
       }
     
       $('#cp_fp_device_list').html(v_html);
+      
+      // ----- Copie de suite celui affiché dans la selection
+      $('#cp_fp_device_selected').val($('#cp_fp_device_list').val());
 
     }
   });
@@ -606,6 +610,8 @@ function cp_fp_device_list_open(p_id='') {
 function cp_fp_device_change(event) {
   //alert('target :'+event.target.value);
   //$('#cp_fp_device_selected').val(event.target.value);
+  
+  cp_fp_device_select(event.target.value);
   
   
 }
@@ -631,7 +637,6 @@ function cp_fp_device_cancel_select() {
   $('#cp_fp_device_select_span').hide();
  
 }
-
 
 
 

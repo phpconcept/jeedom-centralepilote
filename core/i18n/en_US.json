@@ -119,6 +119,7 @@
         "Mode Confort -2 :" : "Confort -2 mode :",
         "Mode Eco :" : "Eco mode :",
         "Mode Hors-Gel :" : "Hors-Gel mode :",
+        "Changer équipement" : "Change device",
 
         "#": "#"
     },
@@ -274,6 +275,7 @@
         "Retour" : "Return",
         "Valider" : "Confirm",
         "à" : "at",
+        "Il manque l'identifiant de l'objet fil-pilote." : "Missing fil-pilote object id.",
 
         "#": "#"
     }
