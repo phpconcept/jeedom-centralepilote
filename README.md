@@ -225,6 +225,8 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
+Release v1.8.8 (dev) :
+
 Release v1.8.7 (beta) :
 - Nouveautés :
   - Ajout d'une configuration globale (mode_icon_color) permettant d'afficher les icônes des modes (confort, eco, etc) en couleur. Particulièrement interessant pour les modes confort-1 et confort-2 qui utilisent le même icône que confort.
