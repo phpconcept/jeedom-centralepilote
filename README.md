@@ -225,6 +225,8 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
+Release v1.8.9 (dev) :
+
 Release v1.8.8 (beta) :
 - Bug corrections :
   - Ajout de l'affichage en couleur aussi pour le mode mobile
