@@ -2217,6 +2217,8 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
      // TBC : voir s'il faut garder cela .... pas utilisé
+     // En fait on utilise la même fonction mais un fichier html différent
+     // donc cela donne un résultat différent
     public function toHtml_mobile_radiateur($_version = 'mobile') {
       //centralepilote::log('debug',  "Call toHtml_mobile_radiateur()");
 
