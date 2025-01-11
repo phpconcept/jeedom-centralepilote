@@ -1989,7 +1989,8 @@ class centralepilote extends eqLogic {
       
       
       // ----- Affichage des couleurs des icones en fonction de la config
-      if (config::byKey('mode_icon_color', 'centralepilote') == 1) {
+      if ( (($_version == 'dashboard') && (config::byKey('mode_icon_color', 'centralepilote') == 1))
+           || (($_version == 'mobile') && (config::byKey('mode_icon_color_mobile', 'centralepilote') == 1)) ) {
         $replace['#cmd_confort_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort').';';
         $replace['#cmd_confort_1_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort_1').';';
         $replace['#cmd_confort_2_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort_2').';';
