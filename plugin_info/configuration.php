@@ -36,6 +36,12 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="row form-group">
+            <label class="col-lg-4 control-label">{{Icônes des modes colorées}} : </label>
+            <div class="col-lg-5">
+                <input type="checkbox" class="configKey form-control" data-l1key="mode_icon_color">
+            </div>
+        </div>
+        <div class="row form-group">
             <label class="col-lg-4 control-label">{{Github Version}} : <?php echo CP_VERSION;?></label>
         </div>
 
