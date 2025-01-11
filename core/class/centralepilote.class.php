@@ -1986,9 +1986,18 @@ class centralepilote extends eqLogic {
       $replace['#cmd_eco_style#'] = '';
       $replace['#cmd_horsgel_style#'] = '';
       $replace['#cmd_off_style#'] = '';
-      $replace['#cmd_auto_style#'] = '';
-
-      $replace['#cmd_auto_style#'] = '';
+      
+      
+      // ----- Affichage des couleurs des icones en fonction de la config
+      if (config::byKey('mode_icon_color', 'centralepilote') == 1) {
+        $replace['#cmd_confort_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort').';';
+        $replace['#cmd_confort_1_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort_1').';';
+        $replace['#cmd_confort_2_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort_2').';';
+        $replace['#cmd_eco_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('eco').';';
+        $replace['#cmd_horsgel_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('horsgel').';';
+        $replace['#cmd_off_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('off').';';
+      }
+      
       $replace['#cmd_auto_style#'] = '';
       
       $v_cmd = $this->getCmd(null, 'pilotage');
