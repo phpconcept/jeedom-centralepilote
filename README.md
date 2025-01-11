@@ -225,7 +225,7 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
-Release v1.8.9 (dev) :
+Release v1.8.9 (beta) :
 - Nouveautés :
   - Ajouté la possibilité de selectionner l'affichage de la couleur des icones de mode pour le tableau de bord et/ou pour le mobile.
   
