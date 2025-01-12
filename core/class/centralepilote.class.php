@@ -1330,6 +1330,19 @@ class centralepilote extends eqLogic {
         
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
         
+        // ----- Creation de commandes infos, contenant les valeurs configurées pour les températures de références
+        $this->cpCmdCreate('temp_ref_confort', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_confort_1', ['name'=>'Temp_Ref_Confort-1', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_confort_2', ['name'=>'Temp_Ref_Confort-2', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_eco', ['name'=>'Temp_Ref_Eco', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('temp_ref_horsgel', ['name'=>'Temp_Ref_HorsGel', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+
+        $this->checkAndUpdateCmd('temp_ref_confort', 19);
+        $this->checkAndUpdateCmd('temperature_confort_1', 18);
+        $this->checkAndUpdateCmd('temperature_confort_2', 17);
+        $this->checkAndUpdateCmd('temperature_eco', 15);
+        $this->checkAndUpdateCmd('temperature_horsgel', 3);
+        
         // ----- Here I can change the value because the centrale eq is created in "enable" status.
         $this->checkAndUpdateCmd('etat', 'normal');
       }
@@ -1372,7 +1385,7 @@ class centralepilote extends eqLogic {
         $this->setConfiguration('support_eco', '1');
         $this->setConfiguration('support_horsgel', '1');
         $this->setConfiguration('support_off', '1');        
-        $this->setConfiguration('nature_fil_pilote', '2_commutateur');        
+        $this->setConfiguration('nature_fil_pilote', 'virtuel');        
         
         $this->setConfiguration('pilotage', 'eco');
         $this->setConfiguration('programme_id', '0');
@@ -1405,6 +1418,13 @@ class centralepilote extends eqLogic {
       // ----- Look for existing device
       else {
         centralepilotelog::log('debug', "preSaveRadiateur() : existing radiateur.");
+        
+        // ----- Verification de certains paramètres avant sauvegarde
+        $v_nature = $this->getConfiguration('nature_fil_pilote','');
+        $v_fp_device_id = $this->getConfiguration('fp_device_id','');
+        if (($v_nature == 'fp_device') && ($v_fp_device_id == '')) {
+          throw new Exception(__("Il manque l'identifiant de l'objet fil-pilote.", __FILE__));
+        }        
 
         // ----- Load device (eqLogic) from DB
         // These values will be erased with the save in DB, so keep what is needed to be kept
@@ -1443,7 +1463,8 @@ class centralepilote extends eqLogic {
       }
       centralepilotelog::log('debug', "preSaveRadiateur() done");
     }
-
+    
+    
     public function preSaveZone() {
       //centralepilotelog::log('debug', "preSave()");
       
@@ -1776,7 +1797,12 @@ class centralepilote extends eqLogic {
             //$this->save();        
           }
         }
-  
+        
+        $this->checkAndUpdateCmd('temp_ref_confort', intval($this->getConfiguration('temperature_confort','19')));
+        $this->checkAndUpdateCmd('temp_ref_confort_1', intval($this->getConfiguration('temperature_confort_1','18')));
+        $this->checkAndUpdateCmd('temp_ref_confort_2', intval($this->getConfiguration('temperature_confort_2','17')));
+        $this->checkAndUpdateCmd('temp_ref_eco', intval($this->getConfiguration('temperature_eco','15')));
+        $this->checkAndUpdateCmd('temp_ref_horsgel', intval($this->getConfiguration('temperature_horsgel','3')));  
       }
       
       centralepilotelog::log('debug', "postSaveCentrale() : end");
@@ -1960,9 +1986,19 @@ class centralepilote extends eqLogic {
       $replace['#cmd_eco_style#'] = '';
       $replace['#cmd_horsgel_style#'] = '';
       $replace['#cmd_off_style#'] = '';
-      $replace['#cmd_auto_style#'] = '';
-
-      $replace['#cmd_auto_style#'] = '';
+      
+      
+      // ----- Affichage des couleurs des icones en fonction de la config
+      if ( (($_version == 'dashboard') && (config::byKey('mode_icon_color', 'centralepilote') == 1))
+           || (($_version == 'mobile') && (config::byKey('mode_icon_color_mobile', 'centralepilote') == 1)) ) {
+        $replace['#cmd_confort_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort').';';
+        $replace['#cmd_confort_1_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort_1').';';
+        $replace['#cmd_confort_2_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('confort_2').';';
+        $replace['#cmd_eco_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('eco').';';
+        $replace['#cmd_horsgel_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('horsgel').';';
+        $replace['#cmd_off_icon_style#'] = 'color:'.centralepilote::cpModeGetColor('off').';';
+      }
+      
       $replace['#cmd_auto_style#'] = '';
       
       $v_cmd = $this->getCmd(null, 'pilotage');
@@ -2182,6 +2218,8 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
      // TBC : voir s'il faut garder cela .... pas utilisé
+     // En fait on utilise la même fonction mais un fichier html différent
+     // donc cela donne un résultat différent
     public function toHtml_mobile_radiateur($_version = 'mobile') {
       //centralepilote::log('debug',  "Call toHtml_mobile_radiateur()");
 

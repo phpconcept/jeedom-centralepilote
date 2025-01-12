@@ -36,6 +36,14 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="row form-group">
+            <label class="col-lg-4 control-label">{{Icônes colorées pour les modes}} : </label>
+            <div class="col-lg-5">
+                <input type="checkbox" class="configKey form-control" data-l1key="mode_icon_color"> {{Tableau de bord}}
+                <br>
+                <input type="checkbox" class="configKey form-control" data-l1key="mode_icon_color_mobile"> {{Mobile}}
+            </div>
+        </div>
+        <div class="row form-group">
             <label class="col-lg-4 control-label">{{Github Version}} : <?php echo CP_VERSION;?></label>
         </div>
 
