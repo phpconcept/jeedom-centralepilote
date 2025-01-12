@@ -225,26 +225,16 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
-Release v1.8.9 (beta) :
+Release v1.8.9 :
 - Nouveautés :
+  - Ajout de commandes de type 'info' pour récupérer par programmation les valeurs des températures de référence, configurées dans l'objet "Centrale fil-pilote" 
+  - Ajout d'une configuration globale (mode_icon_color) permettant d'afficher les icônes des modes (confort, eco, etc) en couleur. Particulièrement interessant pour les modes confort-1 et confort-2 qui utilisent le même icône que confort.
   - Ajouté la possibilité de selectionner l'affichage de la couleur des icones de mode pour le tableau de bord et/ou pour le mobile.
   
-Release v1.8.8 (beta) :
-- Bug corrections :
-  - Ajout de l'affichage en couleur aussi pour le mode mobile
-  
-Release v1.8.7 (beta) :
-- Nouveautés :
-  - Ajout d'une configuration globale (mode_icon_color) permettant d'afficher les icônes des modes (confort, eco, etc) en couleur. Particulièrement interessant pour les modes confort-1 et confort-2 qui utilisent le même icône que confort.
-
-Release v1.8.6 (beta) :
 - Bug corrections :
   - Lorsqu'un radiateur utilisait un objet connecté natif fil-pilote, l'identifiant de celui-ci n'était pas afficher correctement lorsque l'on revenait sur la page de configuration. Le mode de selection des objets a été modifié pour corriger cela et aussi pour optimiser le code listant les objets compatibles.
   - Lorsque l'on était dans la vue de configuration d'un objet le retour par la petite flèche de gauche ne déclenchait pas le réaffichage de la liste des objets. Cela est maintenant le cas.
-
-Release v1.8.5 (beta) :
-- Nouveautés :
-  - Ajout de commandes de type 'info' pour récupérer par programmation les valeurs des températures de référence, configurées dans l'objet "Centrale fil-pilote" 
+  - Ajout de l'affichage en couleur aussi pour le mode mobile
 
 Release v1.8.4 :
 - Nouveautés :
