@@ -1851,6 +1851,34 @@ class centralepilote extends eqLogic {
     }
 
     public function preRemove() {
+      // ----- Suppression d'une zone : ses radiateurs en sortent avant (point 1)
+      if ($this->cpIsType('zone')) {
+        foreach (centralepilote::cpRadList(array('zone'=>$this->getId())) as $v_rad) {
+          centralepilote::log('info', "Suppression de la zone '".$this->getName()."' : le radiateur '".$v_rad->getName()."' sort de la zone");
+          $v_rad->setConfiguration('zone', '');
+          $v_rad->save();   // postSaveRadiateur() -> cpPilotageExitFromZone()
+        }
+      }
+    }
+
+    /**---------------------------------------------------------------------------
+     * Method : cpZoneCleanOrphans()
+     * Description :
+     *   Sort de leur zone les radiateurs dont la zone n'existe plus
+     *   (zones supprimées avant la correction du point 1).
+     * Parameters : none
+     * Returned value : none
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpZoneCleanOrphans() {
+      foreach (centralepilote::cpRadList() as $v_rad) {
+        $v_zone = $v_rad->cpGetConf('zone');
+        if (($v_zone != '') && !is_object(eqLogic::byId($v_zone))) {
+          centralepilote::log('warning', "Radiateur '".$v_rad->getName()."' : zone '".$v_zone."' introuvable, le radiateur sort de la zone");
+          $v_rad->setConfiguration('zone', '');
+          $v_rad->save();
+        }
+      }
     }
 
     public function postRemove() {
@@ -2876,35 +2904,10 @@ class centralepilote extends eqLogic {
         return;
       }
 
-      // ----- Get pilotage for radiateur
-      $v_pilotage = $this->cpGetConf('pilotage');
-      
-      // ----- Look for radiateur in zone : pilotage is the value from zone to use
-      if ($this->cpPilotageIsZone()) {
-        // ----- Get zone
-        $v_zone = $this->cpGetConf('zone');
-        if ($v_zone == '') {
-          centralepilote::log('debug', "!! Unexpected empty zone here (".__FILE__.",".__LINE__.")");
-          return;
-        }
-
-        $v_zone_object = eqLogic::byId($v_zone);
-        if (!is_object($v_zone_object)) {
-          centralepilote::log('debug', "!! Unexpected missing zone object '".$v_zone."' here (".__FILE__.",".__LINE__.")");
-          return;
-        }
-        
-        $v_pilotage = $v_zone_object->cpGetConf('pilotage');
-      }
-      
-      centralepilote::log('warning',  "L'équipement '".$this->getName()."' n'a pas l'état attendu (".$v_mode.") par rapport à celui des commutateurs associés (".$v_real_mode."). Force l'état attendu.");
-
-      if ($v_pilotage == 'auto') {
-        $this->cpPilotageChangeTo('auto', true);
-      }
-      else {
-        $this->cpPilotageChangeTo($v_mode, true);
-      }
+      // ----- Réapplique le mode attendu (etat), sans toucher au pilotage :
+      //       fonctionne aussi en bypass (délestage, fenêtre) et en zone
+      centralepilote::log('warning',  "L'équipement '".$this->getName()."' n'a pas l'état attendu (".$v_mode.") par rapport à celui des commutateurs associés (".$v_real_mode."). Réapplique l'état attendu.");
+      $this->cpModeChangeTo($v_mode, true);
 
 	}
     /* -------------------------------------------------------------------------*/
@@ -2922,35 +2925,73 @@ class centralepilote extends eqLogic {
         centralepilote::log('debug',  "Equipement '".$this->getName()."' is disable, ignore virtual command execution");
         return(0);
       }
-    
-      if ($p_virtual_cmd == '') {
+
+      // ----- Vérification complète avant toute exécution : rien n'est exécuté si
+      //       une seule des commandes est invalide
+      $v_error = '';
+      $v_cmd_list = $this->cpVirtualCmdCheck($p_virtual_cmd, $v_error);
+      if ($v_cmd_list === false) {
+        centralepilote::log('error',  "Equipement '".$this->getName()."' : ".$v_error.". Aucune commande exécutée, état inchangé.");
         return(0);
       }
-   
-      $v_result = 1;
-      $cmds = explode('&&', $p_virtual_cmd);
-      if (is_array($cmds)) {
-        foreach ($cmds as $cmd_id) {
-          $cmd = cmd::byId(str_replace('#', '', $cmd_id));
-          if (is_object($cmd)) {
-            try {
-              $cmd->execCmd($p_options);
-            }
-            catch (\Exception $e) {   
-              $v_result=0;       
-            }
-          }
-          else {
-            $v_result=0;
-          }
+
+      // ----- Exécution
+      foreach ($v_cmd_list as $v_i => $v_cmd) {
+        try {
+          $v_cmd->execCmd($p_options);
+        }
+        catch (\Throwable $e) {
+          centralepilote::log('error',  "Equipement '".$this->getName()."' : échec de la commande '".$v_cmd->getHumanName()."' (".$e->getMessage().")"
+                                      .(($v_i > 0) ? ", ".$v_i." commande(s) déjà exécutée(s)" : "").". Etat inchangé.");
+          return(0);
         }
       }
-      else {
-        $cmd = cmd::byId(str_replace('#', '', $p_virtual_cmd));
-        $cmd->execCmd($p_options);
-        $v_result=0;
+      return(1);
+    }
+    /* -------------------------------------------------------------------------*/
+
+    /**---------------------------------------------------------------------------
+     * Method : cpVirtualCmdCheck()
+     * Description :
+     *   Vérifie, sans rien exécuter, une expression de commandes action de la forme
+     *   '#id#' ou '#id# && #id# ...' : syntaxe, existence des commandes, type
+     *   action, équipement présent et activé.
+     * Parameters :
+     *   $p_virtual_cmd : expression à vérifier
+     *   $p_error : (retour) message d'erreur si la vérification échoue
+     * Returned value : liste des objets cmd, ou false en cas d'erreur
+     * ---------------------------------------------------------------------------
+     */
+    public function cpVirtualCmdCheck($p_virtual_cmd, &$p_error) {
+      $p_error = '';
+      if (trim($p_virtual_cmd) == '') {
+        $p_error = "commande vide";
+        return(false);
       }
-      return($v_result);
+      if (!preg_match('/^\s*#\d+#\s*(&&\s*#\d+#\s*)*$/', $p_virtual_cmd)) {
+        $p_error = "syntaxe invalide '".$p_virtual_cmd."' (attendu : #id# ou #id# && #id#)";
+        return(false);
+      }
+      preg_match_all('/#(\d+)#/', $p_virtual_cmd, $v_match);
+      $v_cmd_list = array();
+      foreach ($v_match[1] as $v_id) {
+        $v_cmd = cmd::byId($v_id);
+        if (!is_object($v_cmd)) {
+          $p_error = "commande #".$v_id."# introuvable";
+          return(false);
+        }
+        if ($v_cmd->getType() != 'action') {
+          $p_error = "'".$v_cmd->getHumanName()."' n'est pas une commande action";
+          return(false);
+        }
+        $v_eq = $v_cmd->getEqLogic();
+        if (!is_object($v_eq) || !$v_eq->getIsEnable()) {
+          $p_error = "l'équipement de la commande '".$v_cmd->getHumanName()."' est absent ou désactivé";
+          return(false);
+        }
+        $v_cmd_list[] = $v_cmd;
+      }
+      return($v_cmd_list);
     }
     /* -------------------------------------------------------------------------*/
 
@@ -2968,19 +3009,37 @@ class centralepilote extends eqLogic {
         return($p_mode);
       }
       
-      // TBC : Look and improve ?
-      if ($this->cpGetConf('support_'.$p_mode) == 0) {
-        centralepilote::log('debug',  "mode '".$p_mode."' not supported on this device.");
-        if (($v_fallback = $this->cpGetConf('fallback_'.$p_mode)) != '') {
-          $p_mode = $v_fallback;
-          centralepilote::log('debug',  "fallback to '".$p_mode."'");
-        }
-        else {
-          // TBC : should not occur
+      // ----- Mode supporté : rien à faire
+      if ($this->cpGetConf('support_'.$p_mode) == 1) {
+        return($p_mode);
+      }
+      centralepilote::log('debug',  "mode '".$p_mode."' not supported on this device.");
+
+      // ----- 1. Repli configuré, s'il est lui-même supporté
+      $v_fallback = $this->cpGetConf('fallback_'.$p_mode);
+      if (($v_fallback != '') && ($this->cpGetConf('support_'.$v_fallback) == 1)) {
+        centralepilote::log('debug',  "fallback to '".$v_fallback."'");
+        return($v_fallback);
+      }
+
+      // ----- 2. Sinon, mode supporté le plus proche dans l'ordre du plus chaud au plus froid ;
+      //          à égalité de distance, celui qui chauffe le moins
+      $v_order = array('confort','confort_1','confort_2','eco','horsgel','off');
+      $v_index = array_search($p_mode, $v_order);
+      if ($v_index !== false) {
+        for ($d = 1; $d < count($v_order); $d++) {
+          foreach (array($v_index + $d, $v_index - $d) as $i) {
+            if (($i >= 0) && ($i < count($v_order)) && ($this->cpGetConf('support_'.$v_order[$i]) == 1)) {
+              centralepilote::log('info',  "Equipement '".$this->getName()."' : pas de repli valide pour '".$p_mode."', utilise '".$v_order[$i]."'");
+              return($v_order[$i]);
+            }
+          }
         }
       }
-      
-      return($p_mode);
+
+      // ----- Aucun mode supporté : rien ne sera exécuté
+      centralepilote::log('warning',  "Equipement '".$this->getName()."' : aucun mode supporté pour remplacer '".$p_mode."'");
+      return('');
     }
     /* -------------------------------------------------------------------------*/
 
@@ -3007,6 +3066,9 @@ class centralepilote extends eqLogic {
 
         // ----- Look for alternative mode
         $p_mode = $this->cpModeAlternative($p_mode);
+        if ($p_mode == '') {
+          return;
+        }
         
         // ----- Look if already the same mode        
         if (($this->cpModeGetFromCmd() == $p_mode) && (!$p_force)) {
@@ -3036,19 +3098,13 @@ class centralepilote extends eqLogic {
           break;
         }
         
-        // ----- Start the actions
-        if ($v_command != '') {
-          if ($this->cpExecuteVirtualCmd($v_command) === 1) {
-            $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
-          }
-          else {
-            centralepilote::log('error',  "Impossible d'executer la commande '".$v_command."' pour '".$this->getName()."'");
-          }
+        // ----- Start the actions : commande vérifiée entièrement avant exécution.
+        //       En cas d'erreur (vide, syntaxe, commande absente, ...), l'erreur est
+        //       journalisée par cpExecuteVirtualCmd() et l'état reste inchangé.
+        if ($this->cpExecuteVirtualCmd($v_command) !== 1) {
+          return;
         }
-        else {
-          centralepilote::log('warning',  "Impossible d'executer une commande vide pour '".$this->getName()."'");
-          $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
-        }
+        $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
         
         centralepilote::log('info',  "Equipement '".$this->getName()."' change mode to '".$p_mode."'");
       }

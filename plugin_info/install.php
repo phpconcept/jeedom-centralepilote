@@ -42,6 +42,9 @@ function centralepilote_update() {
   // ----- Create a default centrale object (if not exists)
   centralepilote::cpCentraleCreateDefault();
 
+  // ----- Sort de leur zone les radiateurs dont la zone a disparu
+  centralepilote::cpZoneCleanOrphans();
+
   // ----- Look for specific upgrade from versions
   if (CP_VERSION == '0.2') {
     centralepilote_update_v_0_2($v_version);
