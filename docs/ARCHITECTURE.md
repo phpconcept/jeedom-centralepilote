@@ -4,7 +4,7 @@
 > version 1.8.9 (commit `723afe9`), septembre 2026.
 > La documentation utilisateur reste le [README](../README.md).
 > Les points d'attention (§11) ont été vérifiés sur le banc de test de jeedom-dev (§12).
-> Les lots de corrections 1 à 4 (§13) sont appliqués sur jeedom-dev.
+> Les lots de corrections 1 à 5 (§13) sont appliqués sur jeedom-dev.
 
 ## 1. Objet
 
@@ -85,7 +85,8 @@ y photographie l'état en base (nom, isEnable, zone, nature, modes supportés) p
 | logicalId | Type | Contenu |
 |---|---|---|
 | `confort`, `confort_1`, `confort_2`, `eco`, `horsgel`, `off`, `auto` | action/other | Changement de pilotage. |
-| `etat` | info/string, historisée | **Libellé traduit** du mode effectif (`cpModeGetName()`, ex. « Hors-Gel »). Relu par `cpModeGetFromCmd()`. |
+| `etat` | info/string, historisée | **Libellé traduit** du mode effectif (`cpModeGetName()`, ex. « Hors-Gel »). Destiné à l'affichage et aux scénarios existants. |
+| `mode_code` | info/string | **Code brut** du mode (`horsgel`). Source de référence lue par `cpModeGetFromCmd()`, stable quelle que soit la langue (§13, C19). |
 | `pilotage` | info/string, historisée | `<mode>`, `auto`, `zone` ou `bypass`. |
 | `programme`, `programme_id` | info/string | Programme courant. |
 | `programme_select` | action/select | `listValue` régénérée par `cpCmdAllProgrammeSelectUpdate()`. |
@@ -352,7 +353,7 @@ au test du §12.2.
 | 1 | Supprimer une zone laisse ses radiateurs avec un `zone` orphelin (pas de `preRemove`). Le pilotage affiché reste « zone », les commandes sont ignorées (seulement une ligne DEBUG « Unexpected missing zone object ») et les ticks les excluent. Par lecture du code : après un délestage, un radiateur orphelin resterait en off indéfiniment. | **Corrigé** (lot 1, C4) |
 | 2 | `cpRefresh()` réapplique le mode via `cpPilotageChangeTo()`. En bypass, rien n'est corrigé, alors que le WARNING annonce « Force l'état attendu ». Hors bypass, la conf `pilotage` est réécrite avec le mode effectif (après repli). | **Corrigé** (lot 1, C3) |
 | 3 | La sortie de délestage traite les équipements par ordre alphabétique de nom, les zones après leurs radiateurs dans le cas testé. Un radiateur en zone avec délai ne crée pas son trigger (« in zone pilotage ») et reçoit immédiatement le mode de la zone : pas de sortie progressive. Son `pilotage` reste affiché « bypass » durablement. Les radiateurs en zone qui sortent avant leur zone reprennent d'abord le mode délesté. | **Corrigé** (lot 2 et lot 3) |
-| 4 | L'`etat` des radiateurs et zones stocke un libellé traduit, relu pour retrouver le mode. Un libellé inconnu devient `eco` sans alerte. | Lecture de code (voir aussi 16) |
+| 4 | L'`etat` des radiateurs et zones stocke un libellé traduit, relu pour retrouver le mode. Un libellé inconnu devenait `eco` sans alerte. | **Corrigé** (lot 5) |
 | 5 | `cpProgSave()` : `$p_id === 0` est toujours faux depuis l'ajax (chaîne `"0"`), donc le programme par défaut est modifiable. Un JSON invalide provoque une `Error` fatale. | **Corrigé** (lot 4) |
 | 6 | Un trigger qui se déclenche pendant une fenêtre ouverte est supprimé sans être appliqué. À la fermeture, le radiateur revient à l'ancien pilotage. Le log annonce à tort une sortie du bypass. | **Corrigé** (lot 2) |
 | 7 | `cpProgNextModeFromClockTick()` : la limite de 250 itérations est inférieure aux 336 créneaux d'une semaine en demi-heure. Au-delà de 125 h, aucun prochain changement n'est affiché. En horaire, la détection « semaine complète » ne marche qu'à la minute 00, d'où un faux « Loop detected ». | **Corrigé** (lot 4) |
@@ -360,7 +361,7 @@ au test du §12.2.
 | 9 | `cpEqGetTemperatureActuelle()` : `round('')` lève une `TypeError` en PHP 8 si le capteur n'a pas de valeur. Sans effet sur jeedom-dev (PHP 7.4). | **Corrigé** (lot 4) |
 | 10 | Changer de nature ne vide pas les `command_*` et `statut_*` des modes devenus inutiles. Ils continuent de viser l'ancien équipement lié et faussent le diagnostic de `cpRefresh()`. Recocher un de ces modes dans l'interface réactiverait ces commandes. | **Corrigé** (lot 4) |
 | 11 | `install.php` compare des versions sous forme de chaînes (`$v_version < '1.2'`). `'1.10' < '1.2'` est vrai : les anciennes migrations se relanceront à partir de la version 1.10. | **Corrigé** (lot 2) |
-| 12 | Performance : `cpCentraleGet()` recharge `eqLogic::byType()` à chaque appel, au moins quatre fois par rendu de widget. `cpCmdResetDisplay()` sauvegarde une dizaine de commandes à chaque changement de pilotage. | Lecture de code |
+| 12 | Performance. Mesures sur jeedom-dev (16 équipements) : `eqLogic::byType()` coûte 17 ms au premier appel puis 0,07 ms, `cpCentraleGet()` et `cpProgGetList()` 0,15 ms, un `cron5` complet moins d'une seconde. Le rechargement de `cpCentraleGet()` n'est donc **pas un problème en pratique** et ne justifie pas de mémoïsation. Seul `cpCmdResetDisplay()` écrivait 21 commandes à chaque changement de pilotage, y compris sans changement réel. | **Requalifié et corrigé en partie** (lot 5) |
 | 13 | Encodages hétérogènes : `install.php` et `core/config/devices/*.inc.php` sont en ISO-8859-1 avec des fins de ligne CRLF, le reste est en UTF-8. Les accents ne sont que dans les commentaires. | Constaté |
 | 14 | `core/i18n/en_US.json` était illisible (ISO-8859-1 et erreur de syntaxe). | **Corrigé** le 11/09/2026 |
 | 15 | « Dupliquer » un radiateur : `eqLogic::copy()` fait `setId('')` puis `save()`, donc `preSaveRadiateur()` le traite comme un nouvel équipement. Sont réinitialisés : nature (→ `virtuel`), pilotage, programme, triggers, consignes, délai de délestage, modes supportés et capteur de température. Le lien vers l'équipement et les commandes sont conservés : **la copie, active, pilote le même équipement physique que l'original**, et les deux se contredisent à chaque cron5. | **Corrigé** (lot 2, T7 rejoué le 12/09) |
@@ -513,3 +514,33 @@ Restent ouverts : points 4, 5, 7, 8, 9, 10, 12, 13 et 18.
 | Non-régression | `cron5` complet (8 `cpRefresh`, ticks, triggers) sans erreur ni warning. |
 
 Restent ouverts : points 4, 12 et 13.
+
+### 13.8 Lot 5 (12/09/2026) : code du mode, écritures inutiles
+
+| # | Méthode(s) | Correction | Points |
+|---|---|---|---|
+| C19 | `postInsert()`, `cpModeChangeTo()`, `cpModeGetFromCmd()`, `cpModeGetCodeFromName()`, `cpPilotageChangeToZone()`, widgets, migration `1_9_0` | Nouvelle commande info `mode_code` (masquée, non historisée) contenant le **code brut** du mode, écrite en même temps que `etat`. `cpModeGetFromCmd()` lit `mode_code` en priorité et se replie sur `etat` tant qu'il est vide. `cpModeGetCodeFromName()` retourne `''` et journalise un WARNING sur un libellé inconnu, au lieu de retomber sur `eco`. La zone et les widgets déterminent le mode par `mode_code`. La migration crée la commande et l'initialise depuis l'`etat` courant. `etat` reste inchangé : libellé traduit, historisé, compatible avec les scénarios existants. | 4 |
+| C20 | `cpCmdHide()` | N'écrit en base que si la visibilité change réellement. | 12 |
+
+### 13.9 Vérifications du lot 5
+
+| Test | Résultat |
+|---|---|
+| Migration | `mode_code` créée sur les 15 radiateurs et zones, initialisée depuis `etat`. |
+| Changement de mode | `etat` et `mode_code` cohérents sur un radiateur, sur une zone, et sur les radiateurs pilotés par la zone. |
+| Langue changée (`etat` forcé à un libellé inconnu) | `mode_code` prend le relais : le mode demandé est appliqué correctement, sans repli sur `eco`. |
+| `mode_code` vidé **et** `etat` inconnu | WARNING « Libellé de mode inconnu », au lieu d'un repli silencieux. |
+| `cpCmdHide()` | `cpCmdResetDisplay()` : 1,08 ms au premier appel, 0,02 ms ensuite quand rien ne change. |
+| Non-régression | `cron5` complet sans erreur ni warning. |
+
+Restent ouverts : point 13 (encodages), traité séparément.
+
+### 13.10 Piège d'environnement rencontré
+
+Jeedom stocke les valeurs des commandes dans des fichiers de cache (`FileCache`,
+`/tmp/jeedom/cache/cmdCacheAttr<id>`). Un script lancé en ligne de commande sous l'utilisateur
+`claude` avec un umask 022 y crée des fichiers `claude:www-data` en 644 : **Apache ne peut alors
+plus les réécrire**, et `checkAndUpdateCmd()` échoue silencieusement pour ces commandes, alors que
+la même opération fonctionne en CLI. Symptôme observé : `etat` se met à jour mais `mode_code` non,
+uniquement via l'API. Les scripts de test doivent donc être lancés avec `umask 002`
+(`sg www-data -c 'umask 002; php ...'`).
