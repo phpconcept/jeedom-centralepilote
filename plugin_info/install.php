@@ -19,7 +19,7 @@
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 
-// Fonction exécutée automatiquement après l'installation ou activation du plugin 
+// Fonction exÃ©cutÃ©e automatiquement aprÃ¨s l'installation ou activation du plugin 
 function centralepilote_install() {
 
   log::add('centralepilote', 'info', "Start installation/activation of plugin 'centralepilote' version ".CP_VERSION);
@@ -33,7 +33,7 @@ function centralepilote_install() {
   log::add('centralepilote', 'info', "Finished installation/activation of plugin 'centralepilote'");
 }
 
-// Fonction exécutée automatiquement après la mise à jour du plugin
+// Fonction exÃ©cutÃ©e automatiquement aprÃ¨s la mise Ã  jour du plugin
 function centralepilote_update() {
     
   $v_version = config::byKey('version', 'centralepilote', '');
@@ -103,7 +103,7 @@ function centralepilote_update_v_1_9_0($v_from_version='') {
 
   log::add('centralepilote', 'info', "Update devices to version 1.9.0 of plugin 'centralepilote'");
 
-  // ----- Ajout de la commande de fin de temporisation de delestage sur les radiateurs et zones
+  // ----- Ajout des commandes 'delestage_exit' et 'mode_code' sur les radiateurs et zones
   foreach (eqLogic::byType('centralepilote') as $v_eq) {
     if (!$v_eq->cpIsType(array('radiateur','zone'))) {
       continue;
@@ -111,6 +111,18 @@ function centralepilote_update_v_1_9_0($v_from_version='') {
     if (!is_object($v_eq->getCmd(null, 'delestage_exit'))) {
       centralepilotelog::log('debug', "Equipement '".$v_eq->getName()."' : Add missing cmd 'delestage_exit'");
       $v_eq->cpCmdCreate('delestage_exit', ['name'=>'Fin Temporisation Delestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'icon'=>'icon jeedom-sanslimite']);
+    }
+    if (!is_object($v_eq->getCmd(null, 'mode_code'))) {
+      centralepilotelog::log('debug', "Equipement '".$v_eq->getName()."' : Add missing cmd 'mode_code'");
+      $v_eq->cpCmdCreate('mode_code', ['name'=>'Mode', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0]);
+      // ----- Initialise le code du mode a partir du libelle traduit de 'etat'
+      $v_etat = $v_eq->cpCmdGetValue('etat');
+      if ($v_etat != '') {
+        $v_mode = centralepilote::cpModeGetCodeFromName($v_etat);
+        if ($v_mode != '') {
+          $v_eq->checkAndUpdateCmd('mode_code', $v_mode);
+        }
+      }
     }
   }
 }
@@ -384,7 +396,7 @@ function centralepilote_update_v_0_4($v_from_version='') {
       $v_flag_save = true;
     }
     
-    // ----- Ajout de la configuration trigger_list mais pas la peine de l'initialisée cela se fera tout seul
+    // ----- Ajout de la configuration trigger_list mais pas la peine de l'initialisÃ©e cela se fera tout seul
     if ($v_eq->getConfiguration('trigger_list', '') == '') {
       $v_eq->setConfiguration('trigger_list', array());
       $v_flag_save = true;
@@ -427,7 +439,7 @@ function centralepilote_update_v_0_3($v_from_version='') {
     return;
   }
   
-  // ----- Ajouter ces commandes à la centrale
+  // ----- Ajouter ces commandes Ã  la centrale
   $v_cmd = $v_centrale->getCmd(null, 'normal');
   if (!is_object($v_cmd)) {
     centralepilotelog::log('debug', "Add missing cmd 'normal' to Centrale equipement.");
@@ -548,7 +560,7 @@ function centralepilote_update_v_0_2($v_from_version='') {
 }
 
 
-// Fonction exécutée automatiquement après la suppression ou la désactivation du plugin
+// Fonction exÃ©cutÃ©e automatiquement aprÃ¨s la suppression ou la dÃ©sactivation du plugin
 function centralepilote_remove() {
 
   log::add('centralepilote', 'info', "Plugin 'centralepilote' removed");

@@ -413,11 +413,9 @@ class centralepilote extends eqLogic {
       }
       
       if ($p_mode_name != '') {
-        centralepilote::log('debug', "!! Unexpected mode name '".$p_mode_name."' here (".__FILE__.",".__LINE__.")");
+        centralepilote::log('warning', "Libellé de mode inconnu '".$p_mode_name."' (langue changée ou traduction modifiée ?) (".__FILE__.",".__LINE__.")");
       }
-
-      $v_result = 'eco';
-      return $v_result;
+      return('');
     }
     /* -------------------------------------------------------------------------*/
 
@@ -1299,6 +1297,7 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('auto', ['name'=>'Auto', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>'far fa-clock']);
           
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('mode_code', ['name'=>'Mode', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
   
         $this->cpCmdCreate('pilotage', ['name'=>'Pilotage', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
   
@@ -1337,6 +1336,7 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('horsgel', ['name'=>'HorsGel', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>1, 'order'=>$v_cmd_order++, 'icon'=>centralepilote::cpModeGetIconClass('horsgel')]);
         
         $this->cpCmdCreate('etat', ['name'=>'Etat', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>1, 'isVisible'=>1, 'order'=>$v_cmd_order++]);
+        $this->cpCmdCreate('mode_code', ['name'=>'Mode', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
         
         // ----- Creation de commandes infos, contenant les valeurs configurées pour les températures de références
         $this->cpCmdCreate('temp_ref_confort', ['name'=>'Temp_Ref_Confort', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
@@ -2063,12 +2063,13 @@ class centralepilote extends eqLogic {
         $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
       }
       
-      $v_etat = 'eco';
-      $v_etat_name = centralepilote::cpModeGetName($v_etat);
+      $v_etat = $this->cpModeGetFromCmd();
+      $v_etat_name = ($v_etat != '' ? centralepilote::cpModeGetName($v_etat) : '');
       $v_cmd = $this->getCmd(null, 'etat');
-      if (is_object($v_cmd)) {         
-        $v_etat_name = $v_cmd->execCmd();
-        $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
+      if (is_object($v_cmd)) {
+        if (($v_value = $v_cmd->execCmd()) != '') {
+          $v_etat_name = $v_value;
+        }
         $replace['#cmd_etat_id#'] = $v_cmd->getId();
       }
       $replace['#cmd_etat_value#'] = $v_etat;
@@ -2307,12 +2308,13 @@ class centralepilote extends eqLogic {
         $replace['#cmd_pilotage_value#'] = $v_pilotage_value;
       }
       
-      $v_etat = 'eco';
-      $v_etat_name = centralepilote::cpModeGetName($v_etat);
+      $v_etat = $this->cpModeGetFromCmd();
+      $v_etat_name = ($v_etat != '' ? centralepilote::cpModeGetName($v_etat) : '');
       $v_cmd = $this->getCmd(null, 'etat');
-      if (is_object($v_cmd)) {         
-        $v_etat_name = $v_cmd->execCmd();
-        $v_etat = centralepilote::cpModeGetCodeFromName($v_etat_name);
+      if (is_object($v_cmd)) {
+        if (($v_value = $v_cmd->execCmd()) != '') {
+          $v_etat_name = $v_value;
+        }
         $replace['#cmd_etat_id#'] = $v_cmd->getId();
       }
       $replace['#cmd_etat_value#'] = $v_etat;
@@ -2819,8 +2821,12 @@ class centralepilote extends eqLogic {
         // TBC Error
       }
       else {
-        $v_cmd->setIsVisible(($p_hide?0:1));
-        $v_cmd->save();
+        $v_visible = ($p_hide ? 0 : 1);
+        // ----- Evite une écriture en base quand la visibilité ne change pas
+        if ($v_cmd->getIsVisible() != $v_visible) {
+          $v_cmd->setIsVisible($v_visible);
+          $v_cmd->save();
+        }
       }
     }
     /* -------------------------------------------------------------------------*/
@@ -3174,6 +3180,7 @@ class centralepilote extends eqLogic {
           return;
         }
         $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
+        $this->checkAndUpdateCmd('mode_code', $p_mode);
         
         centralepilote::log('info',  "Equipement '".$this->getName()."' change mode to '".$p_mode."'");
       }
@@ -3192,6 +3199,7 @@ class centralepilote extends eqLogic {
          
         // ----- Update zone status
         $this->checkAndUpdateCmd('etat', centralepilote::cpModeGetName($p_mode));
+        $this->checkAndUpdateCmd('mode_code', $p_mode);
       }
       
       else if ($this->cpGetType() == 'centrale') {
@@ -3213,17 +3221,21 @@ class centralepilote extends eqLogic {
      * ---------------------------------------------------------------------------
      */
     public function cpModeGetFromCmd() {
-    
+      // ----- 'mode_code' contient le code brut du mode : c'est la source de référence.
+      $v_mode = $this->cpCmdGetValue('mode_code');
+      if (($v_mode != '') && centralepilote::cpModeExist($v_mode)) {
+        return($v_mode);
+      }
+
+      // ----- Repli sur 'etat' (libellé traduit) pour les équipements créés avant
+      //       l'apparition de 'mode_code'.
       $v_mode_name = $this->cpCmdGetValue('etat');
       // ----- At first enable of the eq the value will be empty
       if ($v_mode_name == '') {
         // ----- Etat inconnu (équipement neuf, copie) : pas de mode supposé
-        $v_mode = '';
+        return('');
       }
-      else {
-        $v_mode = centralepilote::cpModeGetCodeFromName($v_mode_name);
-      }
-      return($v_mode);
+      return(centralepilote::cpModeGetCodeFromName($v_mode_name));
     }
     /* -------------------------------------------------------------------------*/
 
@@ -3434,12 +3446,14 @@ class centralepilote extends eqLogic {
         centralepilote::log('debug', "!! Unexpected missing zone object '".$v_zone."' here (".__FILE__.",".__LINE__.")");
         return(false);
       }
-      $v_mode_name = $v_zone_object->cpCmdGetValue('etat');
-      
-      centralepilote::log('info',  "Radiateur '".$this->getName()."' change pilotage to 'zone'");      
+      centralepilote::log('info',  "Radiateur '".$this->getName()."' change pilotage to 'zone'");
 
-      // ----- Swap name to mode id (value in command is the name not the internal code)
-      $v_mode = centralepilote::cpModeGetCodeFromName($v_mode_name);
+      // ----- Mode courant de la zone (code brut, cf. cpModeGetFromCmd())
+      $v_mode = $v_zone_object->cpModeGetFromCmd();
+      if ($v_mode == '') {
+        centralepilote::log('debug', "Zone '".$v_zone_object->getName()."' : mode courant inconnu, rien à appliquer");
+        return(true);
+      }
       
       // ----- Apply the mode to the radiateur
       $this->cpModeChangeTo($v_mode, true);
