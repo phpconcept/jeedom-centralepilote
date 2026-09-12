@@ -1,27 +1,27 @@
 <?php 
 /* Jeedom "Centrale-Pilote"
  *
- * Ce fichier contient la description des models d'objets supportés comme
+ * Ce fichier contient la description des models d'objets supportÃ©s comme
  * fil-pilote nativement pas le plugin.
- * L'objectif étant de simplement avoir à les sélectionner sans être un expert 
+ * L'objectif Ã©tant de simplement avoir Ã  les sÃ©lectionner sans Ãªtre un expert 
  * de comment fonctionnent les commandes.
  * 
- * La structure des la suivante (si vous voulez ajouter des devices par vous même) :
+ * La structure des la suivante (si vous voulez ajouter des devices par vous mÃªme) :
  * - Chaque device a un nom arbitraire (le mieux c'est de mettre le nom du fabriquant et le model)
- * - Le nom du plugin qui le gère (un objet zigbee par exemple pourrait être 
- *   géré de façon differente par deux plugin différents)  
- * - Un clé de recherche 'search_by_config_value' qui contient la liste des 
- *   configurations à regarder et les valeurs qu'elles doivent avoir pour reconnaitre le device concerné. 
+ * - Le nom du plugin qui le gÃ¨re (un objet zigbee par exemple pourrait Ãªtre 
+ *   gÃ©rÃ© de faÃ§on differente par deux plugin diffÃ©rents)  
+ * - Un clÃ© de recherche 'search_by_config_value' qui contient la liste des 
+ *   configurations Ã  regarder et les valeurs qu'elles doivent avoir pour reconnaitre le device concernÃ©. 
  * - Deux champs d'information ('manufacturer' et 'model') qui permettent un affichage plus convivial eventuellement
- * - Enfin la liste des 12 commandes nécessaire au plugin filpilote pour faire les actions.
- *   Chaque commande peut être d'un "type" différent (pour essayer de couvrir un maximum de cas de figure).
+ * - Enfin la liste des 12 commandes nÃ©cessaire au plugin filpilote pour faire les actions.
+ *   Chaque commande peut Ãªtre d'un "type" diffÃ©rent (pour essayer de couvrir un maximum de cas de figure).
  *   Le type "single_cmd", veut dire que l'on n'a basoin que du nom de la commande 
- *   à lancer sur le device pour réaliser la commande.
+ *   Ã  lancer sur le device pour rÃ©aliser la commande.
  *   Le type "cmd_value", veut dire qu'il suffit de tester la valeur d'une seule 
- *   commande pour avoir le résultat. On y precise donc le nom de la commande et 
- *   la valeur de résultat attendu. C'est surtout utilisé pour savoir si un certain état est actif.
+ *   commande pour avoir le rÃ©sultat. On y precise donc le nom de la commande et 
+ *   la valeur de rÃ©sultat attendu. C'est surtout utilisÃ© pour savoir si un certain Ã©tat est actif.
  *   Le type "double_cmd", va lancer les deux commandes (avec un &&)
- *   Le type "expression" est le plus générique. il va lancer l'expression demandée. Il est possible d'indique __HUMAN_NAME__ qui sera remplacé par la bonne valeur au moment de l'execustion.
+ *   Le type "expression" est le plus gÃ©nÃ©rique. il va lancer l'expression demandÃ©e. Il est possible d'indique __HUMAN_NAME__ qui sera remplacÃ© par la bonne valeur au moment de l'execustion.
  *   
  * Exemple :
  * 
@@ -58,7 +58,7 @@
  *    
  *         /!\ Attention /!\
  *         Si vous modifiez ce fichier,
- *         Il est vivement conseillé de vérifier la validité du format JSON de cette valeur
+ *         Il est vivement conseillÃ© de vÃ©rifier la validitÃ© du format JSON de cette valeur
  *         par exemple en utilisant des outils de validation en ligne (en ajoutant {} autour si besoin)
  */
 

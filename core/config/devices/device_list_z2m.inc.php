@@ -1,31 +1,31 @@
 <?php 
 /* Jeedom "Centrale-Pilote"
  *
- * Ce fichier contient la description des models d'objets supportés comme
+ * Ce fichier contient la description des models d'objets supportÃ©s comme
  * fil-pilote nativement pas le plugin.
- * L'objectif étant de simplement avoir à les sélectionner sans être un expert 
+ * L'objectif Ã©tant de simplement avoir Ã  les sÃ©lectionner sans Ãªtre un expert 
  * de comment fonctionnent les commandes.
  * 
- * La structure des la suivante (si vous voulez ajouter des devices par vous même) :
+ * La structure des la suivante (si vous voulez ajouter des devices par vous mÃªme) :
  * - Chaque device a un nom arbitraire (le mieux c'est de mettre le nom du fabriquant et le model)
- * - Un clé de recherche 'search_by_config_value' qui contient la liste des 
- *   configurations à regarder et les valeurs qu'elles doivent avoir pour reconnaitre le device concerné.
- * - Une alternative de clé de recherche est 'search_by_command_name', qui permet de 
+ * - Un clÃ© de recherche 'search_by_config_value' qui contient la liste des 
+ *   configurations Ã  regarder et les valeurs qu'elles doivent avoir pour reconnaitre le device concernÃ©.
+ * - Une alternative de clÃ© de recherche est 'search_by_command_name', qui permet de 
  *   trouver un objet s'il a toutes les commandes listees
  * - Trois champs d'information ('name', 'manufacturer' et 'model').
- * - Enfin la liste des (jusqu'à) 12 commandes nécessaire au plugin filpilote pour faire les actions.
- *   Chaque commande peut être d'un "type" différent (pour essayer de couvrir un maximum de cas de figure).
- *   Explication des types supportés (pour les 'commandes') :
- *   "single_cmd" : Simplement le nom de la commande à appeler dans 'cmd'.
- *   "double_cmd" : Simplement le nom des 2 commandes à appeler en les combinants avec un &&.
- *   "expression" : Une expression à executer. Le mot clé '__HUMAN_NAME__' sera 
- *   automatiquement remplacé par le vrai nom de l'équipement concerné au moment de l'execution.
- *   Explication des types supportés (pour les 'status') :
- *   'cmd_value' : On récupère la valeur de la commande 'cmd' et on compare la valeur à 'value'.
- *   'double_cmd_value_and' : On récupère les valeurs des deux commandes et on les comparent avec leurs valeurs avec un && pour les combiner.
- *   'double_cmd_value_or' : On récupère les valeurs des deux commandes et on les comparent avec leurs valeurs avec un || pour les combiner.
- *   "expression" : Une expression à executer. Le mot clé '__HUMAN_NAME__' sera 
- *   automatiquement remplacé par le vrai nom de l'équipement concerné au moment de l'execution. Le résultat doit être un booléen.
+ * - Enfin la liste des (jusqu'Ã ) 12 commandes nÃ©cessaire au plugin filpilote pour faire les actions.
+ *   Chaque commande peut Ãªtre d'un "type" diffÃ©rent (pour essayer de couvrir un maximum de cas de figure).
+ *   Explication des types supportÃ©s (pour les 'commandes') :
+ *   "single_cmd" : Simplement le nom de la commande Ã  appeler dans 'cmd'.
+ *   "double_cmd" : Simplement le nom des 2 commandes Ã  appeler en les combinants avec un &&.
+ *   "expression" : Une expression Ã  executer. Le mot clÃ© '__HUMAN_NAME__' sera 
+ *   automatiquement remplacÃ© par le vrai nom de l'Ã©quipement concernÃ© au moment de l'execution.
+ *   Explication des types supportÃ©s (pour les 'status') :
+ *   'cmd_value' : On rÃ©cupÃ¨re la valeur de la commande 'cmd' et on compare la valeur Ã  'value'.
+ *   'double_cmd_value_and' : On rÃ©cupÃ¨re les valeurs des deux commandes et on les comparent avec leurs valeurs avec un && pour les combiner.
+ *   'double_cmd_value_or' : On rÃ©cupÃ¨re les valeurs des deux commandes et on les comparent avec leurs valeurs avec un || pour les combiner.
+ *   "expression" : Une expression Ã  executer. Le mot clÃ© '__HUMAN_NAME__' sera 
+ *   automatiquement remplacÃ© par le vrai nom de l'Ã©quipement concernÃ© au moment de l'execution. Le rÃ©sultat doit Ãªtre un boolÃ©en.
  *   
  * Exemple :
  * 
@@ -70,7 +70,7 @@
  *    
  *         /!\ Attention /!\
  *         Si vous modifiez ce fichier,
- *         Il est vivement conseillé de vérifier la validité du format JSON de cette valeur
+ *         Il est vivement conseillÃ© de vÃ©rifier la validitÃ© du format JSON de cette valeur
  *         par exemple en utilisant des outils de validation en ligne (en ajoutant {} autour si besoin)
  */
  
