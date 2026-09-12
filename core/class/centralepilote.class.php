@@ -1213,6 +1213,11 @@ class centralepilote extends eqLogic {
       $v_jour = $v_jour_nom[$v_jour];
       
       centralepilote::log('debug', 'Clock tick : '.$v_jour.', '.$v_heure.'h, '.$v_minute.'m');
+
+      // ----- Fin des sorties progressives du délestage (tous les radiateurs, en zone ou non)
+      foreach (centralepilote::cpRadList(['_isEnable'=>true]) as $v_radiateur) {
+        $v_radiateur->cpEqBypassExitTick($v_now);
+      }
       
       // ----- Parcourir toutes les zones et fixer le mode
       $v_list = centralepilote::cpZoneList(['_isEnable'=>true]);
@@ -1376,6 +1381,26 @@ class centralepilote extends eqLogic {
       // The trick is that before the first save the eq is not in the DB so it has not yet a deviceId
       // In my plugin I need to remember I first save the device in javscript with the sub-type 'radiateur', 'centrale' or 'zone'
       if ($this->getId() == '') {
+        // ----- Copie d'un radiateur (eqLogic::copy() : id vide mais configuration déjà remplie).
+        //       La copie est désactivée et ses liens physiques effacés, pour qu'elle ne pilote pas
+        //       l'équipement de l'original. Le reste de la configuration est conservé.
+        if ($this->getConfiguration('nature_fil_pilote', '') != '') {
+          centralepilote::log('warning', "Copie du radiateur '".$this->getName()."' : copie désactivée, équipement physique à choisir avant de l'activer");
+          foreach (array('lien_commutateur', 'lien_commutateur_a', 'lien_commutateur_b', 'fp_device_id', 'temperature', 'delestage_sortie_time') as $v_key) {
+            $this->setConfiguration($v_key, '');
+          }
+          foreach (array('confort','confort_1','confort_2','eco','horsgel','off') as $v_mode) {
+            $this->setConfiguration('command_'.$v_mode, '');
+            $this->setConfiguration('statut_'.$v_mode, '');
+          }
+          $this->setConfiguration('trigger_list', array());
+          $this->setConfiguration('bypass_type', 'no');
+          $this->setConfiguration('bypass_mode', 'no');
+          $this->setIsEnable(0);
+          $this->_pre_save_cache = null;
+          return;
+        }
+
         centralepilotelog::log('debug', "preSaveRadiateur() : new radiateur, init properties");
         
         // ----- Set default values
@@ -2866,6 +2891,13 @@ class centralepilote extends eqLogic {
       // Need to take the command value to take all the situations : zone, bypass, alternative, ...
        $v_mode = $this->cpModeGetFromCmd();
 
+      // ----- Etat inconnu (équipement neuf, copie) : applique le pilotage attendu
+      if ($v_mode == '') {
+        centralepilote::log('info', "Equipement '".$this->getName()."' : état inconnu, application du pilotage");
+        $this->cpPilotageChangeTo($this->cpPilotageGetAdminValue(), true);
+        return;
+      }
+
       // ----- Quick check the expected status
       if (jeedom::evaluateExpression($this->getConfiguration('statut_'.$v_mode, '')) == 1) {
         // ----- Everything is ok
@@ -3113,6 +3145,11 @@ class centralepilote extends eqLogic {
         // ----- Get all radiateurs in zone and chage mode
         $v_list = centralepilote::cpRadList(['_isEnable'=>true, 'zone'=>$this->getId()]);
         foreach ($v_list as $v_rad) {
+          // ----- Le bypass du radiateur (délestage, sortie progressive, fenêtre) est prioritaire sur la zone
+          if ($v_rad->cpGetConf('bypass_type') != 'no') {
+            centralepilote::log('debug', "Zone '".$this->getName()."' : radiateur '".$v_rad->getName()."' en bypass, mode de zone non appliqué");
+            continue;
+          }
           $v_rad->cpModeChangeTo($p_mode);
         }
          
@@ -3143,7 +3180,8 @@ class centralepilote extends eqLogic {
       $v_mode_name = $this->cpCmdGetValue('etat');
       // ----- At first enable of the eq the value will be empty
       if ($v_mode_name == '') {
-        $v_mode = 'eco';
+        // ----- Etat inconnu (équipement neuf, copie) : pas de mode supposé
+        $v_mode = '';
       }
       else {
         $v_mode = centralepilote::cpModeGetCodeFromName($v_mode_name);
@@ -3203,7 +3241,7 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpPilotageChangeTo($p_pilotage, $p_force=false) {
+    public function cpPilotageChangeTo($p_pilotage, $p_force=false, $p_manual=false) {
     
       // ----- Only for 'radiateur' or 'zone'
       if (!$this->cpIsType(array('radiateur','zone'))) {
@@ -3229,14 +3267,34 @@ class centralepilote extends eqLogic {
         return;
       }
       
-      // ----- Look if device is in bypass mode
-      if (($v_bypass_type = $this->cpGetConf('bypass_type')) == 'delestage') {
-        centralepilote::log('info',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_type."', exit from bypass mode before changing pilotage mode to '".$p_pilotage."'.");
+      // ----- Bypass actif (délestage, sortie progressive, fenêtre ouverte)
+      $v_bypass_type = $this->cpGetConf('bypass_type');
+      if (($v_bypass_type == 'delestage') || ($v_bypass_type == 'open_window')) {
+        // ----- Demande manuelle pendant la sortie progressive du délestage :
+        //       appliquée tout de suite, la sortie progressive de l'équipement est abandonnée
+        if ($p_manual && ($v_bypass_type == 'delestage') && ($this->cpGetConf('delestage_sortie_time') != '')) {
+          centralepilote::log('info', "Equipement '".$this->getName()."' : demande manuelle '".$p_pilotage."' pendant la sortie progressive du délestage, appliquée immédiatement");
+          $this->setConfiguration('pilotage', $p_pilotage);
+          $this->cpPilotageExitFromBypass(true);
+          return;
+        }
+        // ----- Sinon : pilotage mémorisé, appliqué à la sortie du bypass
+        if ($this->cpGetConf('pilotage') != $p_pilotage) {
+          $this->setConfiguration('pilotage', $p_pilotage);
+          $this->save();
+        }
+        centralepilote::log('info', "Equipement '".$this->getName()."' en bypass '".$v_bypass_type."' : pilotage '".$p_pilotage."' mémorisé, appliqué à la sortie du bypass");
         return;
       }
-      if (($v_bypass_type = $this->cpGetConf('bypass_type')) == 'open_window') {
-        centralepilote::log('info',  "Equipement '".$this->getName()."' is in bypass mode '".$v_bypass_type."', exit from bypass mode before changing pilotage mode to '".$p_pilotage."'.");
-        return;
+
+      // ----- Zone : une demande manuelle arrête la sortie progressive de ses radiateurs
+      if ($p_manual && $this->cpIsType('zone')) {
+        foreach (centralepilote::cpRadList(array('_isEnable'=>true, 'zone'=>$this->getId())) as $v_rad) {
+          if ($v_rad->cpGetConf('delestage_sortie_time') != '') {
+            centralepilote::log('info', "Demande manuelle sur la zone '".$this->getName()."' : fin immédiate de la sortie progressive du radiateur '".$v_rad->getName()."'");
+            $v_rad->cpPilotageExitFromBypass(true);
+          }
+        }
       }
       
       // ----- Get current real pilotage mode
@@ -3446,7 +3504,7 @@ class centralepilote extends eqLogic {
       
       // ----- Look for 'open_window' bypass mode
       else if ($p_bypass_type == 'open_window') {
-        if ($v_current_bypass == 'delestage') {
+        if (($v_current_bypass == 'delestage') && ($this->cpGetConf('delestage_sortie_time') == '')) {
           centralepilote::log('info',  "Equipement '".$this->getName()."' en mode 'delestage', fonction fenêtre ouverte indisponible.");
           return;
         }
@@ -3494,9 +3552,10 @@ class centralepilote extends eqLogic {
       // ----- Change display of pilotage mode
       $this->checkAndUpdateCmd('pilotage', 'bypass');
       
-      // ----- Store bypass mode
+      // ----- Store bypass mode (une éventuelle sortie progressive en attente est annulée)
       $this->setConfiguration('bypass_type', $p_bypass_type);
       $this->setConfiguration('bypass_mode', $p_bypass_mode);
+      $this->setConfiguration('delestage_sortie_time', '');
       
       // ----- Change commands visibility
       $this->cpCmdResetDisplay();
@@ -3520,56 +3579,61 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
-    public function cpPilotageExitFromBypass() {
-      centralepilote::log('info',  "Radiateur or Zone '".$this->getName()."' exit from 'bypass' mode.");      
-      
+    public function cpPilotageExitFromBypass($p_immediate=false) {
       $v_current_bypass_type = $this->cpGetConf('bypass_type');
-      $v_current_bypass_mode = $this->cpGetConf('bypass_mode');
-      
+
+      // ----- Déjà hors bypass : rien à faire
+      if ($v_current_bypass_type == 'no') {
+        return;
+      }
+
+      // ----- Sortie progressive du délestage (radiateur, zone ou non) : l'équipement reste en
+      //       bypass jusqu'à l'échéance, traitée par cpEqBypassExitTick()
+      if (($v_current_bypass_type == 'delestage') && (!$p_immediate) && $this->cpIsType('radiateur')) {
+        $v_delai = intval($this->cpGetConf('delestage_sortie_delai'));
+        if ($v_delai > 0) {
+          $v_time = date('Y-m-d-H-i', time() + $v_delai*60);
+          $this->setConfiguration('delestage_sortie_time', $v_time);
+          $this->save();
+          centralepilote::log('info', "Equipement '".$this->getName()."' : sortie progressive du délestage prévue à ".$v_time);
+          return;
+        }
+      }
+
+      centralepilote::log('info',  "Radiateur or Zone '".$this->getName()."' exit from 'bypass' mode.");
+
       // ----- Reset bypass mode to no bypass
       $this->setConfiguration('bypass_type', 'no');
       $this->setConfiguration('bypass_mode', 'no');
+      $this->setConfiguration('delestage_sortie_time', '');
       $this->save();
-      
-      // ----- Get last stored admin pilotage mode
-      $v_pilotage = $this->cpPilotageGetAdminValue();
-      
-      if ($v_current_bypass_type == 'delestage') {
-        // ----- Look for progressive out of delestage         
-        $v_delestage_sortie_delai = $this->cpGetConf('delestage_sortie_delai');
-        if ($v_delestage_sortie_delai > 0) {
-        
-          // ----- On fixe un trigger dans le délais imparti avec le mode de pilotage cible.
-          $v_trigger_time = time()+$v_delestage_sortie_delai*60;
-          $this->cpPilotageSetTriggerTime($v_pilotage, $v_trigger_time);
-          
-          // ----- On reste sur le mode du bypass
-          $v_pilotage = $v_current_bypass_mode;
-        }
-        
-        // ----- Pas de delai donc on passe au pilotage d'avant
-        else {
-          // rien à faire on a déjà la valeur dans $v_pilotage
-        }
-        
-        
-      }
-      
-      else if ($v_current_bypass_type == 'open_window') {
+
+      if ($v_current_bypass_type == 'open_window') {
         $this->checkAndUpdateCmd('window_status', 'close');
       }
-      
-      else if ($v_current_bypass_type == 'no') {
-        // TBC : on est déjà hors bypass, donc normalement rien à faire, on sort ...
-        return;
-      }
-      
-      else {
+      else if ($v_current_bypass_type != 'delestage') {
         centralepilote::log('debug',  "Error : unknown bypass_type '".$v_current_bypass_type."' here (".__FILE__.",".__LINE__.") ");
-        $v_pilotage = 'eco';
       }
-      
-      $this->cpPilotageChangeTo($v_pilotage);
+
+      // ----- Retour au pilotage admin mémorisé (ou au pilotage par zone)
+      $this->cpPilotageChangeTo($this->cpPilotageGetAdminValue());
+    }
+
+    /**---------------------------------------------------------------------------
+     * Method : cpEqBypassExitTick()
+     * Description :
+     *   Termine la sortie progressive du délestage quand son échéance est atteinte.
+     * Parameters :
+     *   $p_now : date courante au format 'Y-m-d-H-i'
+     * Returned value : none
+     * ---------------------------------------------------------------------------
+     */
+    public function cpEqBypassExitTick($p_now) {
+      $v_time = $this->cpGetConf('delestage_sortie_time');
+      if (($v_time != '') && ($p_now >= $v_time)) {
+        centralepilote::log('info', "Equipement '".$this->getName()."' : fin de la sortie progressive du délestage");
+        $this->cpPilotageExitFromBypass(true);
+      }
     }
     /* -------------------------------------------------------------------------*/
 
@@ -4750,7 +4814,7 @@ class centralepiloteCmd extends cmd {
 		}
         
 		if ($v_logical_id == 'auto') {        
-          $eqLogic->cpPilotageChangeTo($v_logical_id);
+          $eqLogic->cpPilotageChangeTo($v_logical_id, false, true);
 		  return;
 		}
 
@@ -4772,7 +4836,7 @@ class centralepiloteCmd extends cmd {
         // ----- Look for all other commands that should be a mode
         if (centralepilote::cpModeExist($v_logical_id)) {
           //$eqLogic->cpModeChangeTo($v_logical_id);
-          $eqLogic->cpPilotageChangeTo($v_logical_id);
+          $eqLogic->cpPilotageChangeTo($v_logical_id, false, true);
           return;
         }
         
@@ -4831,10 +4895,13 @@ class centralepiloteCmd extends cmd {
       }
       
       // ----- Update all equip
+      // ----- Zones d'abord, puis radiateurs : l'ordre ne dépend plus des noms
       $eqLogics = eqLogic::byType('centralepilote');
-      foreach ($eqLogics as $v_eq) {
-        if ($v_eq->cpIsType(array('radiateur','zone'))) {
-          $v_eq->cpPilotageChangeToBypass($v_bypass_type, $v_bypass_mode);
+      foreach (array('zone', 'radiateur') as $v_type) {
+        foreach ($eqLogics as $v_eq) {
+          if ($v_eq->cpIsType($v_type)) {
+            $v_eq->cpPilotageChangeToBypass($v_bypass_type, $v_bypass_mode);
+          }
         }
       }      
       

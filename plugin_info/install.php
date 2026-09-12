@@ -83,11 +83,11 @@ function centralepilote_update() {
   if ($v_version < '1.1') centralepilote_update_v_1.1($v_version);
   */
 
-  if ($v_version < '1.2') centralepilote_update_v_1_2($v_version);
-  if ($v_version < '1.3') centralepilote_update_v_1_3($v_version);
-  if ($v_version < '1.4') centralepilote_update_v_1_4($v_version);
-  if ($v_version < '1.5') centralepilote_update_v_1_5($v_version);
-  if ($v_version < '1.6') centralepilote_update_v_1_6($v_version);
+  if (version_compare($v_version, '1.2', '<')) centralepilote_update_v_1_2($v_version);
+  if (version_compare($v_version, '1.3', '<')) centralepilote_update_v_1_3($v_version);
+  if (version_compare($v_version, '1.4', '<')) centralepilote_update_v_1_4($v_version);
+  if (version_compare($v_version, '1.5', '<')) centralepilote_update_v_1_5($v_version);
+  if (version_compare($v_version, '1.6', '<')) centralepilote_update_v_1_6($v_version);
   
   if (version_compare($v_version, '1.8.5', '<')) centralepilote_update_v_1_8_5($v_version);
     
