@@ -4,7 +4,7 @@
 > version 1.8.9 (commit `723afe9`), septembre 2026.
 > La documentation utilisateur reste le [README](../README.md).
 > Les points d'attention (§11) ont été vérifiés sur le banc de test de jeedom-dev (§12).
-> Les lots de corrections 1 à 5 (§13) sont appliqués sur jeedom-dev.
+> Les lots de corrections 1 à 6 (§13) sont appliqués sur jeedom-dev.
 
 ## 1. Objet
 
@@ -91,7 +91,7 @@ y photographie l'état en base (nom, isEnable, zone, nature, modes supportés) p
 | `programme`, `programme_id` | info/string | Programme courant. |
 | `programme_select` | action/select | `listValue` régénérée par `cpCmdAllProgrammeSelectUpdate()`. |
 | `trigger` | action/other | Options `trigger_type` = `trigger_time` (+ `mode`, `trigger_time` en timestamp Unix) ou `trigger_delete` (+ `id`). |
-| `window_open`, `window_close`, `window_swap` | action/other | Bypass fenêtre ouverte. |
+| `window_open`, `window_close`, `window_swap` | action/other | Bypass fenêtre ouverte. `window_close` ne lève que ce bypass, jamais un délestage (§13, C21). |
 | `window_status` | info/string | `open` / `close`. |
 | `delestage_exit` | action/other | Met fin à la temporisation de sortie de délestage. Visible uniquement pendant celle-ci. Sur une zone, libère aussi ses radiateurs. |
 | `refresh` | action/other | Appelle `cpRefresh()`. |
@@ -151,7 +151,7 @@ prioritaire :
 | Priorité | Couche | Source | Effet sur `pilotage` (info) |
 |---|---|---|---|
 | 1 | Bypass délestage | Commande de la centrale, appliquée à tous les radiateurs et zones | `bypass` |
-| 2 | Bypass fenêtre ouverte | `window_*` (refusé pendant un délestage, accepté pendant la temporisation de sortie) | `bypass` |
+| 2 | Bypass fenêtre ouverte | `window_*` (refusé pendant un délestage, accepté pendant la temporisation de sortie ; `window_close` ne lève jamais un délestage) | `bypass` |
 | 3 | Zone | `configuration.zone` non vide | `zone` |
 | 4 | Auto | `pilotage = auto` et programme hebdomadaire | `auto` |
 | 5 | Manuel | `pilotage = <mode>` | `<mode>` |
@@ -193,8 +193,10 @@ Le rôle de chaque méthode :
 - `cpModeChangeTo($mode, $force)` applique un mode physique. Elle ne connaît ni les bypass ni le
   pilotage. Sur une zone, elle propage le mode à ses radiateurs activés. Sans `$force`, elle ne fait
   rien si `etat` indique déjà ce mode.
-- `cpPilotageChangeToBypass($type, $mode)` et `cpPilotageExitFromBypass($immediate)` entrent dans les
-  bypass et en sortent. En sortie, c'est le `pilotage` admin mémorisé qui est restauré. Sans
+- `cpPilotageChangeToBypass($type, $mode, $force_exit)` et `cpPilotageExitFromBypass($immediate)`
+  entrent dans les bypass et en sortent. Un `$type` à `no` ne lève le bypass que s'il s'agit d'une
+  fenêtre ouverte, sauf si `$force_exit` est vrai — ce que font les seules sorties légitimes :
+  centrale remise à `normal`, et réactivation d'un équipement. En sortie, c'est le `pilotage` admin mémorisé qui est restauré. Sans
   `$immediate`, la sortie d'un délestage peut être différée (§5.3).
 - `cpEqBypassExitTick($now)` termine la temporisation quand son échéance est atteinte.
 
@@ -544,3 +546,38 @@ plus les réécrire**, et `checkAndUpdateCmd()` échoue silencieusement pour ces
 la même opération fonctionne en CLI. Symptôme observé : `etat` se met à jour mais `mode_code` non,
 uniquement via l'API. Les scripts de test doivent donc être lancés avec `umask 002`
 (`sg www-data -c 'umask 002; php ...'`).
+
+### 13.11 Lot 6 (12/09/2026) : priorité du délestage, robustesse, nettoyage
+
+Issu d'une relecture complète du plugin après les lots 1 à 5.
+
+| # | Méthode(s) | Correction | Gravité |
+|---|---|---|---|
+| C21 | `cpPilotageChangeToBypass()`, `execute_centrale()`, `cpRadChangeToEnable()`, `cpZoneChangeToEnable()` | `window_close` (et tout appel avec le type `no`) ne lève plus un délestage : le radiateur restait sinon en chauffe alors que le délestage central était actif. Nouveau paramètre `$p_force_exit` pour les sorties légitimes. | 🔴 |
+| C22 | `preRemove()`, deux appels à `cpCentraleGet()` | La suppression de la centrale est refusée (elle porte la liste des programmes). Les deux appels non gardés ne provoquent plus d'erreur fatale si la centrale manque. | 🟠 |
+| C23 | `cpEqClockTriggerTick()`, widgets | Chaque trigger est validé (tableau, `mode` présent, `type` égal à `trigger_time`) ; une entrée invalide est retirée avec un WARNING. Le `type` est désormais réellement vérifié, et l'`explode` des widgets est gardé. | 🟡 |
+| C24 | `cpCmdHide()` (6 appels) | `$v_value != 1` au lieu de `== 0` : avec un `support_*` absent, l'affichage ne dépend plus de la version de PHP (`'' == 0` diffère entre 7 et 8). | 🟡 |
+
+Nettoyage du même lot : suppression de `cron15()` vide (Jeedom planifiait une tâche inutile toutes
+les 15 minutes), de 9 blocs de code désactivés par commentaire, de 27 lignes de code mortes en `//`,
+et des branches obsolètes de `execute()` (raccourci de développement `tick`, commandes `manuel` et
+`prog_select`). La classe passe de 4990 à 4936 lignes.
+
+**Piège de relecture** : la garde « radiateur dans une zone » de `cpPilotageChangeToBypass()` était
+commentée, et une extraction qui filtre les lignes de commentaire la faisait passer pour du code
+actif. Un radiateur dans une zone prend bien son propre bypass ; c'est maintenant écrit en clair à
+cet endroit. Ne jamais auditer le flot de contrôle avec un filtre qui masque les délimiteurs
+`/* */`.
+
+### 13.12 Vérifications du lot 6
+
+| Test | Résultat |
+|---|---|
+| `window_close` pendant un délestage | Refusé, le radiateur reste délesté, `window_status` remis à `close`. |
+| Retour de la centrale à `normal` | Sortie effective de tous les équipements (régression détectée en cours de test puis corrigée : `execute_centrale` passe par le type `no`, d'où le paramètre `$p_force_exit`). |
+| `window_open` puis `window_close` hors délestage | Fonctionnent normalement. |
+| `window_swap` | Bascule correctement dans les deux sens. |
+| Suppression de la centrale | Refusée avec message ; les 3 programmes sont intacts. |
+| Triggers | Pose, tick non échu (conservé), tick échu (appliqué puis retiré). Entrées invalides ou de type inconnu retirées avec WARNING (6 cas testés isolément). |
+| `cron15` et branches obsolètes | Absentes. |
+| Non-régression | `cron5` complet sans erreur ni warning. |
