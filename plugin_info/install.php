@@ -90,11 +90,29 @@ function centralepilote_update() {
   if (version_compare($v_version, '1.6', '<')) centralepilote_update_v_1_6($v_version);
   
   if (version_compare($v_version, '1.8.5', '<')) centralepilote_update_v_1_8_5($v_version);
+
+  if (version_compare($v_version, '1.9.0', '<')) centralepilote_update_v_1_9_0($v_version);
     
   // ----- Save current version
   config::save('version', CP_VERSION, 'centralepilote');
 
   log::add('centralepilote', 'info', "Finished update of plugin 'centralepilote' to ".CP_VERSION);  
+}
+
+function centralepilote_update_v_1_9_0($v_from_version='') {
+
+  log::add('centralepilote', 'info', "Update devices to version 1.9.0 of plugin 'centralepilote'");
+
+  // ----- Ajout de la commande de fin de temporisation de delestage sur les radiateurs et zones
+  foreach (eqLogic::byType('centralepilote') as $v_eq) {
+    if (!$v_eq->cpIsType(array('radiateur','zone'))) {
+      continue;
+    }
+    if (!is_object($v_eq->getCmd(null, 'delestage_exit'))) {
+      centralepilotelog::log('debug', "Equipement '".$v_eq->getName()."' : Add missing cmd 'delestage_exit'");
+      $v_eq->cpCmdCreate('delestage_exit', ['name'=>'Fin Temporisation Delestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'icon'=>'icon jeedom-sanslimite']);
+    }
+  }
 }
 
 function centralepilote_update_v_1_8_5($v_from_version='') {

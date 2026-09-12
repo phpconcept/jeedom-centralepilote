@@ -1214,8 +1214,11 @@ class centralepilote extends eqLogic {
       
       centralepilote::log('debug', 'Clock tick : '.$v_jour.', '.$v_heure.'h, '.$v_minute.'m');
 
-      // ----- Fin des sorties progressives du délestage (tous les radiateurs, en zone ou non)
-      foreach (centralepilote::cpRadList(['_isEnable'=>true]) as $v_radiateur) {
+      // ----- Fin des temporisations de sortie de délestage : zones d'abord, puis radiateurs hors zone
+      foreach (centralepilote::cpZoneList(['_isEnable'=>true]) as $v_zone) {
+        $v_zone->cpEqBypassExitTick($v_now);
+      }
+      foreach (centralepilote::cpRadList(['_isEnable'=>true, 'zone'=>'']) as $v_radiateur) {
         $v_radiateur->cpEqBypassExitTick($v_now);
       }
       
@@ -1312,6 +1315,8 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('window_swap', ['name'=>'Window Swap', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-fenetre-ouverte']);
         
         $this->cpCmdCreate('window_status', ['name'=>'Window Status', 'type'=>'info', 'subtype'=>'string', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
+
+        $this->cpCmdCreate('delestage_exit', ['name'=>'Fin Temporisation Delestage', 'type'=>'action', 'subtype'=>'other', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++, 'icon'=>'icon jeedom-sanslimite']);
         
         // ----- Update value list for the command 'programme_select' which is of subtype 'select'
         $this->cpCmdProgrammeSelectUpdate(centralepilote::cpProgValueList());
@@ -2226,6 +2231,20 @@ class centralepilote extends eqLogic {
       else {
         $replace['#title_delestage_centralise#'] = __("Pilotage Centralisé", __FILE__);
       }
+
+      // ----- Temporisation de fin de délestage : libellé et commande d'arrêt
+      $replace['#delestage_sortie_time#'] = '';
+      $replace['#cmd_delestage_exit_id#'] = '';
+      if (($v_sortie_time = $this->cpGetConf('delestage_sortie_time')) != '') {
+        $v_parts = explode('-', $v_sortie_time);
+        if (count($v_parts) == 5) {
+          $replace['#delestage_sortie_time#'] = $v_parts[3].':'.$v_parts[4];
+        }
+        $replace['#title_delestage_centralise#'] = __("Fin de délestage à", __FILE__).' '.$replace['#delestage_sortie_time#'];
+        if (is_object($v_cmd = $this->getCmd(null, 'delestage_exit'))) {
+          $replace['#cmd_delestage_exit_id#'] = $v_cmd->getId();
+        }
+      }
       $replace['#title_Retour#'] = __("Retour", __FILE__);
       $replace['#title_Annuler#'] = __("Annuler", __FILE__);
       $replace['#title_Valider#'] = __("Valider", __FILE__);
@@ -2247,6 +2266,7 @@ class centralepilote extends eqLogic {
         $replace['#height#'] = '160px';       
       }
       $replace['#icon_button_trigger#'] = 'icon divers-circular114';       
+      $replace['#title_delestage_exit#'] = __("Forcer la sortie du délestage", __FILE__);
       $replace['#icon_button_window#'] = 'icon jeedom-fenetre-ouverte';       
       $replace['#icon_button_prog#'] = 'icon divers-calendar2';    
       $replace['#icon_button_trash#'] = 'far fa-trash-alt';    
@@ -2396,6 +2416,20 @@ class centralepilote extends eqLogic {
       else {
         $replace['#title_delestage_centralise#'] = __("Pilotage Centralisé", __FILE__);
       }
+
+      // ----- Temporisation de fin de délestage : libellé et commande d'arrêt
+      $replace['#delestage_sortie_time#'] = '';
+      $replace['#cmd_delestage_exit_id#'] = '';
+      if (($v_sortie_time = $this->cpGetConf('delestage_sortie_time')) != '') {
+        $v_parts = explode('-', $v_sortie_time);
+        if (count($v_parts) == 5) {
+          $replace['#delestage_sortie_time#'] = $v_parts[3].':'.$v_parts[4];
+        }
+        $replace['#title_delestage_centralise#'] = __("Fin de délestage à", __FILE__).' '.$replace['#delestage_sortie_time#'];
+        if (is_object($v_cmd = $this->getCmd(null, 'delestage_exit'))) {
+          $replace['#cmd_delestage_exit_id#'] = $v_cmd->getId();
+        }
+      }
       $replace['#title_Retour#'] = __("Retour", __FILE__);
       $replace['#title_Annuler#'] = __("Annuler", __FILE__);
       $replace['#title_Valider#'] = __("Valider", __FILE__);
@@ -2412,6 +2446,7 @@ class centralepilote extends eqLogic {
       $replace['#width#'] = '320px';
       $replace['#height#'] = '160px';       
       $replace['#icon_button_trigger#'] = 'icon divers-circular114';       
+      $replace['#title_delestage_exit#'] = __("Forcer la sortie du délestage", __FILE__);
       $replace['#icon_button_window#'] = 'icon jeedom-fenetre-ouverte';       
       $replace['#icon_button_prog#'] = 'icon divers-calendar2';    
       $replace['#icon_button_trash#'] = 'far fa-trash-alt';    
@@ -2657,8 +2692,12 @@ class centralepilote extends eqLogic {
         $this->cpCmdHide('auto', true);
         $this->cpCmdHide('programme_select', true);
         $this->cpCmdHide('programme', true);
+
+        // ----- La commande de fin de temporisation n'est visible que pendant la temporisation
+        $this->cpCmdHide('delestage_exit', ($this->cpGetConf('delestage_sortie_time') == ''));
         return;
       }
+      $this->cpCmdHide('delestage_exit', true);
 
       // ----- Look for radiateur
       if ($this->cpIsType('radiateur')) {
@@ -3589,13 +3628,17 @@ class centralepilote extends eqLogic {
 
       // ----- Sortie progressive du délestage (radiateur, zone ou non) : l'équipement reste en
       //       bypass jusqu'à l'échéance, traitée par cpEqBypassExitTick()
-      if (($v_current_bypass_type == 'delestage') && (!$p_immediate) && $this->cpIsType('radiateur')) {
+      //       Un radiateur dans une zone n'a pas de temporisation propre : c'est sa zone qui la porte.
+      if (($v_current_bypass_type == 'delestage') && (!$p_immediate) && (!$this->cpPilotageIsZone())) {
         $v_delai = intval($this->cpGetConf('delestage_sortie_delai'));
         if ($v_delai > 0) {
           $v_time = date('Y-m-d-H-i', time() + $v_delai*60);
           $this->setConfiguration('delestage_sortie_time', $v_time);
           $this->save();
           centralepilote::log('info', "Equipement '".$this->getName()."' : sortie progressive du délestage prévue à ".$v_time);
+          // ----- La commande de fin de temporisation devient visible
+          $this->cpCmdResetDisplay();
+          $this->refreshWidget();
           return;
         }
       }
@@ -3613,6 +3656,16 @@ class centralepilote extends eqLogic {
       }
       else if ($v_current_bypass_type != 'delestage') {
         centralepilote::log('debug',  "Error : unknown bypass_type '".$v_current_bypass_type."' here (".__FILE__.",".__LINE__.") ");
+      }
+
+      // ----- Une zone qui sort du délestage fait sortir ses radiateurs (ils n'ont pas de
+      //       temporisation propre), avant d'appliquer son mode
+      if ($this->cpIsType('zone')) {
+        foreach (centralepilote::cpRadList(array('_isEnable'=>true, 'zone'=>$this->getId())) as $v_rad) {
+          if ($v_rad->cpGetConf('bypass_type') == 'delestage') {
+            $v_rad->cpPilotageExitFromBypass(true);
+          }
+        }
       }
 
       // ----- Retour au pilotage admin mémorisé (ou au pilotage par zone)
@@ -4818,6 +4871,16 @@ class centralepiloteCmd extends cmd {
 		  return;
 		}
 
+		if ($v_logical_id == 'delestage_exit') {
+          if ($eqLogic->cpGetConf('delestage_sortie_time') == '') {
+            centralepilote::log('info', "Equipement '".$eqLogic->getName()."' : pas de temporisation de sortie de délestage en cours.");
+          }
+          else {
+            centralepilote::log('info', "Equipement '".$eqLogic->getName()."' : fin de la temporisation de délestage demandée.");
+            $eqLogic->cpPilotageExitFromBypass(true);
+          }
+		  return;
+		}
 		if ($v_logical_id == 'window_open') {        
           $eqLogic->cpPilotageChangeToBypass('open_window');
 		  return;

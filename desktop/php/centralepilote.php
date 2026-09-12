@@ -255,7 +255,8 @@ Bon mais c'est juste pour que ce soit joli à l'affichage ...
     <div class="row form-group cp_panel_radiateur_zone">
       <label class="col-sm-3 control-label">{{Sortie délestage}}</label>
       <div class="col-sm-9">
-          <select class="cp_attr_radiateur eqLogicAttr form-control" data-l1key="configuration" data-l2key="delestage_sortie_delai">
+          <span class="cp_delestage_sortie_zone" style="display:none;"><em>{{Défini par la zone}}</em></span>
+          <select class="cp_attr_radiateur eqLogicAttr form-control cp_delestage_sortie_delai" data-l1key="configuration" data-l2key="delestage_sortie_delai">
             <option value="0">{{immédiate}}</option>
             <option value="5">{{délai 5 minutes}}</option>
             <option value="30">{{délai 30 minutes}}</option>

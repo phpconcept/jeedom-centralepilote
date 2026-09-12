@@ -45,6 +45,7 @@
           <a class="btn btn-sm btn-default tooltips cp_area_button cp_trigger_open" style="#cmd_trigger_style#"><i class="#icon_button_trigger# " style="font-size:16px;"></i></a>
           <br>      
           <a class="btn btn-sm btn-default tooltips cp_area_button cp_window_swap" style="#cmd_window_style#" ><i class="#icon_button_window#" style="font-size:16px;"></i></a>
+          <a class="btn btn-sm btn-default tooltips cp_area_button cp_delestage_exit" style="display:none; background-color: #2C941A!important; color: white!important;" title="#title_delestage_exit#"><i class="icon mdi-lock-clock" style="font-size:16px;"></i></a>
           <br>      
           <a class="btn btn-sm btn-default tooltips cp_area_button cp_prog_select_open cp_button_prog" ><i class="#icon_button_prog# " style="font-size:16px;"></i></a>
           <br>      
@@ -224,6 +225,11 @@
       // ----- Show Bypass message
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_bypass_on').show();
 
+      // ----- Temporisation de fin de délestage : bouton de sortie forcée
+      if ("#cmd_delestage_exit_id#" != "") {
+        $('.eqLogic[data-eqLogic_uid=#uid#] .cp_delestage_exit').show();
+      }
+
       // ----- Hide Zone radiateur
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_zone_on').remove();        
             
@@ -238,7 +244,7 @@
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_add').remove();   
       $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_trigger_show').remove();   
       
-      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_button').remove();          
+      $('.eqLogic[data-eqLogic_uid=#uid#] .cp_area_button').not('.cp_delestage_exit').remove();          
     }
     
     else if ("#zone_mode#" != "") {
@@ -482,6 +488,17 @@
     }); 
  
  
+    /**---------------------------------------------------------------------------
+     * Method : $('.eqLogic[data-eqLogic_uid=#uid#] .cp_delestage_exit').on()
+     * Description : Stop the delestage exit temporisation
+     * ---------------------------------------------------------------------------
+     */
+    $('.eqLogic[data-eqLogic_uid=#uid#] .cp_delestage_exit').on('click', function() {
+      if ('#cmd_delestage_exit_id#' != '') {
+        jeedom.cmd.execute({id: '#cmd_delestage_exit_id#'});
+      }
+    });
+    
     /**---------------------------------------------------------------------------
      * Method : $('.eqLogic[data-eqLogic_uid=#uid#] .cp_window_swap').on()
      * Description : Swap the window open status from open to close

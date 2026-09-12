@@ -1,5 +1,6 @@
 {
     "plugins/centralepilote/desktop/php/centralepilote.php": {
+        "Défini par la zone" : "Defined by the zone",
         "401 - Accès non autorisé" : "401 - Denied access",
         "Action" : "Action",
         "Activation" : "Activate",
@@ -244,6 +245,8 @@
         "#": "#"
     },
     "plugins/centralepilote/core/class/centralepilote.class.php": {
+        "Forcer la sortie du délestage" : "Force exit from load shedding",
+        "Fin de délestage à" : "End of load shedding at",
         "Auto" : "Auto",
         "Confort" : "Confort",
         "Confort -1" : "Confort -1",
