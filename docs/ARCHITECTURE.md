@@ -4,7 +4,7 @@
 > version 1.8.9 (commit `723afe9`), septembre 2026.
 > La documentation utilisateur reste le [README](../README.md).
 > Les points d'attention (§11) ont été vérifiés sur le banc de test de jeedom-dev (§12).
-> Le lot 1 de corrections (§13) est appliqué sur jeedom-dev, non commité.
+> Les lots de corrections 1 à 3 (§13) sont appliqués sur jeedom-dev.
 
 ## 1. Objet
 
@@ -54,6 +54,7 @@ commencent par un garde du type `cpIsType(...)`.
 | `support_<mode>` | `0` / `1` | Modes supportés par l'équipement. |
 | `fallback_<mode>` | code de mode ou vide | Mode de repli si le mode demandé n'est pas supporté. Utilisé seulement s'il est lui-même supporté ; sinon, `cpModeAlternative()` choisit le mode supporté le plus proche (§13, C1). L'interface le laisse **vide** tant que l'utilisateur ne le choisit pas explicitement. |
 | `bypass_type` / `bypass_mode` | `no`/`no`, `delestage`/(`delestage`\|`eco`\|`horsgel`), `open_window`/`off` | Surcharge temporaire du pilotage. |
+| `delestage_sortie_time` | `Y-m-d-H-i` ou vide | Échéance de la temporisation de sortie de délestage (§5.3). Clé interne, non saisie. |
 | `trigger_list` | `{'Y-m-d-H-i': {type:'trigger_time', mode, time}}` | Changements de pilotage horodatés, triés par clé. (L'en-tête de la classe mentionne `trigger_mode`, le code utilise `trigger_time`.) |
 | `temperature` | `#id#` d'une commande info | Température mesurée (optionnel). |
 | `radiateur_temperature_<mode>` / `zone_temperature_<mode>` | valeur ou `#id#` | Consigne locale ; vide, c'est la valeur de la centrale qui s'applique. |
@@ -63,7 +64,7 @@ commencent par un garde du type `cpIsType(...)`.
 | `lien_commutateur`, `lien_commutateur_a/_b`, `fp_device_id` | `#eqLogicXX#` | Équipements physiques liés, selon la nature. |
 | `command_<mode>` | `#id# && #id#` | Commandes action à exécuter pour passer dans le mode. |
 | `statut_<mode>` | expression Jeedom | Vaut 1 si les équipements physiques sont dans ce mode (peut être vide). |
-| `delestage_sortie_delai` | minutes (0, 30, 60, ...) | Sortie progressive du délestage (§5.3). |
+| `delestage_sortie_delai` | minutes (0, 5, 30, 60, ...) | Temporisation de sortie de délestage (§5.3). **Ignoré pour un radiateur dans une zone** : c'est la zone qui porte la temporisation, et le champ est masqué dans l'interface. |
 | `puissance`, `notes` | libre | Informatif. |
 
 La classe maintient aussi `_pre_save_cache` (propriété PHP, non persistée) : `preSave*`
@@ -91,6 +92,7 @@ y photographie l'état en base (nom, isEnable, zone, nature, modes supportés) p
 | `trigger` | action/other | Options `trigger_type` = `trigger_time` (+ `mode`, `trigger_time` en timestamp Unix) ou `trigger_delete` (+ `id`). |
 | `window_open`, `window_close`, `window_swap` | action/other | Bypass fenêtre ouverte. |
 | `window_status` | info/string | `open` / `close`. |
+| `delestage_exit` | action/other | Met fin à la temporisation de sortie de délestage. Visible uniquement pendant celle-ci. Sur une zone, libère aussi ses radiateurs. |
 | `refresh` | action/other | Appelle `cpRefresh()`. |
 
 **Centrale** : actions `normal`, `delestage`, `eco`, `horsgel` ; info `etat`, qui stocke le **code**
@@ -148,14 +150,19 @@ prioritaire :
 | Priorité | Couche | Source | Effet sur `pilotage` (info) |
 |---|---|---|---|
 | 1 | Bypass délestage | Commande de la centrale, appliquée à tous les radiateurs et zones | `bypass` |
-| 2 | Bypass fenêtre ouverte | `window_*` (refusé si délestage en cours) | `bypass` |
+| 2 | Bypass fenêtre ouverte | `window_*` (refusé pendant un délestage, accepté pendant la temporisation de sortie) | `bypass` |
 | 3 | Zone | `configuration.zone` non vide | `zone` |
 | 4 | Auto | `pilotage = auto` et programme hebdomadaire | `auto` |
 | 5 | Manuel | `pilotage = <mode>` | `<mode>` |
 | — | Triggers | `trigger_list` : changent le pilotage (4/5) à une date donnée | — |
 
-À toutes les couches, `cpModeAlternative()` substitue ensuite le `fallback_<mode>` quand le mode
-demandé n'est pas supporté.
+À toutes les couches, `cpModeAlternative()` substitue ensuite un mode supporté quand le mode demandé
+ne l'est pas (§13, C1).
+
+Une demande de pilotage reçue pendant un bypass n'est plus perdue : elle est **mémorisée** comme
+pilotage admin et appliquée à la sortie du bypass. Exception : une demande **manuelle** (widget ou
+scénario) pendant la temporisation de sortie de délestage est appliquée immédiatement et met fin à
+cette temporisation ; sur une zone, elle libère aussi ses radiateurs (§13, lot 2 et lot 3).
 
 ### 5.1 Méthodes d'entrée
 
@@ -178,14 +185,17 @@ flowchart TD
 
 Le rôle de chaque méthode :
 
-- `cpPilotageChangeTo($pilotage, $force)` modifie le pilotage admin. Elle délègue à la zone si le
-  radiateur en fait partie, sort sans rien faire si un bypass est actif, puis persiste `pilotage`,
+- `cpPilotageChangeTo($pilotage, $force, $manual)` modifie le pilotage admin. Elle délègue à la zone si
+  le radiateur en fait partie, mémorise la demande sans l'appliquer si un bypass est actif (voir §5),
+  puis persiste `pilotage`,
   recalcule la visibilité des commandes (`cpCmdResetDisplay`), fait un `save()` et un `refreshWidget()`.
 - `cpModeChangeTo($mode, $force)` applique un mode physique. Elle ne connaît ni les bypass ni le
   pilotage. Sur une zone, elle propage le mode à ses radiateurs activés. Sans `$force`, elle ne fait
   rien si `etat` indique déjà ce mode.
-- `cpPilotageChangeToBypass($type, $mode)` et `cpPilotageExitFromBypass()` entrent dans les bypass
-  et en sortent. En sortie, c'est le `pilotage` admin mémorisé qui est restauré.
+- `cpPilotageChangeToBypass($type, $mode)` et `cpPilotageExitFromBypass($immediate)` entrent dans les
+  bypass et en sortent. En sortie, c'est le `pilotage` admin mémorisé qui est restauré. Sans
+  `$immediate`, la sortie d'un délestage peut être différée (§5.3).
+- `cpEqBypassExitTick($now)` termine la temporisation quand son échéance est atteinte.
 
 ### 5.2 Zones
 
@@ -193,13 +203,24 @@ L'entrée dans une zone et la sortie sont détectées dans `postSaveRadiateur()`
 `configuration.zone` avec `_pre_save_cache`. Un radiateur en zone ne reçoit ni tick ni trigger :
 `cpClockTick()` ne traite que les radiateurs avec `zone = ''`, et c'est la zone qui propage.
 
+Une zone ne propage pas son mode à un radiateur qui est lui-même en bypass : le bypass du radiateur
+reste prioritaire. Un radiateur en zone n'a pas de temporisation de sortie propre.
+
 ### 5.3 Délestage et sortie progressive
 
 `execute_centrale()` met à jour l'`etat` de la centrale puis appelle `cpPilotageChangeToBypass()`
-sur **tous** les radiateurs et zones, dans l'ordre de `eqLogic::byType()`. En sortie (`normal`),
-un radiateur dont `delestage_sortie_delai > 0` programme un trigger à `now + délai` avec son
-pilotage d'origine, et reste en attendant dans le mode de délestage. Cela évite que tous les
-radiateurs redémarrent en même temps.
+sur **les zones d'abord, puis les radiateurs** — l'ordre ne dépend donc pas de leurs noms.
+
+En sortie (`normal`), un équipement dont `delestage_sortie_delai > 0` **reste en bypass** et note son
+échéance dans `delestage_sortie_time`. À chaque `cron5`, `cpEqBypassExitTick()` compare l'échéance à
+l'heure courante et termine la sortie le moment venu. Cela évite que tous les radiateurs redémarrent
+en même temps.
+
+La temporisation est portée par la **zone** pour les radiateurs qui en font partie, et par le
+radiateur lui-même sinon. Quand une zone termine sa temporisation, elle fait d'abord sortir ses
+radiateurs du bypass, puis leur applique son mode. Un nouveau délestage efface une échéance en
+attente. Pendant la temporisation, le widget affiche « Fin de délestage à HH:MM » et un bouton
+(commande `delestage_exit`) permet d'y mettre fin tout de suite.
 
 ## 6. Flux principaux
 
@@ -210,8 +231,11 @@ radiateurs redémarrent en même temps.
    Si aucun statut ne vaut 1 (équipement qui ne remonte pas son état), rien n'est fait.
    La réapplication passe par `cpModeChangeTo($mode, true)` : elle fonctionne aussi en bypass et en
    zone, et ne modifie pas le pilotage (§13, C3).
-2. `cpClockTick()` : pour chaque zone, puis chaque radiateur hors zone, activé :
-   `cpEqClockTick()` (ignoré si `pilotage` ≠ `auto`) puis `cpEqClockTriggerTick(now)`.
+2. `cpClockTick()` :
+   - fin des temporisations de sortie de délestage (`cpEqBypassExitTick()`), zones d'abord puis
+     radiateurs hors zone ;
+   - pour chaque zone, puis chaque radiateur hors zone, activé : `cpEqClockTick()` (ignoré si
+     `pilotage` ≠ `auto`) puis `cpEqClockTriggerTick(now)`.
 
 ### 6.2 Exécution d'une commande
 
@@ -291,7 +315,7 @@ mesurée. Les options `mode_icon_color` et `mode_icon_color_mobile` colorent les
 | Point d'entrée | Rôle |
 |---|---|
 | `centralepilote_install()` | Crée la centrale et le programme par défaut ; enregistre `config.version`. |
-| `centralepilote_update()` | Recrée la centrale si besoin, puis lance les migrations `centralepilote_update_v_X` selon `config.version`. |
+| `centralepilote_update()` | Recrée la centrale si besoin, sort les radiateurs des zones disparues, puis lance les migrations `centralepilote_update_v_X` selon `config.version` (comparées avec `version_compare()`). |
 | `centralepilote::start()` | Au démarrage de Jeedom : si le flag `clean_stop` est absent (arrêt non propre), `cpRefresh()` de tous les radiateurs. |
 | `centralepilote::stop()` | Positionne `clean_stop`. |
 
@@ -327,20 +351,20 @@ au test du §12.2.
 |---|---|---|
 | 1 | Supprimer une zone laisse ses radiateurs avec un `zone` orphelin (pas de `preRemove`). Le pilotage affiché reste « zone », les commandes sont ignorées (seulement une ligne DEBUG « Unexpected missing zone object ») et les ticks les excluent. Par lecture du code : après un délestage, un radiateur orphelin resterait en off indéfiniment. | **Corrigé** (lot 1, C4) |
 | 2 | `cpRefresh()` réapplique le mode via `cpPilotageChangeTo()`. En bypass, rien n'est corrigé, alors que le WARNING annonce « Force l'état attendu ». Hors bypass, la conf `pilotage` est réécrite avec le mode effectif (après repli). | **Corrigé** (lot 1, C3) |
-| 3 | La sortie de délestage traite les équipements par ordre alphabétique de nom, les zones après leurs radiateurs dans le cas testé. Un radiateur en zone avec délai ne crée pas son trigger (« in zone pilotage ») et reçoit immédiatement le mode de la zone : pas de sortie progressive. Son `pilotage` reste affiché « bypass » durablement. Les radiateurs en zone qui sortent avant leur zone reprennent d'abord le mode délesté. | Confirmé (T3) |
+| 3 | La sortie de délestage traite les équipements par ordre alphabétique de nom, les zones après leurs radiateurs dans le cas testé. Un radiateur en zone avec délai ne crée pas son trigger (« in zone pilotage ») et reçoit immédiatement le mode de la zone : pas de sortie progressive. Son `pilotage` reste affiché « bypass » durablement. Les radiateurs en zone qui sortent avant leur zone reprennent d'abord le mode délesté. | **Corrigé** (lot 2 et lot 3) |
 | 4 | L'`etat` des radiateurs et zones stocke un libellé traduit, relu pour retrouver le mode. Un libellé inconnu devient `eco` sans alerte. | Lecture de code (voir aussi 16) |
 | 5 | `cpProgSave()` : `$p_id === 0` est toujours faux depuis l'ajax (chaîne `"0"`), donc le programme par défaut est modifiable. Un JSON invalide provoque une `Error` fatale. | Confirmé (PHP 8.3) |
-| 6 | Un trigger qui se déclenche pendant une fenêtre ouverte est supprimé sans être appliqué. À la fermeture, le radiateur revient à l'ancien pilotage. Le log annonce à tort une sortie du bypass. | Confirmé (T4) |
+| 6 | Un trigger qui se déclenche pendant une fenêtre ouverte est supprimé sans être appliqué. À la fermeture, le radiateur revient à l'ancien pilotage. Le log annonce à tort une sortie du bypass. | **Corrigé** (lot 2) |
 | 7 | `cpProgNextModeFromClockTick()` : la limite de 250 itérations est inférieure aux 336 créneaux d'une semaine en demi-heure. Au-delà de 125 h, aucun prochain changement n'est affiché. En horaire, la détection « semaine complète » ne marche qu'à la minute 00, d'où un faux « Loop detected ». | Confirmé (T5, PHP 7.4) |
 | 8 | `postInsert` de la centrale initialise `temperature_confort_1`… au lieu de `temp_ref_confort_1`… | Lecture de code |
 | 9 | `cpEqGetTemperatureActuelle()` : `round('')` lève une `TypeError` en PHP 8 si le capteur n'a pas de valeur. Sans effet sur jeedom-dev (PHP 7.4). | Confirmé (PHP 8.3) |
 | 10 | Changer de nature ne vide pas les `command_*` et `statut_*` des modes devenus inutiles. Ils continuent de viser l'ancien équipement lié et faussent le diagnostic de `cpRefresh()`. Recocher un de ces modes dans l'interface réactiverait ces commandes. | Confirmé (T6) |
-| 11 | `install.php` compare des versions sous forme de chaînes (`$v_version < '1.2'`). `'1.10' < '1.2'` est vrai : les anciennes migrations se relanceront à partir de la version 1.10. | Confirmé (PHP 8.3) |
+| 11 | `install.php` compare des versions sous forme de chaînes (`$v_version < '1.2'`). `'1.10' < '1.2'` est vrai : les anciennes migrations se relanceront à partir de la version 1.10. | **Corrigé** (lot 2) |
 | 12 | Performance : `cpCentraleGet()` recharge `eqLogic::byType()` à chaque appel, au moins quatre fois par rendu de widget. `cpCmdResetDisplay()` sauvegarde une dizaine de commandes à chaque changement de pilotage. | Lecture de code |
 | 13 | Encodages hétérogènes : `install.php` et `core/config/devices/*.inc.php` sont en ISO-8859-1 avec des fins de ligne CRLF, le reste est en UTF-8. Les accents ne sont que dans les commentaires. | Constaté |
-| 14 | `core/i18n/en_US.json` était illisible (ISO-8859-1 et erreur de syntaxe). | **Corrigé** le 11/09/2026 (non commité) |
-| 15 | « Dupliquer » un radiateur : `eqLogic::copy()` fait `setId('')` puis `save()`, donc `preSaveRadiateur()` le traite comme un nouvel équipement. Sont réinitialisés : nature (→ `virtuel`), pilotage, programme, triggers, consignes, délai de délestage, modes supportés et capteur de température. Le lien vers l'équipement et les commandes sont conservés : **la copie, active, pilote le même équipement physique que l'original**, et les deux se contredisent à chaque cron5. | Confirmé (T7) |
-| 16 | Un `etat` vide (radiateur neuf, copie) est interprété comme `eco` par `cpModeGetFromCmd()`. La première demande `eco`, ou un pilotage `eco` déjà positionné, est ignorée (« already in mode 'eco', skip »). Le radiateur n'est commandé qu'au premier `cpRefresh()`, et seulement s'il a des statuts. | Observé (construction du banc) |
+| 14 | `core/i18n/en_US.json` était illisible (ISO-8859-1 et erreur de syntaxe). | **Corrigé** le 11/09/2026 |
+| 15 | « Dupliquer » un radiateur : `eqLogic::copy()` fait `setId('')` puis `save()`, donc `preSaveRadiateur()` le traite comme un nouvel équipement. Sont réinitialisés : nature (→ `virtuel`), pilotage, programme, triggers, consignes, délai de délestage, modes supportés et capteur de température. Le lien vers l'équipement et les commandes sont conservés : **la copie, active, pilote le même équipement physique que l'original**, et les deux se contredisent à chaque cron5. | **Corrigé** (lot 2, T7 rejoué le 12/09) |
+| 16 | Un `etat` vide (radiateur neuf, copie) est interprété comme `eco` par `cpModeGetFromCmd()`. La première demande `eco`, ou un pilotage `eco` déjà positionné, est ignorée (« already in mode 'eco', skip »). Le radiateur n'est commandé qu'au premier `cpRefresh()`, et seulement s'il a des statuts. | **Corrigé** (lot 2) |
 | 17 | `cpModeAlternative()` n'applique qu'un seul niveau de repli et ne vérifie pas que le mode de repli est supporté. Sans repli ou avec un repli non supporté, `cpModeChangeTo()` exécute une commande vide (WARNING) **et met quand même `etat` à jour** : l'état affiché est faux. `cpRefresh()` réessaie ensuite à chaque cron5. Conséquences constatées : un C/O en hors-gel reste en confort, et un C/H **continue de chauffer pendant un délestage**. | **Corrigé** (lot 1, C1 et C2) |
 | 18 | `cpProgNextModeFromClockTick()` : quand le prochain changement tombe le même jour de la semaine mais la semaine suivante, le jour n'est pas renseigné. Le widget affiche alors l'heure comme si c'était aujourd'hui. | Confirmé (T5) |
 
@@ -427,3 +451,42 @@ Effets des replis automatiques (C1) quand aucun repli n'est configuré :
 | Non-régression | Cron5 (refresh, ticks, triggers) sans erreur ; trigger de sortie de délestage de FP6 exécuté à 17h45 (retour en auto). |
 
 Restent ouverts : points 3 à 16 et 18, hors 14 (déjà corrigé).
+
+### 13.3 Lot 2 (11/09/2026) : duplication, bypass, sortie de délestage, versions
+
+| # | Méthode(s) | Correction | Points |
+|---|---|---|---|
+| C5 | `preSaveRadiateur()` | Une copie (id vide mais nature déjà renseignée) est **désactivée**, ses liens physiques, commandes, statuts, capteur, triggers et bypass sont effacés. Le reste de la configuration est conservé. | 15 |
+| C6 | `cpModeGetFromCmd()`, `cpRefresh()` | Un `etat` vide vaut « inconnu » et non plus `eco` : la première demande d'un équipement neuf est exécutée, et `cpRefresh()` applique le pilotage attendu. | 16 |
+| C7 | `cpPilotageChangeTo()` | Une demande reçue pendant un bypass est mémorisée puis appliquée à la sortie. Une demande manuelle pendant la temporisation de sortie est appliquée tout de suite et met fin à la temporisation ; sur une zone, elle libère aussi ses radiateurs. | 6, 3 |
+| C8 | `cpZoneModeChangeTo()`, `execute_centrale()`, `cpPilotageExitFromBypass()`, `cpClockTick()` | Une zone ne commande pas ses radiateurs en bypass ; les zones sont traitées avant les radiateurs ; la temporisation garde le bypass jusqu'à son échéance, via `delestage_sortie_time` et `cpEqBypassExitTick()`. | 3 |
+| C9 | `centralepilote_update()` | `version_compare()` au lieu d'une comparaison de chaînes. | 11 |
+
+### 13.4 Lot 3 (12/09/2026) : la zone maîtresse du délestage, temporisation visible
+
+| # | Fichier(s) | Correction |
+|---|---|---|
+| C10 | `centralepilote.class.php` | Un radiateur dans une zone n'a pas de temporisation propre : `cpPilotageExitFromBypass()` ne pose une échéance que hors zone. Une zone peut en porter une, et elle fait sortir ses radiateurs à son échéance. `cpClockTick()` traite les zones puis les radiateurs hors zone. |
+| C11 | `centralepilote.class.php`, widgets dashboard et mobile | Nouvelle commande action `delestage_exit`, visible uniquement pendant la temporisation. Le bandeau affiche « Fin de délestage à HH:MM », et un bouton vert (icône `mdi-lock-clock`, infobulle « Forcer la sortie du délestage ») placé sous celui de la fenêtre permet d'y mettre fin. Utilisable aussi en scénario. |
+| C12 | `centralepilote.php`, `centralepilote.js` | Le champ « Sortie délestage » est remplacé par « Défini par la zone » dès qu'une zone est choisie, et réapparaît sinon. La valeur enregistrée est conservée. |
+| C13 | `install.php` | Migration `centralepilote_update_v_1_9_0()` : crée `delestage_exit` sur les radiateurs et zones existants. |
+
+**À faire avant publication :** la migration se déclenche pour toute version antérieure à 1.9.0 alors
+que `CP_VERSION` vaut 1.8.9 ; elle se relancera donc à chaque mise à jour (sans effet, car elle
+vérifie l'existence de la commande) tant que la version n'aura pas été portée à **1.9.0**.
+
+### 13.5 Vérifications des lots 2 et 3
+
+| Test | Résultat |
+|---|---|
+| T7 rejoué (duplication par l'interface) | Copie créée désactivée, sans équipement fil pilote ni commandes ; l'original n'est plus perturbé. |
+| T4 rejoué | Trigger posé pendant une fenêtre ouverte : mémorisé, puis appliqué à la fermeture. |
+| Demande manuelle pendant un délestage | Mémorisée, appliquée au retour à normal. |
+| Radiateur neuf (`TB Rad Neuf`) | Commandé dès sa création, `etat` renseigné. |
+| Temporisation zone 5 min / radiateurs 30 min | Seules la zone et les radiateurs hors zone portent une échéance ; à l'échéance, la zone et ses radiateurs repartent ensemble. |
+| Forçage manuel pendant la temporisation | Appliqué immédiatement, échéance annulée. |
+| Bouton `delestage_exit` | Sur la zone : libère la zone et ses radiateurs. Sur un radiateur hors zone : lui seul. Hors temporisation : sans effet, message dans le log. |
+| Interface et widgets | Vérifiés visuellement dans le navigateur. |
+| Non-régression | Une nuit de `cron5` sans erreur ni warning. |
+
+Restent ouverts : points 4, 5, 7, 8, 9, 10, 12, 13 et 18.
