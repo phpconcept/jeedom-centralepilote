@@ -4,7 +4,7 @@
 > version 1.8.9 (commit `723afe9`), septembre 2026.
 > La documentation utilisateur reste le [README](../README.md).
 > Les points d'attention (§11) ont été vérifiés sur le banc de test de jeedom-dev (§12).
-> Les lots de corrections 1 à 3 (§13) sont appliqués sur jeedom-dev.
+> Les lots de corrections 1 à 4 (§13) sont appliqués sur jeedom-dev.
 
 ## 1. Objet
 
@@ -353,12 +353,12 @@ au test du §12.2.
 | 2 | `cpRefresh()` réapplique le mode via `cpPilotageChangeTo()`. En bypass, rien n'est corrigé, alors que le WARNING annonce « Force l'état attendu ». Hors bypass, la conf `pilotage` est réécrite avec le mode effectif (après repli). | **Corrigé** (lot 1, C3) |
 | 3 | La sortie de délestage traite les équipements par ordre alphabétique de nom, les zones après leurs radiateurs dans le cas testé. Un radiateur en zone avec délai ne crée pas son trigger (« in zone pilotage ») et reçoit immédiatement le mode de la zone : pas de sortie progressive. Son `pilotage` reste affiché « bypass » durablement. Les radiateurs en zone qui sortent avant leur zone reprennent d'abord le mode délesté. | **Corrigé** (lot 2 et lot 3) |
 | 4 | L'`etat` des radiateurs et zones stocke un libellé traduit, relu pour retrouver le mode. Un libellé inconnu devient `eco` sans alerte. | Lecture de code (voir aussi 16) |
-| 5 | `cpProgSave()` : `$p_id === 0` est toujours faux depuis l'ajax (chaîne `"0"`), donc le programme par défaut est modifiable. Un JSON invalide provoque une `Error` fatale. | Confirmé (PHP 8.3) |
+| 5 | `cpProgSave()` : `$p_id === 0` est toujours faux depuis l'ajax (chaîne `"0"`), donc le programme par défaut est modifiable. Un JSON invalide provoque une `Error` fatale. | **Corrigé** (lot 4) |
 | 6 | Un trigger qui se déclenche pendant une fenêtre ouverte est supprimé sans être appliqué. À la fermeture, le radiateur revient à l'ancien pilotage. Le log annonce à tort une sortie du bypass. | **Corrigé** (lot 2) |
-| 7 | `cpProgNextModeFromClockTick()` : la limite de 250 itérations est inférieure aux 336 créneaux d'une semaine en demi-heure. Au-delà de 125 h, aucun prochain changement n'est affiché. En horaire, la détection « semaine complète » ne marche qu'à la minute 00, d'où un faux « Loop detected ». | Confirmé (T5, PHP 7.4) |
-| 8 | `postInsert` de la centrale initialise `temperature_confort_1`… au lieu de `temp_ref_confort_1`… | Lecture de code |
-| 9 | `cpEqGetTemperatureActuelle()` : `round('')` lève une `TypeError` en PHP 8 si le capteur n'a pas de valeur. Sans effet sur jeedom-dev (PHP 7.4). | Confirmé (PHP 8.3) |
-| 10 | Changer de nature ne vide pas les `command_*` et `statut_*` des modes devenus inutiles. Ils continuent de viser l'ancien équipement lié et faussent le diagnostic de `cpRefresh()`. Recocher un de ces modes dans l'interface réactiverait ces commandes. | Confirmé (T6) |
+| 7 | `cpProgNextModeFromClockTick()` : la limite de 250 itérations est inférieure aux 336 créneaux d'une semaine en demi-heure. Au-delà de 125 h, aucun prochain changement n'est affiché. En horaire, la détection « semaine complète » ne marche qu'à la minute 00, d'où un faux « Loop detected ». | **Corrigé** (lot 4) |
+| 8 | `postInsert` de la centrale initialise `temperature_confort_1`… au lieu de `temp_ref_confort_1`… | **Corrigé** (lot 4) |
+| 9 | `cpEqGetTemperatureActuelle()` : `round('')` lève une `TypeError` en PHP 8 si le capteur n'a pas de valeur. Sans effet sur jeedom-dev (PHP 7.4). | **Corrigé** (lot 4) |
+| 10 | Changer de nature ne vide pas les `command_*` et `statut_*` des modes devenus inutiles. Ils continuent de viser l'ancien équipement lié et faussent le diagnostic de `cpRefresh()`. Recocher un de ces modes dans l'interface réactiverait ces commandes. | **Corrigé** (lot 4) |
 | 11 | `install.php` compare des versions sous forme de chaînes (`$v_version < '1.2'`). `'1.10' < '1.2'` est vrai : les anciennes migrations se relanceront à partir de la version 1.10. | **Corrigé** (lot 2) |
 | 12 | Performance : `cpCentraleGet()` recharge `eqLogic::byType()` à chaque appel, au moins quatre fois par rendu de widget. `cpCmdResetDisplay()` sauvegarde une dizaine de commandes à chaque changement de pilotage. | Lecture de code |
 | 13 | Encodages hétérogènes : `install.php` et `core/config/devices/*.inc.php` sont en ISO-8859-1 avec des fins de ligne CRLF, le reste est en UTF-8. Les accents ne sont que dans les commentaires. | Constaté |
@@ -366,7 +366,7 @@ au test du §12.2.
 | 15 | « Dupliquer » un radiateur : `eqLogic::copy()` fait `setId('')` puis `save()`, donc `preSaveRadiateur()` le traite comme un nouvel équipement. Sont réinitialisés : nature (→ `virtuel`), pilotage, programme, triggers, consignes, délai de délestage, modes supportés et capteur de température. Le lien vers l'équipement et les commandes sont conservés : **la copie, active, pilote le même équipement physique que l'original**, et les deux se contredisent à chaque cron5. | **Corrigé** (lot 2, T7 rejoué le 12/09) |
 | 16 | Un `etat` vide (radiateur neuf, copie) est interprété comme `eco` par `cpModeGetFromCmd()`. La première demande `eco`, ou un pilotage `eco` déjà positionné, est ignorée (« already in mode 'eco', skip »). Le radiateur n'est commandé qu'au premier `cpRefresh()`, et seulement s'il a des statuts. | **Corrigé** (lot 2) |
 | 17 | `cpModeAlternative()` n'applique qu'un seul niveau de repli et ne vérifie pas que le mode de repli est supporté. Sans repli ou avec un repli non supporté, `cpModeChangeTo()` exécute une commande vide (WARNING) **et met quand même `etat` à jour** : l'état affiché est faux. `cpRefresh()` réessaie ensuite à chaque cron5. Conséquences constatées : un C/O en hors-gel reste en confort, et un C/H **continue de chauffer pendant un délestage**. | **Corrigé** (lot 1, C1 et C2) |
-| 18 | `cpProgNextModeFromClockTick()` : quand le prochain changement tombe le même jour de la semaine mais la semaine suivante, le jour n'est pas renseigné. Le widget affiche alors l'heure comme si c'était aujourd'hui. | Confirmé (T5) |
+| 18 | `cpProgNextModeFromClockTick()` : quand le prochain changement tombe le même jour de la semaine mais la semaine suivante, le jour n'est pas renseigné. Le widget affiche alors l'heure comme si c'était aujourd'hui. | **Corrigé** (lot 4) |
 
 ## 12. Banc de test (jeedom-dev)
 
@@ -490,3 +490,26 @@ vérifie l'existence de la commande) tant que la version n'aura pas été porté
 | Non-régression | Une nuit de `cron5` sans erreur ni warning. |
 
 Restent ouverts : points 4, 5, 7, 8, 9, 10, 12, 13 et 18.
+
+### 13.6 Lot 4 (12/09/2026) : programmes, robustesse
+
+| # | Méthode(s) | Correction | Points |
+|---|---|---|---|
+| C14 | `cpProgNextModeFromClockTick()` | Réécriture : parcours d'exactement une semaine de créneaux (168 en horaire, 336 en demi-heure) sur des index entiers, au lieu d'une boucle horaire plafonnée à 250 tours comparant des chaînes. Le jour n'est renseigné que si le changement dépasse 24 h. | 7, 18 |
+| C15 | `cpProgSave()` | Le programme par défaut est protégé quel que soit le type reçu (`0`, `"0"`, `0.0`). `json_decode()` est testé sur son retour (le `try/catch` ne servait à rien), une programmation sans `agenda` est refusée, et un nom absent ne provoque plus d'erreur. | 5 |
+| C16 | `postInsert()` centrale | logicalId corrigés : `temp_ref_*` au lieu de `temperature_*`. | 8 |
+| C17 | `cpEqGetTemperatureActuelle()` | `is_numeric()` avant `round()` : plus de `TypeError` en PHP 8 avec un capteur sans valeur. | 9 |
+| C18 | `cpNatureChangeTo()` | Les six couples `command_*`/`statut_*` sont vidés avant régénération (sauf nature `virtuel`, saisie par l'utilisateur) : plus d'expression visant un équipement délié. | 10 |
+
+### 13.7 Vérifications du lot 4
+
+| Test | Résultat |
+|---|---|
+| Prochain changement (code réel, 10 cas isolés + 3 programmes du banc) | TB Demi-heure donne « confort jeudi 12h30 » là où l'ancien code répondait « Loop detected ». Programme tout en eco : « Full week with same mode ». Le jour s'affiche pour un changement à plus de 24 h, pas en deçà. Passages de minuit et de dimanche à lundi corrects. |
+| `cpProgSave()` | Programme par défaut refusé avec `'0'` comme avec `0`, et inchangé en base. JSON invalide, JSON sans agenda et JSON tableau refusés avec une ERROR explicite. Les autres programmes restent intacts. |
+| Capteur de température | Capteur vide → `''` ; valeur 19.37 → 19.4. |
+| Changement de nature | C/O → 2 commutateurs → C/O : les `command_*`/`statut_*` d'eco et hors-gel sont vidés au retour, alors qu'ils visaient encore l'ancien commutateur. |
+| Centrale | Les `temp_ref_*` sont cohérents ; aucune commande `temperature_*` résiduelle. |
+| Non-régression | `cron5` complet (8 `cpRefresh`, ticks, triggers) sans erreur ni warning. |
+
+Restent ouverts : points 4, 12 et 13.
