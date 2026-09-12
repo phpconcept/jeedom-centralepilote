@@ -641,18 +641,21 @@ class centralepilote extends eqLogic {
       */
       
       // ----- Program par defaut cant be modified
-      if ($p_id === 0) {
+      if (($p_id === 0) || ($p_id === '0') || ($p_id === 0.0)) {
+        $p_id = 0;
         centralepilotelog::log('info', __("Le programme par défaut ne peut pas être modifié",__FILE__));
         $v_prog_json = json_encode($v_prog_list[$p_id], JSON_FORCE_OBJECT);
         return($v_prog_json);
       }
       
-      // ----- Parse string value
-      try {
-        $v_info_obj = json_decode($p_prog);
+      // ----- Parse string value (json_decode ne lève pas d'exception : on teste le retour)
+      $v_info_obj = json_decode($p_prog);
+      if (!is_object($v_info_obj)) {
+        centralepilotelog::log('error', __('cpProgSave() : Erreur parsing JSON', __FILE__).' : '.json_last_error_msg());
+        return('');
       }
-      catch (Exception $exc) {
-      	centralepilotelog::log('error', __('cpProgSave() : Erreur parsing JSON', __FILE__));
+      if (!isset($v_info_obj->agenda)) {
+        centralepilotelog::log('error', __("cpProgSave() : programmation sans agenda, non sauvegardée", __FILE__));
         return('');
       }
     
@@ -674,7 +677,7 @@ class centralepilote extends eqLogic {
       }
       
       // ----- Check for missing name
-      if ($v_info_obj->name == '') {
+      if (!isset($v_info_obj->name) || ($v_info_obj->name == '')) {
         $v_info_obj->name = __("Programme", __FILE__)." ".$p_id;
       }
       
@@ -1026,57 +1029,52 @@ class centralepilote extends eqLogic {
       }
       $v_current_mode = $v_prog['agenda'][$p_jour][$p_heure];
       
+      // ----- Parcours d'exactement une semaine de créneaux à partir du créneau courant :
+      //       168 en mode horaire, 336 en mode demi-heure.
+      $v_pas_par_jour = ($v_mode_demiheure ? 48 : 24);
+      $v_nb_creneaux  = $v_pas_par_jour * 7;
+
+      // ----- Index du créneau courant dans la semaine (0 = lundi 00h00)
       $i_jour = $v_jour_index[$p_jour];
-      $i_heure = $v_heure_ref;
-      $i_minute = $p_minute;
-      $v_loop_detected = false;
-      $v_loop_count = 0; // for sanity check ...
-      while (!$v_loop_detected) {
-        $v_loop_count++;
-        if ($v_mode_demiheure) $i_minute += 30; else $i_minute += 60;
-        if ($i_minute >= 60) { $i_minute = 0; $i_heure++; }
-        //$i_heure++;
-        if ($i_heure > 23) { $i_heure = 0; $i_jour++; }
-        if ($i_jour > 7) { $i_jour = 1; }
+      $v_creneau_jour = intval($v_heure_ref) * ($v_mode_demiheure ? 2 : 1) + (($v_mode_demiheure && ($p_minute >= 30)) ? 1 : 0);
+      $v_creneau = ($i_jour - 1) * $v_pas_par_jour + $v_creneau_jour;
+
+      for ($i = 1; $i <= $v_nb_creneaux; $i++) {
+        $v_index    = ($v_creneau + $i) % $v_nb_creneaux;
+        $i_jour     = intdiv($v_index, $v_pas_par_jour) + 1;
         $i_nom_jour = $v_jour_nom[$i_jour];
+        $v_reste    = $v_index % $v_pas_par_jour;
         if ($v_mode_demiheure) {
-          if ($i_minute < 30) {
-            $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure.'_00'];
-          }
-          else {
-            $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure.'_30'];
-          }
+          $i_heure  = intdiv($v_reste, 2);
+          $i_minute = (($v_reste % 2) == 0 ? 0 : 30);
+          $v_cle    = $i_heure.(($i_minute == 0) ? '_00' : '_30');
         }
         else {
-          $v_item_mode = $v_prog['agenda'][$i_nom_jour][$i_heure];
+          $i_heure  = $v_reste;
+          $i_minute = 0;
+          $v_cle    = $i_heure;
         }
-        if ($v_item_mode != $v_current_mode) {
-          $p_next_mode = $v_item_mode;
-          if ($i_nom_jour != $p_jour) $p_next_jour = $i_nom_jour;
-          if ($v_mode_demiheure) {
-            if ($i_minute < 30) {
-              $p_next_time = $i_heure.'h';
-            }
-            else {
-              $p_next_time = $i_heure.'h30';
-            }
-          }
-          else {
-            $p_next_time = $i_heure.'h';
-          }
-          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Next mode :'".$p_next_mode."', time :'".$p_next_time."'.");
-          return(true);
-        }
-        if (($i_minute == $p_minute) && ($i_heure == $v_heure_ref) && ($i_jour == $v_jour_index[$p_jour])) {
-          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Full week with same mode.");
-          $v_loop_detected = true;
-        }
-        if ($v_loop_count > 250) {
-          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Error : Loop detected.");
+
+        if (!isset($v_prog['agenda'][$i_nom_jour][$v_cle])) {
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Missing value for '".$i_nom_jour."' '".$v_cle."' for programme '".$p_id."'.");
           return(false);
         }
-      }      
-      
+        $v_item_mode = $v_prog['agenda'][$i_nom_jour][$v_cle];
+
+        if ($v_item_mode != $v_current_mode) {
+          $p_next_mode = $v_item_mode;
+          // ----- Le jour n'est affiché que si le changement n'est pas dans les heures qui viennent
+          if (($i_nom_jour != $p_jour) || ($i >= $v_pas_par_jour)) {
+            $p_next_jour = $i_nom_jour;
+          }
+          $p_next_time = $i_heure.'h'.(($i_minute == 30) ? '30' : '');
+          centralepilote::log('debug', "cpProgNextModeFromClockTick() : Next mode :'".$p_next_mode."', jour :'".$p_next_jour."', time :'".$p_next_time."'.");
+          return(true);
+        }
+      }
+
+      // ----- Semaine entière dans le même mode : pas de prochain changement
+      centralepilote::log('debug', "cpProgNextModeFromClockTick() : Full week with same mode.");
       return(false);
     }
     /* -------------------------------------------------------------------------*/
@@ -1348,10 +1346,10 @@ class centralepilote extends eqLogic {
         $this->cpCmdCreate('temp_ref_horsgel', ['name'=>'Temp_Ref_HorsGel', 'type'=>'info', 'subtype'=>'numeric', 'isHistorized'=>0, 'isVisible'=>0, 'order'=>$v_cmd_order++]);
 
         $this->checkAndUpdateCmd('temp_ref_confort', 19);
-        $this->checkAndUpdateCmd('temperature_confort_1', 18);
-        $this->checkAndUpdateCmd('temperature_confort_2', 17);
-        $this->checkAndUpdateCmd('temperature_eco', 15);
-        $this->checkAndUpdateCmd('temperature_horsgel', 3);
+        $this->checkAndUpdateCmd('temp_ref_confort_1', 18);
+        $this->checkAndUpdateCmd('temp_ref_confort_2', 17);
+        $this->checkAndUpdateCmd('temp_ref_eco', 15);
+        $this->checkAndUpdateCmd('temp_ref_horsgel', 3);
         
         // ----- Here I can change the value because the centrale eq is created in "enable" status.
         $this->checkAndUpdateCmd('etat', 'normal');
@@ -4207,6 +4205,9 @@ class centralepilote extends eqLogic {
         return('');
       }
       $v_value = $cmd->execCmd();
+      if (!is_numeric($v_value)) {
+        return('');
+      }
       $v_value_round = round($v_value,1);
       //centralepilote::log('debug',  "Value '".$v_value."', rounded : '".$v_value_round."'");
       
@@ -4367,7 +4368,17 @@ class centralepilote extends eqLogic {
       }
 
       centralepilote::log('debug', "  Change fil-pilote nature of radiateur '".$this->getName()."' to '".$p_nature."'");
-      
+
+      // ----- Les command_*/statut_* sont entièrement régénérés par la nature choisie.
+      //       On efface les anciens pour ne pas garder d'expression visant un équipement
+      //       qui n'est plus lié (nature 'virtuel' exceptée : ils sont saisis par l'utilisateur).
+      if ($p_nature != 'virtuel') {
+        foreach (array('confort','confort_1','confort_2','eco','horsgel','off') as $v_mode) {
+          $this->setConfiguration('command_'.$v_mode, '');
+          $this->setConfiguration('statut_'.$v_mode, '');
+        }
+      }
+
       // ----- Look for natures
       if ($p_nature == 'virtuel') {
         // TBC : I may check that commands exists ??
