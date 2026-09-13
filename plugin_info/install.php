@@ -46,43 +46,9 @@ function centralepilote_update() {
   centralepilote::cpZoneCleanOrphans();
 
   // ----- Look for specific upgrade from versions
-  if (CP_VERSION == '0.2') {
-    centralepilote_update_v_0_2($v_version);
-  }
-  else if (CP_VERSION == '0.3') {
-    if ($v_version != '0.3') centralepilote_update_v_0_3($v_version);
-  }
-  else if (CP_VERSION == '0.4') {
-    if ($v_version != '0.4') centralepilote_update_v_0_4($v_version);
-  }
-  else if (CP_VERSION == '0.5') {
-    // Nothing to do
-  }
-  else if (CP_VERSION == '0.8') {
-    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
-  }
-  else if (CP_VERSION == '1.0') {
-    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
-  }
-  else if (CP_VERSION == '1.1') {
-    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
-    if ($v_version != '1.1') centralepilote_update_v_1_1($v_version);
-  }
-
-/*  else if (CP_VERSION == '1.2') {
-    if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
-    if ($v_version < '1.1') centralepilote_update_v_1_1($v_version);
-    if ($v_version != '1.2') centralepilote_update_v_1_2($v_version);
-  }
-  */
-/*
-  if ($v_version < '0.2') centralepilote_update_v_0_2($v_version);
-  if ($v_version < '0.3') centralepilote_update_v_0_3($v_version);
-  if ($v_version < '0.4') centralepilote_update_v_0_4($v_version);
-  if ($v_version < '0.8') centralepilote_update_v_0_8($v_version);
-  if ($v_version < '1.1') centralepilote_update_v_1.1($v_version);
-  */
-
+  //       Note : les cascades 'CP_VERSION == 0.x' d'origine ont ete supprimees, elles
+  //       ne pouvaient plus s'executer depuis la 1.2 et comparaient les versions comme
+  //       des chaines de caracteres.
   if (version_compare($v_version, '1.2', '<')) centralepilote_update_v_1_2($v_version);
   if (version_compare($v_version, '1.3', '<')) centralepilote_update_v_1_3($v_version);
   if (version_compare($v_version, '1.4', '<')) centralepilote_update_v_1_4($v_version);

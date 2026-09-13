@@ -31,6 +31,7 @@ il n'y a ni démon ni dépendance.
 | `desktop/modal/modal.device_list.php` | Liste des équipements fil pilote natifs reconnus. |
 | `plugin_info/install.php` | Install, migrations de versions, suppression. |
 | `plugin_info/configuration.php` | Options globales (voir §9). |
+| `tests/` | Tests automatisés hors Jeedom (voir §14). |
 
 ## 3. Modèle de données
 
@@ -581,3 +582,61 @@ cet endroit. Ne jamais auditer le flot de contrôle avec un filtre qui masque le
 | Triggers | Pose, tick non échu (conservé), tick échu (appliqué puis retiré). Entrées invalides ou de type inconnu retirées avec WARNING (6 cas testés isolément). |
 | `cron15` et branches obsolètes | Absentes. |
 | Non-régression | `cron5` complet sans erreur ni warning. |
+
+## 14. Tests automatisés
+
+### 14.1 Lancer les tests
+
+```
+cd /var/www/html/plugins/centralepilote
+php tests/run_all.php
+```
+
+Aucune dépendance : ni Jeedom, ni base de données, ni réseau. Les tests peuvent donc être lancés
+sur jeedom-dev comme sur un poste de développement, avant chaque commit. Le code de retour vaut 0
+si tout passe, 1 sinon. Pour ne lancer qu'une suite :
+
+```
+php tests/test_prog_next_mode.php
+```
+
+### 14.2 Principe
+
+Les méthodes testées sont **extraites telles quelles du fichier source** par
+`tests/harness.php` (`cp_extract_methods()`), puis injectées dans une classe bouchon qui ne fournit
+que les dépendances nécessaires (`cp_build_class()`). C'est le code réellement livré qui est
+exécuté, pas une copie.
+
+L'extraction s'appuie sur la convention d'indentation du fichier : une méthode se termine par une
+ligne contenant exactement quatre espaces puis `}`. Si cette convention change, l'extraction lève
+une exception explicite plutôt que de tester un code tronqué.
+
+Chaque suite s'exécute dans son propre processus, car toutes définissent une classe `centralepilote`
+et une classe ne peut être déclarée qu'une fois par processus. C'est le rôle de `run_all.php`.
+
+### 14.3 Les suites
+
+| Fichier | Couvre | Points |
+|---|---|---|
+| `test_prog_next_mode.php` | `cpProgNextModeFromClockTick()` : alternance horaire, changement au-delà de 125 h, programme uniforme, passage de minuit et de dimanche à lundi, mode demi-heure, jour renseigné ou non, agenda vide | 7, 18 |
+| `test_mode_alternative.php` | `cpModeAlternative()` : repli configuré, repli non supporté, mode supporté le plus proche, aucun mode supporté | 17 |
+| `test_virtual_cmd.php` | `cpVirtualCmdCheck()` et `cpExecuteVirtualCmd()` : syntaxe, commande absente, type info, équipement désactivé ou absent, exception et `Error` à l'exécution, et surtout qu'une expression invalide n'exécute **rien** | 17 (C2) |
+| `test_mode_code.php` | `cpModeGetFromCmd()` et `cpModeGetCodeFromName()` : priorité de `mode_code`, repli sur `etat`, équipement neuf, langue changée avec et sans `mode_code` | 4, 16 |
+| `test_triggers.php` | `cpEqClockTriggerTick()` : trigger échu, à venir, `time` absent, `mode` absent, type inconnu, valeur non tabulaire | C23 |
+| `test_statique.php` | Contrôles sur les sources : syntaxe de tous les fichiers PHP, `CP_VERSION` égal à `info.json`, `en_US.json` décodable et clés préfixées, et garde-fous contre le retour des défauts corrigés (`version_compare`, `!= 1` dans `cpCmdHide`, `is_numeric` avant `round`, `temp_ref_*`, `$p_force_exit`, refus de suppression de la centrale, absence de `cron15` et du raccourci `tick`, aucune ligne de code morte en `//`) | 5, 8, 9, 11, 12, 13, 14, C21-C24 |
+
+Total : 64 tests répartis en 6 suites.
+
+### 14.4 Ce que les tests ne couvrent pas
+
+Ils valident la logique métier isolée, pas l'intégration avec Jeedom. Restent à vérifier à la main
+sur le banc (§12) : les enchaînements de bypass et de délestage, la propagation par les zones, les
+temporisations de sortie, le rendu des widgets, et les écrans de configuration. Les scénarios
+correspondants sont décrits aux §12.2, §13.2, §13.5, §13.7, §13.9 et §13.12.
+
+### 14.5 Ajouter une suite
+
+Créer `tests/test_<sujet>.php` : `run_all.php` le détecte automatiquement (`glob` sur `test_*.php`).
+Le squelette tient en trois lignes : `require_once __DIR__.'/harness.php';`, puis `cp_build_class()`
+avec les bouchons nécessaires et la liste des méthodes à extraire, puis les appels à
+`cp_test::eq()` / `cp_test::ok()`. Terminer par `exit(cp_test::bilan());`.
