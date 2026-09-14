@@ -46,8 +46,15 @@ cp_test::ok('postInsert de la centrale initialise temp_ref_*',
   && strpos($src, "checkAndUpdateCmd('temperature_confort_1'") === false);
 cp_test::ok('la sortie de bypass par "no" est conditionnée ($p_force_exit)',
   strpos($src, '$p_force_exit') !== false);
-cp_test::ok('la suppression de la centrale est refusée',
-  preg_match('/preRemove\(\).{0,400}cpIsType\(\x27centrale\x27\).{0,200}throw new Exception/s', $src) === 1);
+// eqLogic::remove() supprime les commandes AVANT d'appeler preRemove() : le refus
+// doit donc être posé dans remove(), pas dans preRemove().
+cp_test::ok('la suppression de la centrale est refusée dans remove()',
+  preg_match('/function remove\(\).{0,200}cpIsType\(\x27centrale\x27\).{0,200}throw new Exception.{0,200}parent::remove\(\)/s', $src) === 1);
+cp_test::ok('preRemove() ne porte plus ce refus (il serait trop tardif)',
+  preg_match('/function preRemove\(\).{0,300}cpIsType\(\x27centrale\x27\)/s', $src) !== 1);
+cp_test::ok('les commandes manquantes de la centrale sont recréées',
+  strpos($src, 'function cpCentraleCheckCmd(') !== false
+  && strpos(file_get_contents($racine.'/plugin_info/install.php'), 'cpCentraleCheckCmd()') !== false);
 cp_test::ok('cron15() vide supprimée', strpos($src, 'function cron15(') === false);
 cp_test::ok("raccourci de développement 'tick' supprimé",
   strpos($src, "getName() == 'tick'") === false);

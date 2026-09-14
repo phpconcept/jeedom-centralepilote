@@ -147,6 +147,31 @@ class centralepilote extends eqLogic {
      * Returned value : 
      * ---------------------------------------------------------------------------
      */
+    /**---------------------------------------------------------------------------
+     * Method : cpCentraleCheckCmd()
+     * Description :
+     *   Recrée les commandes manquantes de la centrale. postInsert() est idempotent
+     *   (cpCmdCreate() ne crée que ce qui n'existe pas). Sert de filet si les
+     *   commandes ont été supprimées, par exemple par une tentative de suppression
+     *   de l'équipement.
+     * Parameters : none
+     * Returned value : none
+     * ---------------------------------------------------------------------------
+     */
+    public static function cpCentraleCheckCmd() {
+      if (!is_object($v_centrale = centralepilote::cpCentraleGet())) {
+        return;
+      }
+      if (count($v_centrale->getCmd()) >= 11) {
+        return;
+      }
+      centralepilote::log('warning', "Equipement centrale : commandes manquantes, elles sont recréées.");
+      $v_centrale->postInsert();
+      $v_centrale = eqLogic::byId($v_centrale->getId());
+      $v_centrale->save();
+    }
+    /* -------------------------------------------------------------------------*/
+
     public static function cpCentraleCreateDefault() {
       $eqLogics = eqLogic::byType('centralepilote');
       foreach ($eqLogics as $v_eq) {
@@ -1850,13 +1875,26 @@ class centralepilote extends eqLogic {
     public function postUpdate() {
     }
 
-    public function preRemove() {
-      // ----- La centrale porte la liste des programmes : sa suppression les detruirait,
-      //       et tout le plugin en depend. On la refuse.
+    /**---------------------------------------------------------------------------
+     * Method : remove()
+     * Description :
+     *   eqLogic::remove() supprime toutes les commandes de l'équipement AVANT
+     *   d'appeler preRemove(). Un refus posé dans preRemove() arriverait donc trop
+     *   tard et laisserait une centrale vidée de ses commandes. Le refus est posé
+     *   ici, avant toute suppression.
+     * Parameters : none
+     * Returned value : cf. eqLogic::remove()
+     * ---------------------------------------------------------------------------
+     */
+    public function remove() {
       if ($this->cpIsType('centrale')) {
         throw new Exception(__("L'équipement centrale ne peut pas être supprimé : il contient la liste des programmes.", __FILE__));
       }
+      return parent::remove();
+    }
+    /* -------------------------------------------------------------------------*/
 
+    public function preRemove() {
       // ----- Suppression d'une zone : ses radiateurs en sortent avant (point 1)
       if ($this->cpIsType('zone')) {
         foreach (centralepilote::cpRadList(array('zone'=>$this->getId())) as $v_rad) {

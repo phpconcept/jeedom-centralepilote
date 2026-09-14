@@ -42,6 +42,9 @@ function centralepilote_update() {
   // ----- Create a default centrale object (if not exists)
   centralepilote::cpCentraleCreateDefault();
 
+  // ----- Recree les commandes de la centrale si elles ont disparu
+  centralepilote::cpCentraleCheckCmd();
+
   // ----- Sort de leur zone les radiateurs dont la zone a disparu
   centralepilote::cpZoneCleanOrphans();
 

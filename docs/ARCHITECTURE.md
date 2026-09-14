@@ -555,7 +555,7 @@ Issu d'une relecture complète du plugin après les lots 1 à 5.
 | # | Méthode(s) | Correction | Gravité |
 |---|---|---|---|
 | C21 | `cpPilotageChangeToBypass()`, `execute_centrale()`, `cpRadChangeToEnable()`, `cpZoneChangeToEnable()` | `window_close` (et tout appel avec le type `no`) ne lève plus un délestage : le radiateur restait sinon en chauffe alors que le délestage central était actif. Nouveau paramètre `$p_force_exit` pour les sorties légitimes. | 🔴 |
-| C22 | `preRemove()`, deux appels à `cpCentraleGet()` | La suppression de la centrale est refusée (elle porte la liste des programmes). Les deux appels non gardés ne provoquent plus d'erreur fatale si la centrale manque. | 🟠 |
+| C22 | `remove()`, deux appels à `cpCentraleGet()` | La suppression de la centrale est refusée (elle porte la liste des programmes). Les deux appels non gardés ne provoquent plus d'erreur fatale si la centrale manque. Voir §13.13 : le refus a d'abord été posé au mauvais endroit. | 🟠 |
 | C23 | `cpEqClockTriggerTick()`, widgets | Chaque trigger est validé (tableau, `mode` présent, `type` égal à `trigger_time`) ; une entrée invalide est retirée avec un WARNING. Le `type` est désormais réellement vérifié, et l'`explode` des widgets est gardé. | 🟡 |
 | C24 | `cpCmdHide()` (6 appels) | `$v_value != 1` au lieu de `== 0` : avec un `support_*` absent, l'affichage ne dépend plus de la version de PHP (`'' == 0` diffère entre 7 et 8). | 🟡 |
 
@@ -582,6 +582,36 @@ cet endroit. Ne jamais auditer le flot de contrôle avec un filtre qui masque le
 | Triggers | Pose, tick non échu (conservé), tick échu (appliqué puis retiré). Entrées invalides ou de type inconnu retirées avec WARNING (6 cas testés isolément). |
 | `cron15` et branches obsolètes | Absentes. |
 | Non-régression | `cron5` complet sans erreur ni warning. |
+
+### 13.13 Correctif C22 bis (12/09/2026) : le refus de suppression était posé trop tard
+
+Le refus de supprimer la centrale avait d'abord été placé dans `preRemove()`. Or `eqLogic::remove()`
+procède dans cet ordre :
+
+```php
+foreach (($this->getCmd()) as $cmd) { $cmd->remove(); }   // les commandes sont détruites ici
+...
+return DB::remove($this);                                  // preRemove() n'est appelé qu'ici
+```
+
+L'exception arrivait donc **après** la suppression des commandes : l'équipement survivait, vidé.
+Symptôme : le widget de la centrale affichait les substitutions `#cmd_*#` non résolues, faute de
+commandes à référencer. La protection était ainsi pire que son absence, puisqu'elle laissait un
+équipement à moitié détruit sans message clair.
+
+| Correction | Détail |
+|---|---|
+| `remove()` | La classe surcharge `remove()` et lève l'exception **avant** `parent::remove()`. Le refus de `preRemove()` est retiré ; cette méthode garde sa logique de sortie de zone. |
+| `cpCentraleCheckCmd()` | Nouvelle méthode appelée par `centralepilote_update()` : si la centrale a moins de 11 commandes, `postInsert()` (idempotent) les recrée, puis un `save()` restaure les `temp_ref_*` depuis la configuration. |
+| `tests/test_statique.php` | Le contrôle vérifiait la présence du refus dans `preRemove()` et serait resté vert malgré le défaut. Il vérifie maintenant que le refus est dans `remove()` avec `parent::remove()`, **et** qu'il n'est plus dans `preRemove()`. |
+
+Vérifié : 11 commandes avant tentative de suppression, refus, 11 commandes après, programmes intacts.
+Les programmes n'ont jamais été menacés : ils sont stockés dans la configuration de l'équipement,
+pas dans ses commandes.
+
+**Leçon** : un test qui vérifie qu'une opération est refusée doit aussi vérifier **ce qui n'a pas été
+détruit**, et pas seulement que l'exception a été levée. Un test destructif exécuté sur le banc doit
+par ailleurs être considéré comme destructif tant que l'inverse n'est pas prouvé.
 
 ## 14. Tests automatisés
 
