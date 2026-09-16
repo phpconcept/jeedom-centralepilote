@@ -273,6 +273,9 @@ function cp_radiateur_display_init() {
   $('.cp_panel_zone').hide();
   $('.cp_panel_radiateur_zone').show();
   $('.cp_panel_centrale').hide();
+
+  // ----- Le délai de sortie de délestage est porté par la zone quand le radiateur est dans une zone
+  cp_delestage_sortie_display();
   
   // ----- Rafraichi l'affichage initial des commandes
   v_mode = 'support_confort';
@@ -298,6 +301,25 @@ function cp_radiateur_display_init() {
 }
 
 /*
+ * Affiche ou masque le délai de sortie de délestage d'un radiateur :
+ * il est ignoré (et porté par la zone) quand le radiateur est dans une zone.
+ */
+function cp_delestage_sortie_display() {
+  if ($('.eqLogicAttr[data-l1key=configuration][data-l2key=zone]').value() != '') {
+    $('.cp_delestage_sortie_delai').hide();
+    $('.cp_delestage_sortie_zone').show();
+  }
+  else {
+    $('.cp_delestage_sortie_delai').show();
+    $('.cp_delestage_sortie_zone').hide();
+  }
+}
+
+$('body').on('change', '.eqLogicAttr[data-l1key=configuration][data-l2key=zone]', function() {
+  cp_delestage_sortie_display();
+});
+
+/*
  * Fonction d'initialisation du display d'un zone
  */
 function cp_zone_display_init() {
@@ -307,6 +329,10 @@ function cp_zone_display_init() {
   $('.cp_panel_zone').show();
   $('.cp_panel_radiateur_zone').show();
   $('.cp_panel_centrale').hide();
+
+  // ----- Une zone porte toujours son propre délai de sortie de délestage
+  $('.cp_delestage_sortie_delai').show();
+  $('.cp_delestage_sortie_zone').hide();
   
   /*
   $('.cp_attr_radiateur[data-l1key=configuration]').each(function () {

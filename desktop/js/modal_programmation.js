@@ -386,7 +386,7 @@ function cp_prog_display(p_prog) {
   
   // ----- Update de la liste ?
   
-  // ----- selected dans le menu déroulant la bonne ligne
+  // ----- selected dans le menu dÃ©roulant la bonne ligne
   $('#cp_prog_select option[value="'+v_obj.id+'"]').prop('selected', true);
 }
 
@@ -470,7 +470,7 @@ function cp_prog_update_agenda() {
 }
 
 /*
-* Fonction appelée lors de la selection dans la liste des programmations
+* Fonction appelÃ©e lors de la selection dans la liste des programmations
 */
 $('#cp_prog_select').on('change', function (e) {
   cp_prog_load($('#cp_prog_select').val());
@@ -478,7 +478,7 @@ $('#cp_prog_select').on('change', function (e) {
 
 
 /*
-* Fonction appelée lors de la selection dans la liste des modes horaires
+* Fonction appelÃ©e lors de la selection dans la liste des modes horaires
 */
 $('#cp_prog_mode_horaire_select').on('change', function (e) {
   cp_prog_mode_swap_horaire($('#cp_prog_mode_horaire_select').val());
@@ -547,12 +547,12 @@ $(".cp_prog_copy_line").off('click').on('click', function () {
   //alert('copy jour : '+v_jour_cible+' dans jour '+v_jour);
   
   for (i=0; i<24; i++) {
-    // ----- Modification des créneaux en mode horaire
+    // ----- Modification des crÃ©neaux en mode horaire
     v_heure = i;
     var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
     cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
     
-    // ----- Modification des créneaux en mode demiheure
+    // ----- Modification des crÃ©neaux en mode demiheure
     v_heure = i+'_00';
     var v_elt = $("#cp_"+v_jour_cible+"_"+v_heure);
     cp_mode_set_slot(v_jour, v_heure, v_elt.data('mode'));
@@ -573,11 +573,11 @@ $(".cp_prog_reset_line").off('click').on('click', function () {
   //alert('reset jour : '+v_jour);
   
   for (i=0; i<24; i++) {
-    // ----- Modification des créneaux en mode horaire
+    // ----- Modification des crÃ©neaux en mode horaire
     v_heure = i;
     cp_mode_set_slot(v_jour, v_heure, 'eco');
     
-    // ----- Modification des créneaux en mode demiheure
+    // ----- Modification des crÃ©neaux en mode demiheure
     v_heure = i+'_00';
     cp_mode_set_slot(v_jour, v_heure, 'eco');
     v_heure = i+'_30';
