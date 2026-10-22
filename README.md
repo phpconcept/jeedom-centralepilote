@@ -215,9 +215,9 @@ Afin de permettre une sortie du delestage plus progressive, il est possible de c
 
 ![Centrale](docs/images/config_radiateur_sortie_delestage.png)
 
-Lorsque le délestage est remis en mode "normal", les radiateurs/zones, ayant un délai de configuré, vont rester dans le mode du délestage (eco, hors-gel ou off), mais un déclenchement unitaire programmé sera mis en place avec le délai configuré pour qu'il reprenne sont pilotage mémorisé au bout de ce délai.
+Lorsque le délestage est remis en mode "normal", les radiateurs/zones, ayant un délai de configuré, vont rester dans le mode du délestage (eco, hors-gel ou off), mais un mécanisme interne est mis en place avec le délai configuré pour qu'il reprenne sont pilotage mémorisé au bout de ce délai.
 
-De plus, à partir du moment où le délestage n'est plus actif, il est possible de reprendre la main sur les radiateurs et de modifier le mode de pilotage ou de supprimer les déclenchements unitaires. 
+De plus, à partir du moment où le délestage n'est plus actif, il est possible d'arrêter le délai de sortie et reprendre la main sur les radiateurs. 
 
 
 ---
@@ -225,6 +225,65 @@ De plus, à partir du moment où le délestage n'est plus actif, il est possible
 
 ### Change Logs
 
+Release v1.9.0 :
+- Nouveautés :
+  - Sortie de délestage différée : pour un radiateur appartenant à une zone, c'est
+    désormais la zone qui porte le délai de sortie. Les radiateurs d'une même zone
+    redémarrent donc ensemble, et le délai propre au radiateur est ignoré (le champ
+    est masqué dans sa configuration tant qu'il est dans une zone).
+  - Pendant la temporisation de fin de délestage, le widget affiche « Fin de délestage
+    à HH:MM » et un bouton vert permet d'y mettre fin immédiatement. Une nouvelle
+    commande « Fin Temporisation Delestage » permet de faire la même chose depuis un
+    scénario.
+  - Un ordre donné pendant un délestage ou une fenêtre ouverte n'est plus perdu : il
+    est mémorisé et appliqué dès la sortie. Un ordre donné à la main pendant la
+    temporisation de fin de délestage est, lui, appliqué tout de suite et met fin à
+    cette temporisation.
+  - Nouvelle commande de type 'info' « Mode », qui contient le code du mode (confort,
+    eco, horsgel, ...) indépendamment de la langue. Elle est plus fiable que la
+    commande « Etat » pour écrire des scénarios, « Etat » restant inchangée.
+
+- Bug corrections :
+  - Délestage : un radiateur ne supportant pas le mode demandé (par exemple un
+    radiateur commutateur confort/hors-gel pendant un délestage en « off ») pouvait
+    continuer à chauffer. Le plugin choisit maintenant un mode supporté qui ne chauffe
+    pas davantage que celui demandé.
+  - Un mode non supporté pouvait laisser le radiateur dans son état précédent tout en
+    affichant un autre état. L'état affiché correspond désormais à la réalité, et une
+    commande mal configurée génère une erreur explicite dans le log au lieu d'une
+    exécution partielle.
+  - La fermeture d'une fenêtre ne lève plus un délestage en cours.
+  - Les déclenchements unitaires programmés qui tombaient pendant une fenêtre ouverte
+    étaient perdus ; ils sont maintenant appliqués à la fermeture.
+  - Widget : le prochain changement de programme ne s'affichait pas lorsqu'il était à
+    plus de cinq jours, ni pour un programme entièrement dans le même mode. De plus,
+    un changement tombant le même jour de la semaine suivante s'affichait comme s'il
+    était le jour même.
+  - Le programme par défaut n'est plus modifiable, conformément à ce qui était prévu,
+    et une programmation invalide est refusée au lieu d'être enregistrée.
+  - Dupliquer un radiateur créait une copie active qui pilotait le même équipement
+    physique que l'original, les deux se contredisant toutes les cinq minutes. La copie
+    est maintenant créée désactivée et sans équipement lié : il suffit de choisir le
+    nouvel équipement puis de l'activer.
+  - Supprimer une zone laissait ses radiateurs inutilisables (ni pilotables, ni
+    programmés). Ils en sortent désormais proprement, et les radiateurs déjà dans ce
+    cas sont réparés lors de la mise à jour.
+  - L'équipement « Centrale Fil-Pilote » ne peut plus être supprimé : il contient la
+    liste des programmes.
+  - Changer la nature fil-pilote d'un radiateur laissait des commandes pointant vers
+    l'équipement précédent.
+  - Un radiateur venant d'être créé n'était réellement commandé qu'au bout de cinq
+    minutes.
+  - Correction du fichier de traduction anglais, qui était illisible : les traductions
+    anglaises ne s'appliquaient pas.
+  - Divers : initialisation des températures de référence à la création de la centrale,
+    affichage de la température lorsque le capteur associé n'a pas encore de valeur,
+    et suppression d'une tâche planifiée inutile.
+
+- Note de mise à jour :
+  - La mise à jour ajoute automatiquement deux commandes aux radiateurs et aux zones.
+    Aucune action n'est nécessaire.
+    
 Release v1.8.9 :
 - Nouveautés :
   - Ajout de commandes de type 'info' pour récupérer par programmation les valeurs des températures de référence, configurées dans l'objet "Centrale fil-pilote" 
